@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pocket-ic"
+version = "0.0.0"
+authors = [
+  { name="Elias Datler", email="elias.datler@dfinity.org" },
+  { name="Michael Weigelt", email="michael.weigelt@dfinity.org" },
+]
+description = "A canister testing library"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/dfinity/pocketic-py"
