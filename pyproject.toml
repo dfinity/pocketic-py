@@ -5,10 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pocket-ic"
 version = "0.0.0"
-authors = [
-  { name="Elias Datler", email="elias.datler@dfinity.org" },
-  { name="Michael Weigelt", email="michael.weigelt@dfinity.org" },
-]
+authors = ["The Internet Computer Project Developers"]
 description = "A canister testing library"
 readme = "README.md"
 requires-python = ">=3.7"
