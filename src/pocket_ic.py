@@ -128,9 +128,9 @@ class PocketIC:
         candid = ic.decode(bytes(request_result))
         return candid
     
-    def create_canister_with_candid(self, sender: ic.Principal, ic, candid: str, wasm_module: bytes, init_args: list) -> Canister:
+    def create_canister_with_candid(self, candid: str, wasm_module: bytes, init_args: list, sender: ic.Principal=None) -> Canister:
         canister_id = self.create_empty_canister(sender)
-        canister = Canister(ic, canister_id, candid)
+        canister = Canister(self, canister_id, candid)
 
         canister_arguments = canister.actor['arguments']
         if len(canister_arguments) == 1:
@@ -154,4 +154,3 @@ class PocketIC:
                 raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
         else:
             raise ValueError(f'Malformed response: {request_result}')
-

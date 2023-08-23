@@ -8,7 +8,6 @@ class ICRC1Tests(unittest.TestCase):
         # this is run for every test individually
         ic = PocketIC()
 
-        sender = ic_py.Principal.anonymous()
         with open('ledger.did', 'r') as f:
             candid = f.read()
         init_args = {
@@ -50,7 +49,7 @@ class ICRC1Tests(unittest.TestCase):
         # cd rs/rosetta-api/icrc1/ledger ; bazel build :ledger_canister -> with open('../../../bazel-bin/rs/rosetta-api/icrc1/ledger/ledger_canister.wasm', 'rb') as f:
         with open('ledger_canister.wasm', 'rb') as f:
             wasm_module = f.read()
-        ledger_canister = ic.create_canister_with_candid(sender, ic, candid, wasm_module, init_args)
+        ledger_canister = ic.create_canister_with_candid(candid, wasm_module, init_args)
 
         self.ledger_canister = ledger_canister
         return super().setUp()
