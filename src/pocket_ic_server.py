@@ -41,4 +41,3 @@ class PocketICServer:
 
     def list_instances(self) -> List[str]:
         return self.request_client.get(f"{self.daemon_url}instance").text.split(", ")
-    
