@@ -15,7 +15,7 @@ class CanisterTests(unittest.TestCase):
 
     def test_counter_canister(self):
         sender = ic.Principal.anonymous()
-        canister_id = self.ic.create_canister(sender)
+        canister_id = self.ic.create_empty_canister(sender)
 
         self.assertEqual(canister_id.to_str(), "rwlgt-iiaaa-aaaaa-aaaaa-cai")
         self.assertEqual(self.ic.add_cycles(canister_id, 1_000_000_000_000_000_000), 1_000_000_000_000_000_000)
@@ -23,12 +23,12 @@ class CanisterTests(unittest.TestCase):
         with open("counter.wasm", "rb") as f:
             wasm_module = f.read()
 
-        self.assertEqual(self.ic.install_canister(sender, canister_id, bytes(wasm_module)), [])
+        self.assertEqual(self.ic.install_canister(sender, canister_id, bytes(wasm_module), []), [])
 
-        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "read", [])["Ok"]["Reply"], [0, 0, 0, 0])
-        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "write", [])["Ok"]["Reply"], [1, 0, 0, 0])
-        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "write", [])["Ok"]["Reply"], [2, 0, 0, 0])
-        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "read", [])["Ok"]["Reply"], [2, 0, 0, 0])
+        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "read", []), [0, 0, 0, 0])
+        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "write", []), [1, 0, 0, 0])
+        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "write", []), [2, 0, 0, 0])
+        self.assertEqual(self.ic.canister_update_call(sender, canister_id, "read", []), [2, 0, 0, 0])
 
     def test_pocket_ic(self):
         print(f"all instances: {self.ic.backend.list_instances()}")
