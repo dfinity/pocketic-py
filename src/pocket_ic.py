@@ -101,7 +101,7 @@ class PocketIC:
         }}]
 
         request_result = self.canister_update_call(sender, None, "create_canister", payload)
-        ok_reply = request_result['Ok']['Reply']
+        ok_reply = self.get_ok_reply(request_result)
         candid = ic.decode(bytes(ok_reply), Types.Record({'canister_id': Types.Principal}))
         canister_id = candid[0]['value']['canister_id']
         return canister_id
@@ -123,6 +123,18 @@ class PocketIC:
         }]
 
         request_result = self.canister_update_call(sender, None, "install_code", payload)
-        ok_reply = request_result['Ok']['Reply']
+        ok_reply = self.get_ok_reply(request_result)
         candid = ic.decode(bytes(ok_reply))
         return candid
+    
+    def get_ok_reply(self, request_result):
+        if 'Err' in request_result:
+            raise ValueError(f'Request returned "Err": {request_result["Err"]}')
+        elif 'Ok' in request_result:
+            if 'Reply' in request_result['Ok']:
+                return request_result['Ok']['Reply']
+            else:
+                raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+        else:
+            raise ValueError(f'Malformed response: {request_result}')
+
