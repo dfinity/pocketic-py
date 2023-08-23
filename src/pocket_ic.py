@@ -132,8 +132,15 @@ class PocketIC:
         canister_id = self.create_empty_canister(sender)
         canister = Canister(ic, canister_id, candid)
 
-        type_ = canister.actor['arguments'][0]
-        arg = [{'type': type_, 'value': init_args}]
+        canister_arguments = canister.actor['arguments']
+        if len(canister_arguments) == 1:
+            type_ = canister_arguments[0]
+            arg = [{'type': type_, 'value': init_args}]
+        elif len(canister_arguments) == 0:
+            arg = []
+        else:
+            raise ValueError('This should not happen. Please check the candid file')
+        
         self.install_canister(sender, canister_id, wasm_module, arg)
         return canister
 
