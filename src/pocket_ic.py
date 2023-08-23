@@ -88,7 +88,7 @@ class PocketIC:
         res = self.send_request(payload)
         return self.get_ok_reply(res)
 
-    def create_empty_canister(self, sender: ic.Principal) -> ic.Principal:
+    def create_empty_canister(self, sender: ic.Principal, settings=[]) -> ic.Principal:
         record = Types.Record({'settings': Types.Opt(Types.Record(
                     {
                         'controllers': Types.Opt(Types.Vec(Types.Principal)),
@@ -100,7 +100,7 @@ class PocketIC:
             )
         })
         payload = [{'type': record, 'value': {
-            'settings': []
+            'settings': settings
         }}]
 
         request_result = self.canister_update_call(sender, None, "create_canister", payload)
