@@ -5,6 +5,7 @@ import ic
 import requests
 from ic.candid import Types
 from pocket_ic_server import PocketICServer
+from canister import Canister
 
 
 class PocketIC:
@@ -70,7 +71,8 @@ class PocketIC:
                 "arg": base64.b64encode(ic.encode(payload)).decode()
             }
         }
-        return self.send_request(payload)
+        res = self.send_request(payload)
+        return self.get_ok_reply(res)
     
     def canister_query_call(self, sender: Optional[ic.Principal], canister_id: Optional[ic.Principal], method: str, payload: dict):
         sender = sender if sender else ic.Principal.anonymous()
@@ -83,9 +85,10 @@ class PocketIC:
                 "arg": base64.b64encode(ic.encode(payload)).decode()
             }
         }
-        return self.send_request(payload)
+        res = self.send_request(payload)
+        return self.get_ok_reply(res)
 
-    def create_canister(self, sender: ic.Principal) -> ic.Principal:
+    def create_empty_canister(self, sender: ic.Principal, settings=[]) -> ic.Principal:
         record = Types.Record({'settings': Types.Opt(Types.Record(
                     {
                         'controllers': Types.Opt(Types.Vec(Types.Principal)),
@@ -97,12 +100,11 @@ class PocketIC:
             )
         })
         payload = [{'type': record, 'value': {
-            'settings': []
+            'settings': settings
         }}]
 
         request_result = self.canister_update_call(sender, None, "create_canister", payload)
-        ok_reply = request_result['Ok']['Reply']
-        candid = ic.decode(bytes(ok_reply), Types.Record({'canister_id': Types.Principal}))
+        candid = ic.decode(bytes(request_result), Types.Record({'canister_id': Types.Principal}))
         canister_id = candid[0]['value']['canister_id']
         return canister_id
 
@@ -123,6 +125,32 @@ class PocketIC:
         }]
 
         request_result = self.canister_update_call(sender, None, "install_code", payload)
-        ok_reply = request_result['Ok']['Reply']
-        candid = ic.decode(bytes(ok_reply))
+        candid = ic.decode(bytes(request_result))
         return candid
+    
+    def create_canister_with_candid(self, candid: str, wasm_module: bytes, init_args: list, sender: ic.Principal=None) -> Canister:
+        canister_id = self.create_empty_canister(sender)
+        canister = Canister(self, canister_id, candid)
+
+        canister_arguments = canister.actor['arguments']
+        if len(canister_arguments) == 1:
+            type_ = canister_arguments[0]
+            arg = [{'type': type_, 'value': init_args}]
+        elif len(canister_arguments) == 0:
+            arg = []
+        else:
+            raise ValueError('This should not happen. Please check the candid file')
+        
+        self.install_canister(sender, canister_id, wasm_module, arg)
+        return canister
+
+    def get_ok_reply(self, request_result):
+        if 'Err' in request_result:
+            raise ValueError(f'Request returned "Err": {request_result["Err"]}')
+        elif 'Ok' in request_result:
+            if 'Reply' in request_result['Ok']:
+                return request_result['Ok']['Reply']
+            else:
+                raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+        else:
+            raise ValueError(f'Malformed response: {request_result}')

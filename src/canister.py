@@ -2,7 +2,6 @@ from ic.parser.DIDEmitter import *;
 from antlr4 import *
 from antlr4.InputStream import InputStream
 from ic.candid import FuncClass, decode
-from pocket_ic import PocketIC
 
 
 class Canister:
@@ -30,7 +29,7 @@ class Canister:
 
 
 class PocketICCanisterMethod:
-    def __init__(self, ic: PocketIC, canister_id, name, args, rets, anno = None):
+    def __init__(self, ic, canister_id, name, args, rets, anno = None):
         self.ic = ic
         self.canister_id = canister_id
         self.name = name
@@ -47,11 +46,9 @@ class PocketICCanisterMethod:
         # effective_cansiter_id = args[0]['canister_id'] if self.canister_id == 'aaaaa-aa' and len(args) > 0 and type(args[0]) == dict and 'canister_id' in args[0] else self.canister_id
         if self.anno == 'query':
             res = self.ic.canister_query_call(sender, self.canister_id, self.name, arguments)
-            res = res['Ok']['Reply']
             res = decode(bytes(res), self.rets)
         else:
             res = self.ic.canister_update_call(sender, self.canister_id, self.name, arguments)
-            res = res['Ok']['Reply']
             res = decode(bytes(res), self.rets)
             
         if type(res) is not list:
