@@ -2,12 +2,13 @@ import unittest
 import ic as ic_py
 from pocket_ic import PocketIC
 
+
 class ICRC1Tests(unittest.TestCase):
     def setUp(self) -> None:
         # this is run for every test individually
         ic = PocketIC()
 
-        with open('ledger.did', 'r') as f:
+        with open("ledger.did", "r") as f:
             candid = f.read()
         init_args = {
             "Init": {
@@ -16,17 +17,11 @@ class ICRC1Tests(unittest.TestCase):
                 "transfer_fee": 0,
                 "metadata": [],
                 "minting_account": {
-                    "owner": 'i3gqp-srkaa-aaaaa-aaaap-4ai',
-                    "subaccount": []
+                    "owner": "i3gqp-srkaa-aaaaa-aaaap-4ai",
+                    "subaccount": [],
                 },
                 "initial_balances": [
-                    (
-                        {
-                            "owner": 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-                            "subaccount": []
-                        },
-                        88_888
-                    )
+                    ({"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}, 88_888)
                 ],
                 "maximum_number_of_accounts": [],
                 "accounts_overflow_trim_quantity": [],
@@ -38,103 +33,86 @@ class ICRC1Tests(unittest.TestCase):
                     "max_message_size_bytes": [],
                     "cycles_for_archive_creation": [],
                     "node_max_memory_size_bytes": [],
-                    "controller_id": '2vxsx-fae'
+                    "controller_id": "2vxsx-fae",
                 },
                 "max_memo_length": [],
                 "token_name": "My great coin",
-                "feature_flags": []
+                "feature_flags": [],
             }
         }
         # cd rs/rosetta-api/icrc1/ledger ; bazel build :ledger_canister -> with open('../../../bazel-bin/rs/rosetta-api/icrc1/ledger/ledger_canister.wasm', 'rb') as f:
-        with open('ledger_canister.wasm', 'rb') as f:
+        with open("ledger_canister.wasm", "rb") as f:
             wasm_module = f.read()
         ledger = ic.create_canister_with_candid(candid, wasm_module, init_args)
 
         self.ledger = ledger
         return super().setUp()
-    
-    
+
     def test_get_name(self):
         res = self.canister.icrc1_name(None)
-        print('Token name:', res)
+        print("Token name:", res)
 
     def test_get_decimals(self):
         res = self.canister.icrc1_symbol(None)
-        print('Token symbol:', res)
+        print("Token symbol:", res)
 
     def test_get_fee(self):
         res = self.canister.icrc1_fee(None)
-        print('Token fee:', res)
+        print("Token fee:", res)
 
     def test_get_total_supply(self):
         res = self.canister.icrc1_total_supply(None)
-        print('Token total supply:', res)
+        print("Token total supply:", res)
 
     def test_transfer(self):
-        res = self.canister.icrc1_balance_of(None,
-            {
-                'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-                'subaccount': []
-            }
+        res = self.canister.icrc1_balance_of(
+            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print('ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ', res)
-        receiver = {
-            'owner': 'i3gqp-srkaa-aaaaa-aaaap-4ai',
-            'subaccount': []
-        }
-        res = self.canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+        print("ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ", res)
+        receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
+        res = self.canister.icrc1_transfer(
+            ic_py.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"),
             {
-                'from_subaccount': [],
-                'to': receiver,
-                'amount': 42,
-                'fee': [],
-                'memo': [],
-                'created_at_time': []
-            }
+                "from_subaccount": [],
+                "to": receiver,
+                "amount": 42,
+                "fee": [],
+                "memo": [],
+                "created_at_time": [],
+            },
         )
-        print('Transfer result:', res)
-        res = self.canister.icrc1_balance_of(None, 
-            {
-                'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-                'subaccount': []
-            }
+        print("Transfer result:", res)
+        res = self.canister.icrc1_balance_of(
+            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print('ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens after sending 42: ', res)
+        print(
+            "ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens after sending 42: ", res
+        )
 
     def test_get_transactions(self):
-        receiver = {
-            'owner': 'i3gqp-srkaa-aaaaa-aaaap-4ai',
-            'subaccount': []
-        }
-        res = self.canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+        receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
+        res = self.canister.icrc1_transfer(
+            ic_py.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"),
             {
-                'from_subaccount': [],
-                'to': receiver,
-                'amount': 42,
-                'fee': [],
-                'memo': [],
-                'created_at_time': []
-            }
-        )   
-        res = self.canister.get_transactions(None,
-            {
-                'start': 0,
-                'length': 10
-            }
+                "from_subaccount": [],
+                "to": receiver,
+                "amount": 42,
+                "fee": [],
+                "memo": [],
+                "created_at_time": [],
+            },
         )
-        print('Transaction list:', res)
+        res = self.canister.get_transactions(None, {"start": 0, "length": 10})
+        print("Transaction list:", res)
 
     def test_get_balance_of(self):
-        res = self.canister.icrc1_balance_of(None,
-            {
-                'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-                'subaccount': []
-            }
+        res = self.canister.icrc1_balance_of(
+            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print('ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ', res)
+        print("ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ", res)
 
     # def test_get_balance_of_legacy(self):
-    #     args = [{'type': Account, 'value': 
+    #     args = [{'type': Account, 'value':
     #                 {
     #                     "owner": ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai').bytes,
     #                     "subaccount": []
