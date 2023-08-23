@@ -2,7 +2,6 @@ import unittest
 import ic as ic_py
 from pocket_ic import PocketIC
 
-
 class ICRC1Tests(unittest.TestCase):
     def setUp(self) -> None:
         # this is run for every test individually
@@ -49,30 +48,30 @@ class ICRC1Tests(unittest.TestCase):
         # cd rs/rosetta-api/icrc1/ledger ; bazel build :ledger_canister -> with open('../../../bazel-bin/rs/rosetta-api/icrc1/ledger/ledger_canister.wasm', 'rb') as f:
         with open('ledger_canister.wasm', 'rb') as f:
             wasm_module = f.read()
-        ledger_canister = ic.create_canister_with_candid(candid, wasm_module, init_args)
+        ledger = ic.create_canister_with_candid(candid, wasm_module, init_args)
 
-        self.ledger_canister = ledger_canister
+        self.ledger = ledger
         return super().setUp()
     
     
     def test_get_name(self):
-        res = self.ledger_canister.icrc1_name(None)
+        res = self.canister.icrc1_name(None)
         print('Token name:', res)
 
     def test_get_decimals(self):
-        res = self.ledger_canister.icrc1_symbol(None)
+        res = self.canister.icrc1_symbol(None)
         print('Token symbol:', res)
 
     def test_get_fee(self):
-        res = self.ledger_canister.icrc1_fee(None)
+        res = self.canister.icrc1_fee(None)
         print('Token fee:', res)
 
     def test_get_total_supply(self):
-        res = self.ledger_canister.icrc1_total_supply(None)
+        res = self.canister.icrc1_total_supply(None)
         print('Token total supply:', res)
 
     def test_transfer(self):
-        res = self.ledger_canister.icrc1_balance_of(None,
+        res = self.canister.icrc1_balance_of(None,
             {
                 'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
                 'subaccount': []
@@ -83,7 +82,7 @@ class ICRC1Tests(unittest.TestCase):
             'owner': 'i3gqp-srkaa-aaaaa-aaaap-4ai',
             'subaccount': []
         }
-        res = self.ledger_canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+        res = self.canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
             {
                 'from_subaccount': [],
                 'to': receiver,
@@ -94,7 +93,7 @@ class ICRC1Tests(unittest.TestCase):
             }
         )
         print('Transfer result:', res)
-        res = self.ledger_canister.icrc1_balance_of(None, 
+        res = self.canister.icrc1_balance_of(None, 
             {
                 'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
                 'subaccount': []
@@ -107,7 +106,7 @@ class ICRC1Tests(unittest.TestCase):
             'owner': 'i3gqp-srkaa-aaaaa-aaaap-4ai',
             'subaccount': []
         }
-        res = self.ledger_canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+        res = self.canister.icrc1_transfer(ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai'),
             {
                 'from_subaccount': [],
                 'to': receiver,
@@ -117,7 +116,7 @@ class ICRC1Tests(unittest.TestCase):
                 'created_at_time': []
             }
         )   
-        res = self.ledger_canister.get_transactions(None,
+        res = self.canister.get_transactions(None,
             {
                 'start': 0,
                 'length': 10
@@ -126,7 +125,7 @@ class ICRC1Tests(unittest.TestCase):
         print('Transaction list:', res)
 
     def test_get_balance_of(self):
-        res = self.ledger_canister.icrc1_balance_of(None,
+        res = self.canister.icrc1_balance_of(None,
             {
                 'owner': 'ryjl3-tyaaa-aaaaa-aaaba-cai',
                 'subaccount': []
@@ -141,7 +140,7 @@ class ICRC1Tests(unittest.TestCase):
     #                     "subaccount": []
     #                 }
     #             }]
-    #     res = self.ic.canister_query_call(self.sender, self.ledger_canister_id, 'icrc1_balance_of', args)
+    #     res = self.ic.canister_query_call(self.sender, self.canister_id, 'icrc1_balance_of', args)
     #     print('Balance', self.extract_value(res))
 
 
