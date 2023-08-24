@@ -4,7 +4,7 @@ import time
 import requests
 from typing import List
 
-POCKET_IC_BIN = "pocketic"
+POCKET_IC_BIN = "pocket-ic"
 
 
 class PocketICServer:

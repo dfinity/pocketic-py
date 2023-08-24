@@ -3,8 +3,8 @@ import os
 import unittest
 import ic
 
-# the example needs to have the module in its sys path, so we traverse
-# up until we find pocketic
+# The example needs to have the module in its sys path, so we traverse
+# up until we find PocketIC.
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -14,7 +14,7 @@ from pocket_ic import PocketIC
 
 class CounterCanisterTests(unittest.TestCase):
     def setUp(self) -> None:
-        # this is being run for every test independently
+        # This is being run for every test independently.
         self.pic = PocketIC()
         self.canister_id = self.pic.create_canister()
         self.pic.add_cycles(self.canister_id, 1_000_000_000_000_000_000)
