@@ -26,7 +26,7 @@ For more detailed examples, see the section [below](#how-to-use-this-library) an
 
 ## Installation
 
-### PocketIc Server Binary
+### PocketIC Server Binary
 
 Download the latest stable PocketIC server binary from the URL below:
 
