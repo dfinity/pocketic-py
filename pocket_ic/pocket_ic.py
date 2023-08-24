@@ -202,7 +202,7 @@ class PocketIC:
             raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
         raise ValueError(f"Malformed response: {request_result}")
 
-    ############### for compatibility with ip-py's `Agent` class ##############
+    ############### for compatibility with ic-py's `Agent` class ##############
 
     def query_raw(
         self, canister_id, name, arguments, return_types, _effective_canister_id
