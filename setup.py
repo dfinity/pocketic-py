@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-print("packages: " + str(find_packages()))
-
 setup(
     name="pocket_ic",
     version="0.0.0",

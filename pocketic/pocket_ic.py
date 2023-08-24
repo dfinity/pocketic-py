@@ -5,8 +5,8 @@ import ic
 import requests
 from ic.candid import Types
 
-from pocket_ic.pocket_ic_server import PocketICServer
-from pocket_ic.canister import Canister
+from pocketic.pocket_ic_server import PocketICServer
+from pocketic.canister import Canister
 
 
 class PocketIC:
