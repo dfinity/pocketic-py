@@ -10,7 +10,7 @@ sys.path.append(
 import unittest
 
 import ic
-from pocketic import PocketIC
+from pocket_ic import PocketIC
 
 
 class CanisterTests(unittest.TestCase):

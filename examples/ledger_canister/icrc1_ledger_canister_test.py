@@ -9,7 +9,7 @@ sys.path.append(
 
 import unittest
 import ic as ic_py
-from pocketic import PocketIC
+from pocket_ic import PocketIC
 
 
 class ICRC1Tests(unittest.TestCase):
