@@ -19,7 +19,7 @@ class CanisterTests(unittest.TestCase):
         return super().setUp()
 
     def test_counter_canister(self):
-        canister_id = self.pic.create_empty_canister()
+        canister_id = self.pic.create_canister()
 
         self.assertEqual(canister_id.to_str(), "rwlgt-iiaaa-aaaaa-aaaaa-cai")
         self.assertEqual(
@@ -30,24 +30,22 @@ class CanisterTests(unittest.TestCase):
         with open("counter.wasm", "rb") as f:
             wasm_module = f.read()
 
-        self.assertEqual(
-            self.pic.install_canister(canister_id, bytes(wasm_module), []), []
-        )
+        self.assertEqual(self.pic.install_code(canister_id, bytes(wasm_module), []), [])
 
         self.assertEqual(
-            self.pic.canister_update_call(canister_id, "read", ic.encode([])),
+            self.pic.update_call(canister_id, "read", ic.encode([])),
             [0, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.canister_update_call(canister_id, "write", ic.encode([])),
+            self.pic.update_call(canister_id, "write", ic.encode([])),
             [1, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.canister_update_call(canister_id, "write", ic.encode([])),
+            self.pic.update_call(canister_id, "write", ic.encode([])),
             [2, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.canister_update_call(canister_id, "read", ic.encode([])),
+            self.pic.update_call(canister_id, "read", ic.encode([])),
             [2, 0, 0, 0],
         )
 
