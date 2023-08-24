@@ -2,11 +2,11 @@
 
 PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
 
-PocketIC has two components: A server and a library. 
+PocketIC has two components: A server and an integration library. 
 
 The **server** is built as part of the build process for the Internet Computer. It runs as local HTTP server which manages IC instances. Every test may request its own, independent IC instance and interact with it concurrently with other running tests. 
 
-This PocketIC integration **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
+This PocketIC **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
 
 ```python
 ic = PocketIC()
@@ -17,7 +17,7 @@ assert(ic.get_root_key() == MAINNET_ROOTKEY)
 
 ```python
 ic = PocketIC()
-counter_canister = ic.install_canister_with_candid(...)
+counter_canister = ic.create_and_install_canister_with_candid(...)
 counter_canister.inc()
 assert(counter_canister.read() == 1)
 ```
@@ -52,11 +52,11 @@ You can also add the last line to your `~/.bashrc` or `~/.zshrc`.
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
-```python3 pip install pocketic-py```
+```python3 -m pip install pocketic-py```
 
 or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/releases) and call
 
-```python3 pip install <file>.whl```
+```python3 -m pip install <file>.whl```
 
 ## How to use this library
 
