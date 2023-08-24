@@ -4,7 +4,7 @@ import time
 import requests
 from typing import List
 
-POCKET_IC_BIN_PATH = "./pocket_ic_binary"
+POCKET_IC_BIN_PATH = "./pocket-ic"
 
 
 class PocketICServer:
@@ -32,7 +32,7 @@ class PocketICServer:
 
         port = None
         if os.path.isfile(ready_file_path):
-            with open(port_file_path) as port_file:
+            with open(port_file_path, "r") as port_file:
                 port = port_file.readline().strip()
         else:
             raise ValueError(f"{ready_file_path} is not a file!")
@@ -40,4 +40,4 @@ class PocketICServer:
         return f"http://127.0.0.1:{port}/"
 
     def list_instances(self) -> List[str]:
-        return self.request_client.get(f"{self.daemon_url}instance").text.split(", ")
+        return self.request_client.get(f"{self.daemon_url}instances").text.split(", ")

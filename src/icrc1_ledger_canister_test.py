@@ -1,19 +1,19 @@
 import unittest
-import ic as ic_py
+import ic
 from pocket_ic import PocketIC
 
 
 class ICRC1Tests(unittest.TestCase):
     def setUp(self) -> None:
         # this is run for every test individually
-        ic = PocketIC()
+        pic = PocketIC()
 
-        with open("ledger.did", "r") as f:
-            candid = f.read()
+        with open("ledger.did", "r") as candid_file:
+            candid = candid_file.read()
         init_args = {
             "Init": {
                 "decimals": [],
-                "token_symbol": "MGC",
+                "token_symbol": "MAT",
                 "transfer_fee": 0,
                 "metadata": [],
                 "minting_account": {
@@ -21,7 +21,7 @@ class ICRC1Tests(unittest.TestCase):
                     "subaccount": [],
                 },
                 "initial_balances": [
-                    ({"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}, 88_888)
+                    ({"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}, 666)
                 ],
                 "maximum_number_of_accounts": [],
                 "accounts_overflow_trim_quantity": [],
@@ -36,42 +36,44 @@ class ICRC1Tests(unittest.TestCase):
                     "controller_id": "2vxsx-fae",
                 },
                 "max_memo_length": [],
-                "token_name": "My great coin",
+                "token_name": "My Awesome Token",
                 "feature_flags": [],
             }
         }
-        # cd rs/rosetta-api/icrc1/ledger ; bazel build :ledger_canister -> with open('../../../bazel-bin/rs/rosetta-api/icrc1/ledger/ledger_canister.wasm', 'rb') as f:
-        with open("ledger_canister.wasm", "rb") as f:
-            wasm_module = f.read()
-        ledger = ic.create_canister_with_candid(candid, wasm_module, init_args)
+        with open("ledger_canister.wasm", "rb") as wasm_file:
+            wasm_module = wasm_file.read()
 
+        ledger = pic.create_canister_with_candid(candid, wasm_module, init_args)
+        self.pic = pic
         self.ledger = ledger
         return super().setUp()
 
     def test_get_name(self):
-        res = self.canister.icrc1_name(None)
-        print("Token name:", res)
+        res = self.ledger.icrc1_name()
+        self.assertEqual(res, ["My Awesome Token"])
 
     def test_get_decimals(self):
-        res = self.canister.icrc1_symbol(None)
-        print("Token symbol:", res)
+        res = self.ledger.icrc1_symbol()
+        self.assertEqual(res, ["MAT"])
 
     def test_get_fee(self):
-        res = self.canister.icrc1_fee(None)
-        print("Token fee:", res)
+        res = self.ledger.icrc1_fee()
+        self.assertEqual(res, [0])
 
     def test_get_total_supply(self):
-        res = self.canister.icrc1_total_supply(None)
-        print("Token total supply:", res)
+        res = self.ledger.icrc1_total_supply()
+        self.assertEqual(res, [666])
 
     def test_transfer(self):
-        res = self.canister.icrc1_balance_of(
-            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
+        res = self.ledger.icrc1_balance_of(
+            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print("ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ", res)
+        self.assertEqual(res, [666])
+
+        self.pic.set_sender(ic.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"))
+
         receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
-        res = self.canister.icrc1_transfer(
-            ic_py.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"),
+        res = self.ledger.icrc1_transfer(
             {
                 "from_subaccount": [],
                 "to": receiver,
@@ -81,18 +83,20 @@ class ICRC1Tests(unittest.TestCase):
                 "created_at_time": [],
             },
         )
-        print("Transfer result:", res)
-        res = self.canister.icrc1_balance_of(
-            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
+        self.assertEqual(res, [{"Ok": 1}])
+
+        self.pic.anonymous_sender()
+
+        res = self.ledger.icrc1_balance_of(
+            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print(
-            "ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens after sending 42: ", res
-        )
+        self.assertEqual(res, [666 - 42])
 
     def test_get_transactions(self):
+        self.pic.set_sender(ic.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"))
+
         receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
-        res = self.canister.icrc1_transfer(
-            ic_py.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"),
+        res = self.ledger.icrc1_transfer(
             {
                 "from_subaccount": [],
                 "to": receiver,
@@ -102,24 +106,17 @@ class ICRC1Tests(unittest.TestCase):
                 "created_at_time": [],
             },
         )
-        res = self.canister.get_transactions(None, {"start": 0, "length": 10})
-        print("Transaction list:", res)
+
+        self.pic.anonymous_sender()
+
+        res = self.ledger.get_transactions({"start": 0, "length": 10})
+        self.assertEqual(len(res[0]["archived_transactions"]), 1)
 
     def test_get_balance_of(self):
-        res = self.canister.icrc1_balance_of(
-            None, {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
+        res = self.ledger.icrc1_balance_of(
+            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
         )
-        print("ryjl3-tyaaa-aaaaa-aaaba-cai has this many tokens: ", res)
-
-    # def test_get_balance_of_legacy(self):
-    #     args = [{'type': Account, 'value':
-    #                 {
-    #                     "owner": ic_py.Principal.from_str('ryjl3-tyaaa-aaaaa-aaaba-cai').bytes,
-    #                     "subaccount": []
-    #                 }
-    #             }]
-    #     res = self.ic.canister_query_call(self.sender, self.canister_id, 'icrc1_balance_of', args)
-    #     print('Balance', self.extract_value(res))
+        self.assertEqual(res, [666])
 
 
 if __name__ == "__main__":

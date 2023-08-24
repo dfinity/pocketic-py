@@ -1,5 +1,4 @@
 import unittest
-
 import ic
 from pocket_ic import PocketIC
 
@@ -7,19 +6,18 @@ from pocket_ic import PocketIC
 class CanisterTests(unittest.TestCase):
     def setUp(self) -> None:
         # this is being run for every test independently
-        self.ic = PocketIC()
+        self.pic = PocketIC()
         return super().setUp()
 
     def tearDown(self) -> None:
         return super().tearDown()
 
     def test_counter_canister(self):
-        sender = ic.Principal.anonymous()
-        canister_id = self.ic.create_empty_canister(sender)
+        canister_id = self.pic.create_empty_canister()
 
         self.assertEqual(canister_id.to_str(), "rwlgt-iiaaa-aaaaa-aaaaa-cai")
         self.assertEqual(
-            self.ic.add_cycles(canister_id, 1_000_000_000_000_000_000),
+            self.pic.add_cycles(canister_id, 1_000_000_000_000_000_000),
             1_000_000_000_000_000_000,
         )
 
@@ -27,29 +25,33 @@ class CanisterTests(unittest.TestCase):
             wasm_module = f.read()
 
         self.assertEqual(
-            self.ic.install_canister(sender, canister_id, bytes(wasm_module), []), []
+            self.pic.install_canister(canister_id, bytes(wasm_module), []), []
         )
 
         self.assertEqual(
-            self.ic.canister_update_call(sender, canister_id, "read", []), [0, 0, 0, 0]
+            self.pic.canister_update_call(canister_id, "read", ic.encode([])),
+            [0, 0, 0, 0],
         )
         self.assertEqual(
-            self.ic.canister_update_call(sender, canister_id, "write", []), [1, 0, 0, 0]
+            self.pic.canister_update_call(canister_id, "write", ic.encode([])),
+            [1, 0, 0, 0],
         )
         self.assertEqual(
-            self.ic.canister_update_call(sender, canister_id, "write", []), [2, 0, 0, 0]
+            self.pic.canister_update_call(canister_id, "write", ic.encode([])),
+            [2, 0, 0, 0],
         )
         self.assertEqual(
-            self.ic.canister_update_call(sender, canister_id, "read", []), [2, 0, 0, 0]
+            self.pic.canister_update_call(canister_id, "read", ic.encode([])),
+            [2, 0, 0, 0],
         )
 
     def test_pocket_ic(self):
-        print(f"all instances: {self.ic.backend.list_instances()}")
-        print(f"my instance: {self.ic.instance_url}")
+        print(f"All instances: {self.pic.backend.list_instances()}")
+        print(f"My instance: {self.pic.instance_url}")
 
     def test_get_root_key(self):
         self.assertEqual(
-            self.ic.get_root_key(),
+            self.pic.get_root_key(),
             [
                 48,
                 129,
@@ -189,17 +191,18 @@ class CanisterTests(unittest.TestCase):
 
     def test_time_and_tick(self):
         self.assertEqual(
-            self.ic.get_time(), {"secs_since_epoch": 1620328630, "nanos_since_epoch": 0}
+            self.pic.get_time(),
+            {"secs_since_epoch": 1620328630, "nanos_since_epoch": 0},
         )
-        self.assertEqual(self.ic.set_time(1704067199999999999), None)
+        self.assertEqual(self.pic.set_time(1704067199999999999), None)
         self.assertEqual(
-            self.ic.get_time(),
+            self.pic.get_time(),
             {"secs_since_epoch": 1704067199, "nanos_since_epoch": 999999999},
         )
-        self.assertEqual(self.ic.tick(), None)
-        self.assertEqual(self.ic.advance_time(1 * 1_000_000_000), None)
+        self.assertEqual(self.pic.tick(), None)
+        self.assertEqual(self.pic.advance_time(1 * 1_000_000_000), None)
         self.assertEqual(
-            self.ic.get_time(),
+            self.pic.get_time(),
             {"secs_since_epoch": 1704067200, "nanos_since_epoch": 999999999},
         )
 

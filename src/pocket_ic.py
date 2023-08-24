@@ -6,24 +6,30 @@ import requests
 from ic.candid import Types
 
 from pocket_ic_server import PocketICServer
-from canister import Canister
 
 
 class PocketIC:
     def __init__(self) -> None:
         backend = PocketICServer()
         self.instance_id = backend.request_client.post(
-            f"{backend.daemon_url}instance"
+            f"{backend.daemon_url}instances"
         ).text
-        self.instance_url = f"{backend.daemon_url}instance/{self.instance_id}"
+        self.instance_url = f"{backend.daemon_url}instances/{self.instance_id}"
         self.request_client = requests.session()
         self.backend = backend
+        self.sender = ic.Principal.anonymous()
+
+    def anonymous_sender(self):
+        self.sender = ic.Principal.anonymous()
+
+    def set_sender(self, principal: ic.Principal):
+        self.sender = principal
 
     def send_request(self, payload: Any) -> Any:
         result = self.request_client.post(self.instance_url, json=payload)
         if result.status_code != 200:
             raise ConnectionError(
-                f"IC HTTP request returned with status code {result.status_code}, Error:\n{result.text}"
+                f'PocketIC HTTP request returned with status code {result.status_code}: "{result.reason}"'
             )
         return result.json()
 
@@ -65,19 +71,17 @@ class PocketIC:
 
     def canister_update_call(
         self,
-        sender: Optional[ic.Principal],
         canister_id: Optional[ic.Principal],
         method: str,
         payload: dict,
     ):
-        sender = sender if sender else ic.Principal.anonymous()
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         payload = {
             "CanisterUpdateCall": {
-                "sender": base64.b64encode(sender.bytes).decode(),
+                "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
-                "arg": base64.b64encode(ic.encode(payload)).decode(),
+                "arg": base64.b64encode(payload).decode(),
             }
         }
         res = self.send_request(payload)
@@ -85,25 +89,23 @@ class PocketIC:
 
     def canister_query_call(
         self,
-        sender: Optional[ic.Principal],
         canister_id: Optional[ic.Principal],
         method: str,
         payload: dict,
     ):
-        sender = sender if sender else ic.Principal.anonymous()
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         payload = {
             "CanisterQueryCall": {
-                "sender": base64.b64encode(sender.bytes).decode(),
+                "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
-                "arg": base64.b64encode(ic.encode(payload)).decode(),
+                "arg": base64.b64encode(payload).decode(),
             }
         }
         res = self.send_request(payload)
         return self.get_ok_reply(res)
 
-    def create_empty_canister(self, sender: ic.Principal, settings=[]) -> ic.Principal:
+    def create_empty_canister(self, settings=None) -> ic.Principal:
         record = Types.Record(
             {
                 "settings": Types.Opt(
@@ -118,10 +120,12 @@ class PocketIC:
                 )
             }
         )
-        payload = [{"type": record, "value": {"settings": settings}}]
+        payload = [
+            {"type": record, "value": {"settings": settings if settings else []}}
+        ]
 
         request_result = self.canister_update_call(
-            sender, None, "create_canister", payload
+            None, "create_canister", ic.encode(payload)
         )
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
@@ -131,7 +135,6 @@ class PocketIC:
 
     def install_canister(
         self,
-        sender: ic.Principal,
         canister_id: ic.Principal,
         wasm_module: bytes,
         arg: list,
@@ -164,7 +167,7 @@ class PocketIC:
         ]
 
         request_result = self.canister_update_call(
-            sender, None, "install_code", payload
+            None, "install_code", ic.encode(payload)
         )
         candid = ic.decode(bytes(request_result))
         return candid
@@ -174,10 +177,9 @@ class PocketIC:
         candid: str,
         wasm_module: bytes,
         init_args: list,
-        sender: ic.Principal = None,
-    ) -> Canister:
-        canister_id = self.create_empty_canister(sender)
-        canister = Canister(self, canister_id, candid)
+    ) -> ic.Canister:
+        canister_id = self.create_empty_canister()
+        canister = ic.Canister(self, canister_id, candid)
 
         canister_arguments = canister.actor["arguments"]
         if len(canister_arguments) == 1:
@@ -188,18 +190,30 @@ class PocketIC:
         else:
             raise ValueError("This should not happen. Please check the candid file")
 
-        self.install_canister(sender, canister_id, wasm_module, arg)
+        self.install_canister(canister_id, wasm_module, arg)
         return canister
 
     def get_ok_reply(self, request_result):
         if "Err" in request_result:
             raise ValueError(f'Request returned "Err": {request_result["Err"]}')
-        elif "Ok" in request_result:
+        if "Ok" in request_result:
             if "Reply" in request_result["Ok"]:
                 return request_result["Ok"]["Reply"]
-            else:
-                raise ValueError(
-                    f'Request contains no key "Reply": {request_result["Ok"]}'
-                )
-        else:
-            raise ValueError(f"Malformed response: {request_result}")
+            raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+        raise ValueError(f"Malformed response: {request_result}")
+
+    ############### for compatibility with ip-py's `Agent` class ##############
+
+    def query_raw(
+        self, canister_id, name, arguments, return_types, _effective_canister_id
+    ):
+        res = self.canister_query_call(canister_id, name, arguments)
+        return ic.decode(bytes(res), return_types)
+
+    def update_raw(
+        self, canister_id, name, arguments, return_types, _effective_canister_id
+    ):
+        res = self.canister_update_call(canister_id, name, arguments)
+        return ic.decode(bytes(res), return_types)
+
+    ###########################################################################
