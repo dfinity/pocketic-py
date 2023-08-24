@@ -5,7 +5,7 @@ import ic
 import requests
 from ic.candid import Types
 
-from pocket_ic_server import PocketICServer
+from pocket_ic.pocket_ic_server import PocketICServer
 
 
 class PocketIC:
