@@ -1,3 +1,12 @@
+import sys
+import os
+
+# the example needs to have the module in its sys path, so we traverse
+# up until we find pocketic
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+
 import unittest
 import ic as ic_py
 from pocket_ic import PocketIC
