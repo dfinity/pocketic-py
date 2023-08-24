@@ -4,14 +4,14 @@ import time
 import requests
 from typing import List
 
-POCKET_IC_BIN_PATH = "../../pocket_ic/pocket-ic"
+POCKET_IC_BIN = "pocket-ic"
 
 
 class PocketICServer:
     def __init__(self) -> None:
         # Attempt to start the PocketIC server if it's not already running.
         pid = os.getpid()
-        subprocess.Popen([POCKET_IC_BIN_PATH, "--pid", f"{pid}"])
+        subprocess.Popen([POCKET_IC_BIN, "--pid", f"{pid}"])
         self.url = self._get_url(pid)
 
         self.request_client = requests.session()
