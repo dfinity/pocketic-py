@@ -93,7 +93,7 @@ class ICRC1Tests(unittest.TestCase):
             },
         )
 
-        self.pic.anonymous_sender()
+        self.pic.set_anonymous_sender()
 
         res = self.ledger.get_transactions({"start": 0, "length": 10})
         self.assertEqual(len(res[0]["archived_transactions"]), 1)
@@ -114,7 +114,7 @@ class ICRC1Tests(unittest.TestCase):
         )
         self.assertTrue("Ok" in res[0])
 
-        self.pic.anonymous_sender()
+        self.pic.set_anonymous_sender()
 
         res = self.ledger.icrc1_balance_of(
             {"owner": self.principal_a.to_str(), "subaccount": []}
