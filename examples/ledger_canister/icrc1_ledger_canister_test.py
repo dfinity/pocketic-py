@@ -1,5 +1,7 @@
 import sys
 import os
+import unittest
+import ic
 
 # the example needs to have the module in its sys path, so we traverse
 # up until we find pocketic
@@ -7,8 +9,6 @@ sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-import unittest
-import ic
 from pocket_ic import PocketIC
 
 
@@ -26,7 +26,7 @@ class ICRC1Tests(unittest.TestCase):
         init_args = {
             "Init": {
                 "decimals": [],
-                "token_symbol": "MAT",
+                "token_symbol": "MYTOKEN",
                 "transfer_fee": 0,
                 "metadata": [],
                 "minting_account": {
@@ -50,7 +50,7 @@ class ICRC1Tests(unittest.TestCase):
                     "controller_id": "2vxsx-fae",
                 },
                 "max_memo_length": [],
-                "token_name": "My Awesome Token",
+                "token_name": "My Token",
                 "feature_flags": [],
             }
         }
@@ -64,11 +64,11 @@ class ICRC1Tests(unittest.TestCase):
 
     def test_get_name(self):
         res = self.ledger.icrc1_name()
-        self.assertEqual(res, ["My Awesome Token"])
+        self.assertEqual(res, ["My Token"])
 
     def test_get_decimals(self):
         res = self.ledger.icrc1_symbol()
-        self.assertEqual(res, ["MAT"])
+        self.assertEqual(res, ["MYTOKEN"])
 
     def test_get_fee(self):
         res = self.ledger.icrc1_fee()
