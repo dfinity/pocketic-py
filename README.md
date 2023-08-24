@@ -6,20 +6,20 @@ Pocket-IC has two components: A binary and a library.
 
 The **binary** is built as part of the build process for the Internet Computer. It runs a local HTTP server which manages IC instances. Every test may request its own, independent IC instance and interact with it concurrently with other running tests. 
 
-This Pocket-IC **library** provides a convenient Python frontend to interact with IC instances, while hiding process management, REST-API calls to the server etc. The test author simply interacts with either an IC instance...
+This Pocket-IC **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
 
 ```python3
 ic = PocketIC()
-assert(ic.root_key() == MAINNET_ROOTKEY)
+assert(ic.get_root_key() == MAINNET_ROOTKEY)
 ```
 
 ...or even directly with a canister object:
 
 ```python3 
 ic = PocketIC()
-counter_canister = ic.install_canister(...)
+counter_canister = ic.install_canister_with_candid(...)
 counter_canister.inc()
-assert(counter_canister.get() == 1)
+assert(counter_canister.read() == 1)
 ```
 
 For more detailed examples, see the section [below](#how-to-use-this-library) and the [examples](https://github.com/dfinity/pocketic-py/tree/main/examples).
@@ -38,11 +38,13 @@ chmod +x ~/opt/pocket-ic-backend
 export PATH="${HOME}/opt:${PATH}"
 ```
 
-This library can be found on PyPi, so you can install it using
+This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
-```pip install pocketic-py```
+```python3 pip install pocketic-py```
 
-or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/releases).
+or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/releases) and call
+
+```python3 pip install <file>.whl```
 
 ## How to use this library
 
