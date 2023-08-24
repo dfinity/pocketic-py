@@ -4,7 +4,7 @@ import time
 import requests
 from typing import List
 
-POCKET_IC_BIN_PATH = "./pocket-ic"
+POCKET_IC_BIN_PATH = "../../pocket_ic/pocket-ic"
 
 
 class PocketICServer:
