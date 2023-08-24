@@ -1,8 +1,8 @@
 import os
 import subprocess
 import time
-import requests
 from typing import List
+import requests
 
 POCKET_IC_BIN = "pocket-ic"
 
@@ -38,4 +38,9 @@ class PocketICServer:
         return f"http://127.0.0.1:{port}"
 
     def list_instances(self) -> List[str]:
+        """Lists the currently running instances on the PocketIC Server.
+
+        Returns:
+            List[str]: a list of instance names
+        """
         return self.request_client.get(f"{self.url}/instances").text.split(", ")
