@@ -85,7 +85,7 @@ class PocketIC:
             }
         }
         res = self.send_request(payload)
-        return self.get_ok_reply(res)
+        return self._get_ok_reply(res)
 
     def canister_query_call(
         self,
@@ -103,7 +103,7 @@ class PocketIC:
             }
         }
         res = self.send_request(payload)
-        return self.get_ok_reply(res)
+        return self._get_ok_reply(res)
 
     def create_empty_canister(self, settings=None) -> ic.Principal:
         record = Types.Record(
@@ -193,7 +193,7 @@ class PocketIC:
         self.install_canister(canister_id, wasm_module, arg)
         return canister
 
-    def get_ok_reply(self, request_result):
+    def _get_ok_reply(self, request_result):
         if "Err" in request_result:
             raise ValueError(f'Request returned "Err": {request_result["Err"]}')
         if "Ok" in request_result:

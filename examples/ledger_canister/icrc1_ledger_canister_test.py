@@ -15,10 +15,14 @@ from pocket_ic import PocketIC
 class ICRC1Tests(unittest.TestCase):
     def setUp(self) -> None:
         # this is run for every test individually
-        pic = PocketIC()
+        self.pic = PocketIC()
+        self.principal_a = ic.Principal.from_str("2222s-4iaaa-aaaaf-ax2uq-cai")
+        self.principal_b = ic.Principal.from_str("zzyfr-6yaaa-aaaar-aklsa-cai")
+        self.principal_minting = ic.Principal.from_str("i3gqp-srkaa-aaaaa-aaaap-4ai")
 
         with open("ledger.did", "r") as candid_file:
             candid = candid_file.read()
+
         init_args = {
             "Init": {
                 "decimals": [],
@@ -26,11 +30,12 @@ class ICRC1Tests(unittest.TestCase):
                 "transfer_fee": 0,
                 "metadata": [],
                 "minting_account": {
-                    "owner": "i3gqp-srkaa-aaaaa-aaaap-4ai",
+                    "owner": self.principal_minting.to_str(),
                     "subaccount": [],
                 },
                 "initial_balances": [
-                    ({"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}, 666)
+                    ({"owner": self.principal_a.to_str(), "subaccount": []}, 666),
+                    ({"owner": self.principal_b.to_str(), "subaccount": []}, 420),
                 ],
                 "maximum_number_of_accounts": [],
                 "accounts_overflow_trim_quantity": [],
@@ -52,9 +57,9 @@ class ICRC1Tests(unittest.TestCase):
         with open("ledger_canister.wasm", "rb") as wasm_file:
             wasm_module = wasm_file.read()
 
-        ledger = pic.create_canister_with_candid(candid, wasm_module, init_args)
-        self.pic = pic
-        self.ledger = ledger
+        self.ledger: ic.Canister = self.pic.create_canister_with_candid(
+            candid, wasm_module, init_args
+        )
         return super().setUp()
 
     def test_get_name(self):
@@ -71,40 +76,12 @@ class ICRC1Tests(unittest.TestCase):
 
     def test_get_total_supply(self):
         res = self.ledger.icrc1_total_supply()
-        self.assertEqual(res, [666])
-
-    def test_transfer(self):
-        res = self.ledger.icrc1_balance_of(
-            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
-        )
-        self.assertEqual(res, [666])
-
-        self.pic.set_sender(ic.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"))
-
-        receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
-        res = self.ledger.icrc1_transfer(
-            {
-                "from_subaccount": [],
-                "to": receiver,
-                "amount": 42,
-                "fee": [],
-                "memo": [],
-                "created_at_time": [],
-            },
-        )
-        self.assertEqual(res, [{"Ok": 1}])
-
-        self.pic.anonymous_sender()
-
-        res = self.ledger.icrc1_balance_of(
-            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
-        )
-        self.assertEqual(res, [666 - 42])
+        self.assertEqual(res, [666 + 420])
 
     def test_get_transactions(self):
-        self.pic.set_sender(ic.Principal.from_str("ryjl3-tyaaa-aaaaa-aaaba-cai"))
+        self.pic.set_sender(self.principal_a)
 
-        receiver = {"owner": "i3gqp-srkaa-aaaaa-aaaap-4ai", "subaccount": []}
+        receiver = {"owner": self.principal_b.to_str(), "subaccount": []}
         res = self.ledger.icrc1_transfer(
             {
                 "from_subaccount": [],
@@ -121,9 +98,36 @@ class ICRC1Tests(unittest.TestCase):
         res = self.ledger.get_transactions({"start": 0, "length": 10})
         self.assertEqual(len(res[0]["archived_transactions"]), 1)
 
+    def test_transfer(self):
+        self.pic.set_sender(self.principal_a)
+
+        receiver = {"owner": self.principal_b.to_str(), "subaccount": []}
+        res = self.ledger.icrc1_transfer(
+            {
+                "from_subaccount": [],
+                "to": receiver,
+                "amount": 42,
+                "fee": [],
+                "memo": [],
+                "created_at_time": [],
+            },
+        )
+        self.assertTrue("Ok" in res[0])
+
+        self.pic.anonymous_sender()
+
+        res = self.ledger.icrc1_balance_of(
+            {"owner": self.principal_a.to_str(), "subaccount": []}
+        )
+        self.assertEqual(res, [666 - 42])
+        res = self.ledger.icrc1_balance_of(
+            {"owner": self.principal_b.to_str(), "subaccount": []}
+        )
+        self.assertEqual(res, [420 + 42])
+
     def test_get_balance_of(self):
         res = self.ledger.icrc1_balance_of(
-            {"owner": "ryjl3-tyaaa-aaaaa-aaaba-cai", "subaccount": []}
+            {"owner": self.principal_a.to_str(), "subaccount": []}
         )
         self.assertEqual(res, [666])
 

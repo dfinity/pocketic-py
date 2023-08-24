@@ -12,13 +12,13 @@ class PocketICServer:
         # attempt to start the PocketIC backend if it's not already running
         pid = os.getpid()
         subprocess.Popen([POCKET_IC_BIN_PATH, "--pid", f"{pid}"])
-        daemon_url = self.get_daemon_url(pid)
+        daemon_url = self._get_daemon_url(pid)
         print(f'PocketIC running under "{daemon_url}"')
 
         self.request_client = requests.session()
         self.daemon_url = daemon_url
 
-    def get_daemon_url(self, pid: int) -> str:
+    def _get_daemon_url(self, pid: int) -> str:
         ready_file_path = f"/tmp/pocket_ic_{pid}.ready"
         port_file_path = f"/tmp/pocket_ic_{pid}.port"
 
