@@ -172,7 +172,7 @@ class PocketIC:
         candid = ic.decode(bytes(request_result))
         return candid
 
-    def create_canister_with_candid(
+    def create_and_install_canister_with_candid(
         self,
         candid: str,
         wasm_module: bytes,

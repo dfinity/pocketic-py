@@ -57,7 +57,7 @@ class ICRC1Tests(unittest.TestCase):
         with open("ledger_canister.wasm", "rb") as wasm_file:
             wasm_module = wasm_file.read()
 
-        self.ledger: ic.Canister = self.pic.create_canister_with_candid(
+        self.ledger: ic.Canister = self.pic.create_and_install_canister_with_candid(
             candid, wasm_module, init_args
         )
         return super().setUp()
