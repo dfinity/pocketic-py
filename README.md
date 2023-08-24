@@ -2,11 +2,11 @@
 
 PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
 
-PocketIC has two components: A server and a library. 
+PocketIC has two components: A server and an integration library. 
 
 The **server** is built as part of the build process for the Internet Computer. It runs as local HTTP server which manages IC instances. Every test may request its own, independent IC instance and interact with it concurrently with other running tests. 
 
-This PocketIC integration **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
+This PocketIC **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
 
 ```python
 ic = PocketIC()
