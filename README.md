@@ -1,12 +1,12 @@
-# Pocket-IC: A canister testing platform
+# PocketIC: A canister testing platform
 
-Pocket-IC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
+PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
 
-Pocket-IC has two components: A binary and a library. 
+PocketIC has two components: A server and a library. 
 
-The **binary** is built as part of the build process for the Internet Computer. It runs a local HTTP server which manages IC instances. Every test may request its own, independent IC instance and interact with it concurrently with other running tests. 
+The **server** is built as part of the build process for the Internet Computer. It runs as local HTTP server which manages IC instances. Every test may request its own, independent IC instance and interact with it concurrently with other running tests. 
 
-This Pocket-IC **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
+This PocketIC integration **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
 
 ```python3
 ic = PocketIC()
@@ -26,17 +26,29 @@ For more detailed examples, see the section [below](#how-to-use-this-library) an
 
 ## Installation
 
-The latest stable Pocket-IC binary can be downloaded from the URL below: 
+### PocketIc Server Binary
 
+Download the latest stable PocketIC server binary from the URL below:
+
+Linux:  
 `https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz`
 
-Copy the binary to your preferred location, make it executable and put it on the path. 
+MacOS:  
+`https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz`
 
-```bash title="Linux"
-curl <url> --output ~/opt/pocket-ic-backend
-chmod +x ~/opt/pocket-ic-backend
+Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g., 
+ 
+```bash
+mkdir ~/opt
+curl <url> --output ~/opt/pocket-ic.gz
+gunzip ~/opt/pocket-ic.gz
+chmod +x ~/opt/pocket-ic
 export PATH="${HOME}/opt:${PATH}"
 ```
+
+You can also add the last line to your `~/.bashrc` or `~/.zshrc`. 
+
+### PocketIC Integration Library (this)
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
