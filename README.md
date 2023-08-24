@@ -8,14 +8,14 @@ The **server** is built as part of the build process for the Internet Computer. 
 
 This PocketIC integration **library** provides a convenient Python frontend to interact with IC instances, while hiding the REST-API layer, the process lifetime etc. The test author simply interacts with either an IC instance...
 
-```python3
+```python
 ic = PocketIC()
 assert(ic.get_root_key() == MAINNET_ROOTKEY)
 ```
 
 ...or even directly with a canister object:
 
-```python3 
+```python
 ic = PocketIC()
 counter_canister = ic.install_canister_with_candid(...)
 counter_canister.inc()
