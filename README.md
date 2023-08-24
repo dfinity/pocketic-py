@@ -17,7 +17,7 @@ assert(ic.get_root_key() == MAINNET_ROOTKEY)
 
 ```python
 ic = PocketIC()
-counter_canister = ic.install_canister_with_candid(...)
+counter_canister = ic.create_and_install_canister_with_candid(...)
 counter_canister.inc()
 assert(counter_canister.read() == 1)
 ```
@@ -52,11 +52,11 @@ You can also add the last line to your `~/.bashrc` or `~/.zshrc`.
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
-```python3 pip install pocketic-py```
+```python3 -m pip install pocketic-py```
 
 or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/releases) and call
 
-```python3 pip install <file>.whl```
+```python3 -m pip install <file>.whl```
 
 ## How to use this library
 
