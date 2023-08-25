@@ -29,6 +29,7 @@ class PocketICServer:
     def __init__(self) -> None:
         # Attempt to start the PocketIC server if it's not already running.
         pid = os.getpid()
+        # pylint: disable=locally-disabled, consider-using-with
         subprocess.Popen([POCKET_IC_BIN, "--pid", f"{pid}"])
         self.url = self._get_url(pid)
 
