@@ -20,7 +20,7 @@ class LedgerCanisterTests(unittest.TestCase):
         self.principal_b = ic.Principal.from_str("zzyfr-6yaaa-aaaar-aklsa-cai")
         self.principal_minting = ic.Principal.from_str("i3gqp-srkaa-aaaaa-aaaap-4ai")
 
-        with open("ledger.did", "r") as candid_file:
+        with open("ledger.did", "r", encoding="utf-8") as candid_file:
             candid = candid_file.read()
 
         init_args = {

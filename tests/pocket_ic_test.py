@@ -34,7 +34,7 @@ class PocketICTests(unittest.TestCase):
         )
 
     def test_tick(self):
-        self.assertEqual(self.pic._tick(), None)
+        self.assertEqual(self.pic.tick(), None)
 
 
 if __name__ == "__main__":
