@@ -24,7 +24,7 @@ jobs:
         python3 -m pip install -r requirements.txt
 
     - name: Analysing the code with pylint
-      run: pylint $(git ls-files '*.py')
+      run: python3 -m pylint --recursive yes .
 
     - name: Run unittests 
       run: echo "unittests TODO"
@@ -35,7 +35,7 @@ jobs:
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
-        name: pocket-ic-$(git rev-parse --short ${{ github.sha }})
+        name: pocket-ic-${{ github.sha :0:3}}
         path: dist/*
 
     - name: Run integration tests  # from examples directory
