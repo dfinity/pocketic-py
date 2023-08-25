@@ -1,11 +1,13 @@
+# pylint: disable=locally-disabled, missing-module-docstring, missing-class-docstring, missing-function-docstring, wrong-import-position
+
 import sys
 import os
 import unittest
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pocket_ic import PocketIC
 
 
@@ -32,7 +34,7 @@ class PocketICTests(unittest.TestCase):
         )
 
     def test_tick(self):
-        self.assertEqual(self.pic.tick(), None)
+        self.assertEqual(self.pic._tick(), None)
 
 
 if __name__ == "__main__":

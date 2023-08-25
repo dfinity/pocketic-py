@@ -1,3 +1,6 @@
+"""
+This module contains 'PocketIC', which is the only interface we expose to a test author. 
+"""
 import base64
 from typing import Any, List, Optional
 
@@ -9,6 +12,15 @@ from pocket_ic.pocket_ic_server import PocketICServer
 
 
 class PocketIC:
+    """
+    An instance of this class represents an IC instance on the PocketIC server.
+
+    The interface of this class is derived from the StateMachine testing framework,
+    which presents a blocking API to the user.
+
+    TODO: describe return types and error states
+    """
+
     def __init__(self) -> None:
         self.server = PocketICServer()
         self.instance_id = self.server.request_client.post(
@@ -57,7 +69,6 @@ class PocketIC:
 
         Returns:
             dict: {'secs_since_epoch': ..., 'nanos_since_epoch': ...}
-
         """
         return self.send_request("Time")
 
