@@ -4,7 +4,7 @@ import unittest
 import ic
 
 # The example needs to have the module in its sys path, so we traverse
-# up until we find PocketIC.
+# up until we find the pocket_ic package.
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -20,7 +20,7 @@ class LedgerCanisterTests(unittest.TestCase):
         self.principal_b = ic.Principal.from_str("zzyfr-6yaaa-aaaar-aklsa-cai")
         self.principal_minting = ic.Principal.from_str("i3gqp-srkaa-aaaaa-aaaap-4ai")
 
-        with open("ledger.did", "r") as candid_file:
+        with open("ledger.did", "r", encoding="utf-8") as candid_file:
             candid = candid_file.read()
 
         init_args = {

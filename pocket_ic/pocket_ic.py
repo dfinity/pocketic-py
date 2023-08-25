@@ -31,31 +31,31 @@ class PocketIC:
         self.sender = ic.Principal.anonymous()
 
     def set_anonymous_sender(self) -> None:
-        """Sets the sender for all following calls to the IC to the anonymous principal."""
+        """Sets the new sender for all following calls to the IC to the anonymous principal."""
         self.sender = ic.Principal.anonymous()
 
     def set_sender(self, principal: ic.Principal) -> None:
-        """Sets the sender for all following calls to the IC to the specified principal.
+        """Sets the new sender for all following calls to the IC to the specified principal.
 
         Args:
             principal (ic.Principal): the principal to make calls from
         """
         self.sender = principal
 
-    def send_request(self, payload: dict) -> Any:
+    def send_request(self, body: Any) -> Any:
         """Send a request to the IC.
 
         Args:
-            payload (dict): the JSON payload to be executed on the instance
+            body (Any): the payload for the IC request
 
         Raises:
             ConnectionError: raised on response codes != 200
 
         Returns:
-            Any: a JSON encoded result, if any
+            Any: a JSON encoded result, if the request contains a response
         """
-        result = self.request_client.post(self.instance_url, json=payload)
-        if result.status_code != 200:
+        result = self.request_client.post(self.instance_url, json=body)
+        if result.status_code != requests.codes.ok:
             raise ConnectionError(
                 f'PocketIC HTTP request returned with status code {result.status_code}: "{result.reason}"'
             )
@@ -68,11 +68,12 @@ class PocketIC:
         """Get the current time of the IC.
 
         Returns:
-            dict: the current time in nanoseconds and seconds since epoch
+            dict: {'secs_since_epoch': ..., 'nanos_since_epoch': ...}
         """
         return self.send_request("Time")
 
-    def _tick(self) -> None:
+    def tick(self) -> None:
+        """Make the IC produce and progress by one block."""
         self.send_request("Tick")
 
     def set_time(self, time_nanosec: int) -> None:
@@ -125,7 +126,7 @@ class PocketIC:
         self,
         canister_id: Optional[ic.Principal],
         method: str,
-        payload: dict,
+        payload: bytes,
     ) -> list:
         """Makes an update call to a canister with the given ID. If the ID is not provided, calls the management canister.
 
@@ -138,7 +139,7 @@ class PocketIC:
             list: a list of candid objects
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
-        payload = {
+        body = {
             "CanisterUpdateCall": {
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
@@ -146,14 +147,14 @@ class PocketIC:
                 "arg": base64.b64encode(payload).decode(),
             }
         }
-        res = self.send_request(payload)
+        res = self.send_request(body)
         return self._get_ok_reply(res)
 
     def query_call(
         self,
         canister_id: Optional[ic.Principal],
         method: str,
-        payload: dict,
+        payload: bytes,
     ) -> list:
         """Makes a query call to a canister with the given ID. If the ID is not provided, calls the management canister.
 
@@ -166,7 +167,7 @@ class PocketIC:
             list: a list of candid objects
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
-        payload = {
+        body = {
             "CanisterQueryCall": {
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
@@ -174,7 +175,7 @@ class PocketIC:
                 "arg": base64.b64encode(payload).decode(),
             }
         }
-        res = self.send_request(payload)
+        res = self.send_request(body)
         return self._get_ok_reply(res)
 
     def create_canister(self, settings: list = None) -> ic.Principal:
@@ -238,7 +239,6 @@ class PocketIC:
                 ),
             }
         )
-
         payload = [
             {
                 "type": install_code_arg,
@@ -299,7 +299,8 @@ class PocketIC:
 
         raise ValueError(f"Malformed response: {request_result}")
 
-    ############### For compatibility with ic-py's `Agent` class ##############
+    ############### For compatibility with ic-py's `ic.Agent` class;  #########
+    ############### the `ic.Canister` interface requires these two methods. ###
 
     def query_raw(
         self, canister_id, name, arguments, return_types, _effective_canister_id
