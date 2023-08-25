@@ -1,0 +1,9 @@
+[MAIN]
+ignore-paths=examples/
+
+[MESSAGES-CONTROL]
+
+disable=
+    line-too-long,
+    too-few-public-methods,
+    protected-access,

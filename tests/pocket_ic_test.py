@@ -1,3 +1,5 @@
+# pylint: disable=locally-disabled, missing-module-docstring, missing-class-docstring, missing-function-docstring, wrong-import-position
+
 import sys
 import os
 import unittest
@@ -5,7 +7,6 @@ import unittest
 # The test needs to have the module in its sys path, so we traverse
 # up until we find PocketIC.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from pocket_ic import PocketIC
 
 
