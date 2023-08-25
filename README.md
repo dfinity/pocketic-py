@@ -60,6 +60,19 @@ or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/re
 
 ## How to use this library
 
+sketch: 
+- need canister project
+- has wasm
+- has candid file (maybe)
+- you want to test your canisters
+- 
+- pocketic provides an IC with the following interface: update, query, setstablemem etc
+- as a unittest:
+- implement a setup function for tests with same initial situation
+- ALL TESTS RERUN THE SETUP! this may change in the future
+- define testcases as normal
+- server will shutdown after some time of inactivity. 
+- 
 
 
 See examples/
