@@ -55,7 +55,7 @@ class PocketIC:
             Any: a JSON encoded result, if the request contains a response
         """
         result = self.request_client.post(self.instance_url, json=body)
-        if result.status_code != requests.codes.ok:
+        if result.status_code != 200:
             raise ConnectionError(
                 f'PocketIC HTTP request returned with status code {result.status_code}: "{result.reason}"'
             )
