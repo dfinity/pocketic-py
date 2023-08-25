@@ -1,3 +1,6 @@
+"""
+This module contains 'PocketIC', which is the only interface we expose to a test author. 
+"""
 import base64
 from typing import Any, List, Optional
 
@@ -9,6 +12,15 @@ from pocket_ic.pocket_ic_server import PocketICServer
 
 
 class PocketIC:
+    """
+    An instance of this class represents an IC instance on the PocketIC server.
+
+    The interface of this class is derived from the StateMachine testing framework,
+    which presents a blocking API to the user.
+
+    TODO: describe return types and error states
+    """
+
     def __init__(self) -> None:
         self.server = PocketICServer()
         self.instance_id = self.server.request_client.post(
@@ -18,39 +30,71 @@ class PocketIC:
         self.request_client = requests.session()
         self.sender = ic.Principal.anonymous()
 
-    def set_anonymous_sender(self):
+    def set_anonymous_sender(self) -> None:
+        """Sets the sender for all following calls to the IC to the anonymous principal."""
         self.sender = ic.Principal.anonymous()
 
-    def set_sender(self, principal: ic.Principal):
+    def set_sender(self, principal: ic.Principal) -> None:
+        """Sets the sender for all following calls to the IC to the specified principal.
+
+        Args:
+            principal (ic.Principal): the principal to make calls from
+        """
         self.sender = principal
 
-    def send_request(self, payload: Any) -> Any:
+    def send_request(self, payload: dict) -> Any:
+        """Send a request to the IC.
+
+        Args:
+            payload (dict): the JSON payload to be executed on the instance
+
+        Raises:
+            ConnectionError: raised on response codes != 200
+
+        Returns:
+            Any: a JSON encoded result, if any
+        """
         result = self.request_client.post(self.instance_url, json=payload)
-        if result.status_code != requests.codes.ok:
+        if result.status_code != 200:
             raise ConnectionError(
                 f'PocketIC HTTP request returned with status code {result.status_code}: "{result.reason}"'
             )
         return result.json()
 
-    def get_root_key(self) -> List[int]:
+    def _get_root_key(self) -> List[int]:
         return self.send_request("RootKey")
 
     def get_time(self) -> dict:
+        """Get the current time of the IC.
+
+        Returns:
+            dict: the current time in nanoseconds and seconds since epoch
+        """
         return self.send_request("Time")
 
-    def tick(self) -> None:
-        return self.send_request("Tick")
+    def _tick(self) -> None:
+        self.send_request("Tick")
 
     def set_time(self, time_nanosec: int) -> None:
+        """Sets the current time of the IC.
+
+        Args:
+            time_nanosec (int): the number of nanoseconds since epoch
+        """
         payload = {
             "SetTime": {
                 "secs_since_epoch": time_nanosec // 1_000_000_000,
                 "nanos_since_epoch": time_nanosec % 1_000_000_000,
             }
         }
-        return self.send_request(payload)
+        self.send_request(payload)
 
     def advance_time(self, nanosecs: int) -> None:
+        """Advance the time on the IC by some nanoseconds.
+
+        Args:
+            nanosecs (int): number of nanoseconds to be added to the current time
+        """
         payload = {
             "AdvanceTime": {
                 "secs": nanosecs // 1_000_000_000,
@@ -60,6 +104,15 @@ class PocketIC:
         return self.send_request(payload)
 
     def add_cycles(self, canister_id: ic.Principal, amount: int) -> int:
+        """Add cycles to a specific canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister to add cycles to
+            amount (int): amount of cycles to add to the canister (single cycles, NOT trillion cycles)
+
+        Returns:
+            int: the total amount of cycles the canister holds at after adding `amount`
+        """
         payload = {
             "AddCycles": {
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
@@ -68,13 +121,22 @@ class PocketIC:
         }
         return self.send_request(payload)
 
-    # Makes an update call to a canister with the given ID. If the ID is not provided, calls the management canister.
     def update_call(
         self,
         canister_id: Optional[ic.Principal],
         method: str,
         payload: dict,
-    ):
+    ) -> list:
+        """Makes an update call to a canister with the given ID. If the ID is not provided, calls the management canister.
+
+        Args:
+            canister_id (Optional[ic.Principal]): optional canister ID or `None` for management canister.
+            method (str): the canister method to execute
+            payload (dict): a candid encoded representation of the payload
+
+        Returns:
+            list: a list of candid objects
+        """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         payload = {
             "CanisterUpdateCall": {
@@ -87,13 +149,22 @@ class PocketIC:
         res = self.send_request(payload)
         return self._get_ok_reply(res)
 
-    # Makes a query call to a canister with the given ID. If the ID is not provided, calls the management canister.
     def query_call(
         self,
         canister_id: Optional[ic.Principal],
         method: str,
         payload: dict,
-    ):
+    ) -> list:
+        """Makes a query call to a canister with the given ID. If the ID is not provided, calls the management canister.
+
+        Args:
+            canister_id (Optional[ic.Principal]): optional canister ID or `None` for management canister.
+            method (str): the canister method to execute
+            payload (dict): a candid encoded representation of the payload
+
+        Returns:
+            list: a list of candid objects
+        """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         payload = {
             "CanisterQueryCall": {
@@ -106,8 +177,15 @@ class PocketIC:
         res = self.send_request(payload)
         return self._get_ok_reply(res)
 
-    # Creates an empty canister.
-    def create_canister(self, settings=None) -> ic.Principal:
+    def create_canister(self, settings: list = None) -> ic.Principal:
+        """Creates an empty canister.
+
+        Args:
+            settings (list, optional): optional list of settings, defaults to `None`
+
+        Returns:
+            ic.Principal: the canister ID of the new canister
+        """
         record = Types.Record(
             {
                 "settings": Types.Opt(
@@ -133,13 +211,19 @@ class PocketIC:
         canister_id = candid[0]["value"]["canister_id"]
         return canister_id
 
-    # Installs a WASM code to the canister with the given ID.
     def install_code(
         self,
         canister_id: ic.Principal,
         wasm_module: bytes,
         arg: list,
-    ) -> list:
+    ) -> None:
+        """Installs WASM code to the given canister ID with arguments.
+
+        Args:
+            canister_id (ic.Principal): the target canister
+            wasm_module (bytes): the wasm module as bytes
+            arg (list): list of install arguments
+        """
         install_code_arg = Types.Record(
             {
                 "wasm_module": Types.Vec(Types.Nat8),
@@ -167,17 +251,28 @@ class PocketIC:
             }
         ]
 
-        request_result = self.update_call(None, "install_code", ic.encode(payload))
-        candid = ic.decode(bytes(request_result))  # TODO: is this the candid interface?
-        return candid
+        self.update_call(None, "install_code", ic.encode(payload))
 
-    # Creates a canister, installs the provided WASM with the given init arguments. Returns a canister interface.
     def create_and_install_canister_with_candid(
         self,
         candid: str,
         wasm_module: bytes,
         init_args: list,
     ) -> ic.Canister:
+        """Creates a canister, installs the provided WASM with the given init arguments. Returns a canister object.
+        For an example on how to use the canister object, see `/examples/ledger_canister_test.py`.
+
+        Args:
+            candid (str): a valid candid file describing the canister interface
+            wasm_module (bytes): the canister wasm as bytes
+            init_args (list): the init args as required by the candid file
+
+        Raises:
+            ValueError: can be raised on invalid candid files
+
+        Returns:
+            ic.Canister: the canister object
+        """
         canister_id = self.create_canister()
         canister = ic.Canister(self, canister_id, candid)
 
@@ -188,7 +283,7 @@ class PocketIC:
             type_ = canister_arguments[0]
             arg = [{"type": type_, "value": init_args}]
         else:
-            raise ValueError("Is the Candid file correct?")
+            raise ValueError("The candid file appears to be malformed")
 
         self.install_code(canister_id, wasm_module, arg)
         return canister
@@ -204,17 +299,19 @@ class PocketIC:
 
         raise ValueError(f"Malformed response: {request_result}")
 
-    ############### for compatibility with ic-py's `Agent` class ##############
+    ############### For compatibility with ic-py's `Agent` class ##############
 
     def query_raw(
         self, canister_id, name, arguments, return_types, _effective_canister_id
     ):
+        """For compatibility with `ic-py`'s `Agent` class."""
         res = self.query_call(canister_id, name, arguments)
         return ic.decode(bytes(res), return_types)
 
     def update_raw(
         self, canister_id, name, arguments, return_types, _effective_canister_id
     ):
+        """For compatibility with `ic-py`'s `Agent` class."""
         res = self.update_call(canister_id, name, arguments)
         return ic.decode(bytes(res), return_types)
 
