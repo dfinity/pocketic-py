@@ -1,0 +1,86 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1692799911,
+        "narHash": "sha256-3eihraek4qL744EvQXsK1Ha6C3CR7nnT8X2qWap4RNk=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "f9e7cf818399d17d347f847525c5a5a8032e4e44",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1692964079,
+        "narHash": "sha256-sUtSEzb5k2WRDWWU7oO/8yjeHi4yU3LernATi9QZAUU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b4e453296c475b511ab94b7f1059879ac69aef75",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "release-23.05",
+        "type": "indirect"
+      }
+    },
+    "pocketic-darwin-gz": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-DtpqCIqh0/vI997RAweL1vrDYSdryb6oZ5Lalz/xLNc=",
+        "type": "file",
+        "url": "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+      }
+    },
+    "pocketic-linux-gz": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-EJ3ZvgYCyhxAVj1WD8pvUJBDGEKEcS5iJCx18kcBHK8=",
+        "type": "file",
+        "url": "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "pocketic-darwin-gz": "pocketic-darwin-gz",
+        "pocketic-linux-gz": "pocketic-linux-gz"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
