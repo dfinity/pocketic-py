@@ -49,7 +49,7 @@ jobs:
   
   release: 
     needs: build
-    if: ${{ github.event_name == 'release' }} && github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'release' }} 
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,21 +63,13 @@ jobs:
       with: 
         name: pocket-ic-${{ github.sha }}.tar.gz
 
-    - name: upload wheel to releases
-      uses: actions/upload-release-asset@master
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: pocket-ic-${{ github.sha }}.whl
-        asset_name: pocket-ic-${{github.ref_name}}.whl
-        asset_content_type: application/gzip
+    - name: upload artifacts to release page
+      uses: softprops/action-gh-release@master
+      with: 
+        files: |
+          pocket-ic-${{ github.sha }}.whl
+          pocket-ic-${{ github.sha }}.tar.gz
       
-    - name: upload sources to releases
-      uses: actions/upload-release-asset@master
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: pocket-ic-${{ github.sha }}.tar.gz
-        asset_name: pocket-ic-${{github.ref_name}}.tar.gz
-        asset_content_type: application/gzip
     
   publish: 
     needs: release
