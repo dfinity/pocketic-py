@@ -24,12 +24,12 @@
               pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
                 (python-final: python-prev: {
                   antlr4-python3-runtime = python-prev.antlr4-python3-runtime.override { antlr4 = final.antlr4_9; };
-                  waiter = python-final.callPackage ./waiter.nix {};
-                  ic-py = python-final.callPackage ./ic-py.nix {};
-                  pocketic-py = python-final.callPackage ./pocketic-py.nix {};
+                  waiter = python-final.callPackage ./waiter.nix { };
+                  ic-py = python-final.callPackage ./ic-py.nix { };
+                  pocketic-py = python-final.callPackage ./pocketic-py.nix { };
                 })
               ];
-              pocket-ic = final.runCommand "pocket-ic" {} ''
+              pocket-ic = final.runCommand "pocket-ic" { } ''
                 mkdir -p $out/bin
                 gunzip < ${if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz} > $out/bin/pocket-ic
                 chmod +x $out/bin/pocket-ic
@@ -40,11 +40,14 @@
           ];
         };
         pocketic-py = pkgs.python3.pkgs.pocketic-py;
-      in {
+      in
+      {
         packages.default = pocketic-py;
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pocketic-py ];
         };
+        # so that we can format .nix code using: nix fmt
+        formatter = pkgs.nixpkgs-fmt;
       }
     );
 }
