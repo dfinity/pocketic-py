@@ -13,14 +13,14 @@ jobs:
     - name: Build package
       id: release-build
       run: |
-        out=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
-        echo "::set-output name=out::$out"
+        dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
+        echo "::set-output name=dist::$dist"
 
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
         name: pocket-ic-${{ github.sha }}
-        path: ${{ steps.release-build.outputs.out }}/*
+        path: ${{ steps.release-build.outputs.dist }}/*
 
   publish:
     needs: build
