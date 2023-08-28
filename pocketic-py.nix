@@ -2,7 +2,7 @@
 
 buildPythonPackage rec {
   pname = "pocketic";
-  version = "0.0.1";
+  version = "0.0.0";
   format = "pyproject";
 
   src = lib.cleanSourceWith {

@@ -42,10 +42,26 @@
             })
           ];
         };
-        pocketic-py = pkgs.python3.pkgs.pocketic-py;
+        py = pkgs.python3;
+
+        pocketic-py = py.pkgs.pocketic-py;
+
+        py-env = py.withPackages (ps: [
+          ps.build
+        ]);
       in
       {
         packages.default = pocketic-py;
+
+        packages.pocketic-py-release = pkgs.stdenv.mkDerivation {
+          name = "pocketic-py-release-${pocketic-py.version}";
+          inherit (pocketic-py) src;
+          nativeBuildInputs = [ py-env ];
+          buildPhase = ''
+            python -m build --outdir $out
+          '';
+        };
+
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pocketic-py ];
         };
