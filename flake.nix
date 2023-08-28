@@ -15,7 +15,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, pocketic-darwin-gz, pocketic-linux-gz }:
-    flake-utils.lib.eachSystem [ "aarch64-darwin" /* "x86_64-darwin" "x86-64-linux" */ ] (system:
+    flake-utils.lib.eachSystem [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ] (system:
       let
         pkgs = import nixpkgs {
           inherit system;
