@@ -29,9 +29,12 @@
                   pocketic-py = python-final.callPackage ./pocketic-py.nix { };
                 })
               ];
-              pocket-ic = final.runCommand "pocket-ic" { } ''
+              pocket-ic = final.runCommand "pocket-ic"
+                {
+                  pocket_ic_gz = if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz;
+                } ''
                 mkdir -p $out/bin
-                gunzip < ${if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz} > $out/bin/pocket-ic
+                gunzip < $pocket_ic_gz > $out/bin/pocket-ic
                 chmod +x $out/bin/pocket-ic
                 # test pocketic by running it
                 $out/bin/pocket-ic --help
