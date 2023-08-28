@@ -64,9 +64,7 @@ jobs:
         name: pocket-ic-${{ github.sha }}.tar.gz
 
     - name: upload wheel to releases
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      uses: actions/upload-release-asset@master
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: pocket-ic-${{ github.sha }}.whl
@@ -74,9 +72,7 @@ jobs:
         asset_content_type: application/gzip
       
     - name: upload sources to releases
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      uses: actions/upload-release-asset@master
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: pocket-ic-${{ github.sha }}.tar.gz
