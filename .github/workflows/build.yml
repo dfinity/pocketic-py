@@ -14,7 +14,7 @@ jobs:
       id: release-build
       run: |
         dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
-        echo "::set-output name=dist::$dist"
+        echo "dist=$dist" >> $GITHUB_OUTPUT
 
     - name: Upload package
       uses: actions/upload-artifact@v3
