@@ -6,6 +6,7 @@ import os
 import subprocess
 import time
 from typing import List
+from tempfile import gettempdir
 import requests
 
 POCKET_IC_BIN = "pocket-ic"
@@ -36,9 +37,9 @@ class PocketICServer:
         self.request_client = requests.session()
 
     def _get_url(self, pid: int) -> str:
-        # TODO: Use `tempfile`
-        ready_file_path = f"/tmp/pocket_ic_{pid}.ready"
-        port_file_path = f"/tmp/pocket_ic_{pid}.port"
+        tmp_dir = gettempdir()
+        ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
+        port_file_path = f"{tmp_dir}/pocket_ic_{pid}.port"
 
         stop_at = time.time() + 10  # Wait for the ready file for 10 seconds
 
