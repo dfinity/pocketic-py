@@ -16,7 +16,7 @@ jobs:
     - name: Build release
       id: release-build
       run: |
-        out=$(nix build --no-link --print-out-paths .#pocketic-py-release)
+        out=$(nix build --no-link --print-out-paths .#pocketic-py-dist)
         echo "::set-output name=out::$out"
 
     - name: Upload package

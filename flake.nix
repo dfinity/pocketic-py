@@ -80,19 +80,14 @@
 
         py-env = py.withPackages (ps: [
           ps.build
+          pocketic-py
+          ps.hatchling
         ]);
       in
       {
         packages.default = pocketic-py;
 
-        packages.pocketic-py-release = pkgs.stdenv.mkDerivation {
-          name = "pocketic-py-release-${pocketic-py.version}";
-          inherit (pocketic-py) src;
-          nativeBuildInputs = [ py-env ];
-          buildPhase = ''
-            python -m build --outdir $out
-          '';
-        };
+        packages.pocketic-py-dist = pocketic-py.dist;
 
         packages.pocket-ic = pkgs.pocket-ic;
 
