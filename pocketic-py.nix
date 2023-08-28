@@ -5,7 +5,17 @@ buildPythonPackage rec {
   version = "0.0.1";
   format = "pyproject";
 
-  src = ./.;
+  src = lib.cleanSourceWith {
+    name = "pocketic-py-src";
+    src = ./.;
+    # Filter out files not needed by the Python package:
+    filter = path: _type:
+      ! (lib.hasSuffix ".nix" path ||
+        lib.hasSuffix ".lock" path ||
+        lib.hasSuffix ".envrc" path ||
+        lib.hasSuffix ".github" path ||
+        lib.hasSuffix ".gitignore" path);
+  };
 
   nativeBuildInputs = [
     hatchling
