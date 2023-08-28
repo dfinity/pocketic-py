@@ -87,8 +87,6 @@
       {
         packages.default = pocketic-py;
 
-        packages.pocketic-py-dist = pocketic-py.dist;
-
         packages.pocket-ic = pkgs.pocket-ic;
 
         devShells.default = pkgs.mkShell {
