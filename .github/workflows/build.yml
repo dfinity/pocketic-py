@@ -11,12 +11,9 @@ jobs:
     - uses: cachix/install-nix-action@v22
 
     - name: Build package
-      run: nix build --no-link
-
-    - name: Build release
       id: release-build
       run: |
-        out=$(nix build --no-link --print-out-paths .#default.dist)
+        out=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
         echo "::set-output name=out::$out"
 
     - name: Upload package
