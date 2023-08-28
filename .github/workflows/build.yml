@@ -5,43 +5,29 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: cachix/install-nix-action@v22
       with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install pylint
-        python3 -m pip install build
-        python3 -m pip install -r requirements.txt
-
-    - name: Analysing the code with pylint
-      run: python3 -m pylint --recursive yes .
-
-    - name: Run unittests 
-      run: echo "unittests TODO"
+        extra_nix_config: "extra-experimental-features = nix-command flakes"
 
     - name: Build package
-      run: python3 -m build
+      run: nix build --no-link
+
+    - name: Build release
+      id: release-build
+      run: |
+        out=$(nix build --no-link --print-out-paths .#pocketic-py-release)
+        echo "::set-output name=out::$out"
 
     - name: Upload package
       uses: actions/upload-artifact@v3
       with:
         name: pocket-ic-${{ github.sha }}
-        path: dist/*
+        path: ${{ steps.release-build.outputs.out }}/*
 
-    - name: Run integration tests  # from examples directory
-      run: echo "integration tests TODO"
-  
-  publish: 
+  publish:
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
