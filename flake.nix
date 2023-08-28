@@ -74,24 +74,13 @@
             })
           ];
         };
-        py = pkgs.python3;
-
-        pocketic-py = py.pkgs.pocketic-py;
-
-        py-env = py.withPackages (ps: [
-          ps.build
-          pocketic-py
-          ps.hatchling
-        ]);
+        pocketic-py = pkgs.python3.pkgs.pocketic-py;
       in
       {
         packages.default = pocketic-py;
 
         packages.pocket-ic = pkgs.pocket-ic;
 
-        devShells.default = pkgs.mkShell {
-          inputsFrom = [ pocketic-py ];
-        };
         # so that we can format .nix code using: nix fmt
         formatter = pkgs.nixpkgs-fmt;
       }
