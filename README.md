@@ -48,6 +48,11 @@ export PATH="${HOME}/opt:${PATH}"
 
 You can also add the last line to your `~/.bashrc` or `~/.zshrc`. 
 
+On macOS, run `xattr -dr com.apple.quarantine pocket-ic` in the directory where you have placed the binary file.
+This step is needed to bypass the developer verification from Apple, and only needs to be run once.
+Alternatively, you can open the `pocket-ic` binary by right clicking on it in the Finder and selecting "Open" from the drop-down menu.
+Then, confirm opening this application by clicking "Open" again in the dialog that opened.
+
 ### PocketIC Integration Library (this)
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
