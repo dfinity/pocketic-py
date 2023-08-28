@@ -29,16 +29,48 @@
                   pocketic-py = python-final.callPackage ./pocketic-py.nix { };
                 })
               ];
-              pocket-ic = final.runCommand "pocket-ic"
-                {
-                  pocket_ic_gz = if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz;
-                } ''
-                mkdir -p $out/bin
-                gunzip < $pocket_ic_gz > $out/bin/pocket-ic
-                chmod +x $out/bin/pocket-ic
-                # test pocketic by running it
-                $out/bin/pocket-ic --help
-              '';
+              # pocket-ic = final.runCommand "pocket-ic"
+              #   {
+              #     pocket_ic_gz = if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz;
+              #   } ''
+              #   mkdir -p $out/bin
+              #   gunzip < $pocket_ic_gz > $out/bin/pocket-ic
+              #   chmod +x $out/bin/pocket-ic
+              #   # test pocketic by running it
+              #   # $out/bin/pocket-ic --help
+              # '';
+
+              pocket-ic = pkgs.stdenv.mkDerivation {
+                name = "pocket-ic";
+                pocket_ic_gz = if final.stdenv.isDarwin then pocketic-darwin-gz else pocketic-linux-gz;
+                unpackPhase = ''
+                  mkdir -p $out/bin
+                  gunzip < $pocket_ic_gz > $out/bin/pocket-ic
+                  chmod +x $out/bin/pocket-ic
+                '';
+                buildInputs = [ pkgs.stdenv.cc.cc.lib ];
+                preFixup =
+                  if final.stdenv.isDarwin
+                  then ''
+                    # TODO: install_name_tool?
+                  ''
+                  else
+                    let
+                      libPath = pkgs.lib.makeLibraryPath [
+                        pkgs.stdenv.cc.cc.lib # libstdc++.so.6
+                      ];
+                    in ''
+                    patchelf \
+                      --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
+                      --set-rpath "${libPath}" \
+                      $out/bin/pocket-ic
+                  '';
+                doInstallCheck = true;
+                preInstallCheck = ''
+                  $out/bin/pocket-ic --help
+                '';
+              };
+
             })
           ];
         };
@@ -61,6 +93,8 @@
             python -m build --outdir $out
           '';
         };
+
+        packages.pocket-ic = pkgs.pocket-ic;
 
         devShells.default = pkgs.mkShell {
           inputsFrom = [ pocketic-py ];
