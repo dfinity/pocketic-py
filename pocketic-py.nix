@@ -24,6 +24,6 @@ buildPythonPackage rec {
   meta = {
     homepage = "https://github.com/dfinity/pocketic-py";
     description = "A Pocket IC canister testing library for Python";
-    license = lib.licenses.bsd3;
+    license = lib.licenses.asl20;
   };
 }
