@@ -20,7 +20,7 @@ buildPythonPackage rec {
   ];
 
   meta = {
-    homepage = "https://github.com/coady/waite";
+    homepage = "https://github.com/coady/waiter";
     description = "Delayed iteration for polling and retries.";
     license = lib.licenses.asl20;
   };
