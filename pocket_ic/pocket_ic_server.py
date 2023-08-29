@@ -3,7 +3,6 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 """
 
 import os
-import subprocess
 import time
 from typing import List
 from tempfile import gettempdir
@@ -30,10 +29,8 @@ class PocketICServer:
     def __init__(self) -> None:
         # Attempt to start the PocketIC server if it's not already running.
         pid = os.getpid()
-        # pylint: disable=locally-disabled, consider-using-with
-        subprocess.Popen([POCKET_IC_BIN, "--pid", f"{pid}"])
+        os.system(f"{POCKET_IC_BIN} --pid {pid} &")
         self.url = self._get_url(pid)
-
         self.request_client = requests.session()
 
     def _get_url(self, pid: int) -> str:
