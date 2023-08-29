@@ -4,7 +4,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
 
@@ -16,7 +21,8 @@ jobs:
         dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
         echo "dist=$dist" >> $GITHUB_OUTPUT
 
-    - name: Upload package
+    - if: matrix.os == 'ubuntu-latest'
+      name: Upload package
       uses: actions/upload-artifact@v3
       with:
         name: pocket-ic-${{ github.sha }}
