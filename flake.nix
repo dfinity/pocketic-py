@@ -41,10 +41,7 @@
 
         pocketic-py = pkgs.poetry2nix.mkPoetryApplication {
           inherit projectDir overrides;
-        };
-
-        pocketic-py-env = pkgs.poetry2nix.mkPoetryEnv {
-          inherit projectDir overrides;
+          propagatedBuildInputs = [ pocket-ic ];
         };
 
         projectDir = pkgs.lib.cleanSourceWith {
@@ -68,8 +65,7 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.poetry
-            pocketic-py-env
-            pocket-ic
+            pocketic-py
           ];
         };
 
