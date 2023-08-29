@@ -62,16 +62,13 @@ jobs:
     - uses: actions/download-artifact@v3
       with: 
         name: pocket_ic_${{ github.sha }}.tar.gz
-
-    - name: ls
-      run: echo `ls -la`
       
     - name: upload artifacts to release page
       uses: softprops/action-gh-release@master
       with: 
         files: |
-          pocket_ic_${{ github.sha }}.whl
-          pocket_ic_${{ github.sha }}.tar.gz
+          pocket_ic-0.0.0-py3-none-any.whl
+          pocket_ic-0.0.0.tar.gz
       
     
   publish: 
