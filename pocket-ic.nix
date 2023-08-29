@@ -1,10 +1,10 @@
-{ stdenv, lib, pocketic-darwin-gz, pocketic-linux-gz }:
+{ stdenv, lib, pocket-ic-darwin-gz, pocket-ic-linux-gz }:
 stdenv.mkDerivation {
   name = "pocket-ic";
   pocket_ic_gz =
     if stdenv.isDarwin
-    then pocketic-darwin-gz
-    else pocketic-linux-gz;
+    then pocket-ic-darwin-gz
+    else pocket-ic-linux-gz;
   unpackPhase = ''
     mkdir -p $out/bin
     gunzip < $pocket_ic_gz > $out/bin/pocket-ic

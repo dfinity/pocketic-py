@@ -33,7 +33,7 @@
         "type": "indirect"
       }
     },
-    "pocketic-darwin-gz": {
+    "pocket-ic-darwin-gz": {
       "flake": false,
       "locked": {
         "narHash": "sha256-DtpqCIqh0/vI997RAweL1vrDYSdryb6oZ5Lalz/xLNc=",
@@ -45,7 +45,7 @@
         "url": "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
       }
     },
-    "pocketic-linux-gz": {
+    "pocket-ic-linux-gz": {
       "flake": false,
       "locked": {
         "narHash": "sha256-EJ3ZvgYCyhxAVj1WD8pvUJBDGEKEcS5iJCx18kcBHK8=",
@@ -61,8 +61,8 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "pocketic-darwin-gz": "pocketic-darwin-gz",
-        "pocketic-linux-gz": "pocketic-linux-gz"
+        "pocket-ic-darwin-gz": "pocket-ic-darwin-gz",
+        "pocket-ic-linux-gz": "pocket-ic-linux-gz"
       }
     },
     "systems": {

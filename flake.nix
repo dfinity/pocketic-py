@@ -4,17 +4,17 @@
   inputs = {
     nixpkgs.url = "nixpkgs/release-23.05";
     flake-utils.url = "github:numtide/flake-utils";
-    pocketic-darwin-gz = {
+    pocket-ic-darwin-gz = {
       url = "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz";
       flake = false;
     };
-    pocketic-linux-gz = {
+    pocket-ic-linux-gz = {
       url = "https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, pocketic-darwin-gz, pocketic-linux-gz }:
+  outputs = { self, nixpkgs, flake-utils, pocket-ic-darwin-gz, pocket-ic-linux-gz }:
     flake-utils.lib.eachSystem [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ] (system:
       let
         pkgs = import nixpkgs {
@@ -30,7 +30,7 @@
                 })
               ];
               pocket-ic = final.callPackage ./pocket-ic.nix {
-                inherit pocketic-darwin-gz pocketic-linux-gz;
+                inherit pocket-ic-darwin-gz pocket-ic-linux-gz;
               };
             })
           ];
