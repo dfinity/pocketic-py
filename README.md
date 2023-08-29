@@ -78,14 +78,14 @@ or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/re
 Canister developers have several options to test their software, but there are tradeoffs: 
 - Install and test on the **mainnet**: The 'real' experience, but you pay with real cycles.
 - The **replica** provided by DFX: You get the complete stack of a single IC node. But therefore, you get no cross- or multisubnet functionality, and never will. Replica is quite heavyweight too, because the nonessential components are not abstracted away. 
-- **StateMachine** test: More lightweight than replica, because it *simulates* a subnet. But it launches a process for every test, it uses difficult-to-trace stdio-IPC and it is only integrated with Rust. 
+- **StateMachine** test: More lightweight than replica, because it *simulates* a subnet. But it launches a process for every test, it uses difficult-to-trace stdio-IPC, and it is only integrated with Rust. 
 
 Enter **PocketIC**: 
 - Built from mainnet components
 - Lightweight: Abstracts away consensus and other nonessential components
 - Runs as a service on your test system, and accepts HTTP/JSON. This enables:
     - Concurrent and independent IC instances
-    - Multi-language support: Anyone can write an integration library in any language, it just needs to be implemented against the PocketIC REST-API
+    - Multi-language support: Anyone can write an integration library against the PocketIC REST-API in any language
     - [Will support sharing of setup work between similar tests]
 - [Will support saving and loading checkpoints]
 - [Will support multi-subnet IC instances]
@@ -122,7 +122,7 @@ class MyCanTest(unittest.TestCase):
         # Install the actual wasm code in the empty canister.
         self.pic.install_code(self.canister_id, bytes(wasm_module), [])
 
-    # This tests one aspect of the canister. 
+    # This tests one aspect of the canister. Its initial state is the state after `setUp`. 
     def test_one(self):
         result = self.pic.update_call(self.canister_id, "read", ic.encode([]))
         self.assertEqual(result, [0, 0, 0, 0])
