@@ -5,8 +5,9 @@ import ic
 
 # The example needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
+script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    os.path.dirname(os.path.dirname(script_dir))
 )
 
 from pocket_ic import PocketIC
@@ -18,7 +19,7 @@ class CounterCanisterTests(unittest.TestCase):
         self.pic = PocketIC()
         self.canister_id = self.pic.create_canister()
         self.pic.add_cycles(self.canister_id, 1_000_000_000_000_000_000)
-        with open("counter.wasm", "rb") as wasm_file:
+        with open(os.path.join(script_dir, "counter.wasm"), "rb") as wasm_file:
             wasm_module = wasm_file.read()
         self.pic.install_code(self.canister_id, bytes(wasm_module), [])
 
