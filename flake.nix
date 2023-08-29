@@ -27,7 +27,7 @@
         # PocketIC Python library. Since we use poetry to specify our
         # Python dependencies we use poetry2nix to translate the
         # pyproject.toml and poetry.lock files to a set of Nix
-        # derivations for each dependency.
+        # derivations, one for each dependency.
         pocketic-py = pkgs.poetry2nix.mkPoetryApplication {
           projectDir =
             # Filter out files not needed by the Python library:
