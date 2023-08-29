@@ -1,4 +1,4 @@
-# PocketIC: A canister testing platform
+# PocketIC: A Canister Testing Platform
 
 PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
 
@@ -26,17 +26,17 @@ For more detailed examples, see the section [below](#how-to-use-this-library) an
 
 ## Installation
 
-### PocketIC Server Binary
+### PocketIC Binary
 
-Download the latest stable PocketIC server binary from the URL below:
+Download the latest stable PocketIC binary from the URL below:
 
-Linux:  
+Linux:
 `https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz`
 
-MacOS:  
+MacOS:
 `https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-darwin/pocket-ic.gz`
 
-Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g., 
+Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g.,
  
 ```bash
 mkdir ~/opt
@@ -46,9 +46,17 @@ chmod +x ~/opt/pocket-ic
 export PATH="${HOME}/opt:${PATH}"
 ```
 
-You can also add the last line to your `~/.bashrc` or `~/.zshrc`. 
+You can also add the last line to your `~/.bashrc` or `~/.zshrc`.
 
-### PocketIC Integration Library (this)
+On macOS, run `xattr -dr com.apple.quarantine pocket-ic` in the directory where you have placed the binary file.
+This step is needed to bypass the developer verification from Apple, and only needs to be run once.
+Alternatively, you can open the `pocket-ic` binary by right clicking on it in the Finder and selecting "Open" from the drop-down menu.
+Then, confirm opening this application by clicking "Open" again in the dialog that opened.
+
+You can test that everything is working by calling `pocket-ic` from any folder;
+PocketIC should start and tell you that you're missing the a required argument.
+
+### PocketIC Testing Library (this)
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 

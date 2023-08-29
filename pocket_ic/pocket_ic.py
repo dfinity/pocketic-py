@@ -76,6 +76,38 @@ class PocketIC:
         """Make the IC produce and progress by one block."""
         self.send_request("Tick")
 
+    def check_canister_exists(self, canister_id: ic.Principal) -> bool:
+        """Check whether the provided canister exists.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            bool: `True` if the canister exists, `False` otherwise
+        """
+        payload = {
+            "CanisterExists": {
+                "canister_id": base64.b64encode(canister_id.bytes).decode()
+            }
+        }
+        return self.send_request(payload)
+
+    def get_cycles_balance(self, canister_id: ic.Principal) -> int:
+        """Get the cycles balance of a canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            int: the number of cycles the canister contains
+        """
+        payload = {
+            "CyclesBalance": {
+                "canister_id": base64.b64encode(canister_id.bytes).decode()
+            }
+        }
+        return self.send_request(payload)
+
     def set_time(self, time_nanosec: int) -> None:
         """Sets the current time of the IC.
 
