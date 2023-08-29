@@ -45,6 +45,11 @@ class PocketICTests(unittest.TestCase):
         canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
         self.assertEqual(self.pic.check_canister_exists(canister_id), False)
 
+    def test_cycles_balance(self):
+        canister_id = self.pic.create_canister()
+        self.pic.add_cycles(canister_id, 6_666)
+        self.assertEqual(self.pic.get_cycles_balance(canister_id), 6_666)
+
 
 if __name__ == "__main__":
     unittest.main()
