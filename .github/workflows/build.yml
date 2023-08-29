@@ -1,6 +1,6 @@
 name: Build
 
-on: [push, pull_request]
+on: [push, pull_request, release]
 
 jobs:
   build:
@@ -22,18 +22,26 @@ jobs:
         echo "dist=$dist" >> $GITHUB_OUTPUT
 
     - if: matrix.os == 'ubuntu-latest'
-      name: Upload package
+      name: Upload wheel file
       uses: actions/upload-artifact@v3
       with:
-        name: pocket-ic-${{ github.sha }}
-        path: ${{ steps.release-build.outputs.dist }}/*
+        name: pocket_ic_${{ github.sha }}.whl
+        path: ${{ steps.release-build.outputs.dist }}/*.whl
 
-  publish:
+  release:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.10"]
     steps:
-    - run: echo "publishing TODO"
+    - uses: actions/download-artifact@v3
+      with:
+        name: pocket_ic_${{ github.sha }}.whl
+
+    - name: upload artifacts to release page
+      uses: softprops/action-gh-release@master
+      with:
+        files: |
+          pocket_ic-0.0.0-py3-none-any.whl

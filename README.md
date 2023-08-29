@@ -1,4 +1,4 @@
-# PocketIC: A canister testing platform
+# PocketIC: A Canister Testing Platform
 
 PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/).
 
@@ -35,9 +35,9 @@ environment into scope using either:
 
 ## Installation
 
-### PocketIC Server Binary
+### PocketIC Binary
 
-Download the latest stable PocketIC server binary from the URL below:
+Download the latest stable PocketIC binary from the URL below:
 
 Linux:
 `https://download.dfinity.systems/ic/80bcca3b3e9e79bd07af2747e9cffb0e50c6b868/openssl-static-binaries/x86_64-linux/pocket-ic.gz`
@@ -62,7 +62,10 @@ This step is needed to bypass the developer verification from Apple, and only ne
 Alternatively, you can open the `pocket-ic` binary by right clicking on it in the Finder and selecting "Open" from the drop-down menu.
 Then, confirm opening this application by clicking "Open" again in the dialog that opened.
 
-### PocketIC Integration Library (this)
+You can test that everything is working by calling `pocket-ic` from any folder;
+PocketIC should start and tell you that you're missing the a required argument.
+
+### PocketIC Testing Library (this)
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
