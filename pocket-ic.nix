@@ -1,3 +1,8 @@
+# Derivation for the pocket-ic server binary.
+#
+# Instead of building it from source (which is the default and recommended way
+# in Nix) we instead download a pre-built binary and patch it so that it will
+# run in nix-build containers.
 { stdenv, lib, pocket-ic-darwin-gz, pocket-ic-linux-gz }:
 stdenv.mkDerivation {
   name = "pocket-ic";
