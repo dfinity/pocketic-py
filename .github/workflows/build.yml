@@ -35,13 +35,13 @@ jobs:
     - name: Upload wheel file
       uses: actions/upload-artifact@v3
       with:
-        name: pocket-ic-${{ github.sha }}.whl
+        name: pocket_ic_${{ github.sha }}.whl
         path: dist/*.whl
 
     - name: Upload sources
       uses: actions/upload-artifact@v3
       with:
-        name: pocket-ic-${{ github.sha }}.tar.gz
+        name: pocket_ic_${{ github.sha }}.tar.gz
         path: dist/*.tar.gz
 
     - name: Run integration tests  # from examples directory
@@ -49,7 +49,7 @@ jobs:
   
   release: 
     needs: build
-    if: ${{ github.event_name == 'release' }} 
+    # if: ${{ github.event_name == 'release' }} 
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,18 +57,21 @@ jobs:
     steps:
     - uses: actions/download-artifact@v3
       with: 
-        name: pocket-ic-${{ github.sha }}.whl
+        name: pocket_ic_${{ github.sha }}.whl
         
     - uses: actions/download-artifact@v3
       with: 
-        name: pocket-ic-${{ github.sha }}.tar.gz
+        name: pocket_ic_${{ github.sha }}.tar.gz
 
+    - name: ls
+      run: echo `ls -la`
+      
     - name: upload artifacts to release page
       uses: softprops/action-gh-release@master
       with: 
         files: |
-          pocket-ic-${{ github.sha }}.whl
-          pocket-ic-${{ github.sha }}.tar.gz
+          pocket_ic_${{ github.sha }}.whl
+          pocket_ic_${{ github.sha }}.tar.gz
       
     
   publish: 
