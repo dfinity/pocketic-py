@@ -5,6 +5,7 @@ description = "A canister testing library"
 authors = ["The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>"]
 license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://github.com/dfinity/pocketic-py/"
 
 [tool.poetry.dependencies]
 python = "^3.10"
