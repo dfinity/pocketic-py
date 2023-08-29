@@ -57,6 +57,9 @@
                     );
               in
               {
+                # The following packages depend on setuptools which is
+                # not automatically detected by poetry2nix so we
+                # override them to add setuptools manually:
                 waiter = addSetuptools prev.waiter;
                 ic-py = addSetuptools prev.ic-py;
               });
