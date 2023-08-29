@@ -100,7 +100,7 @@ This section assumes the following:
 
 ### Using python unittest 
 
-We use Python's unittest package to group similar test cases into classes which inherit from `unittest.TestCase`. Thus, we can define unittest's `setUp` and `tearDown` functions. **These will be run before and after *every* test method of the class!**. So we benefit the most if we define a `setUp` to build up an initial state for as many test cases as possible. 
+We can use Python's unittest package to group similar test cases into classes which inherit from `unittest.TestCase`. Thus, we can define unittest's `setUp` and `tearDown` functions. **These will be run before and after *every* test method of the class!**. So we benefit the most if we define a `setUp` to build up an initial state for as many test cases as possible. 
 
 In this example, we `setUp` by simply installing the canister. Individual test methods will only rely on the canister being installed, and continue from there:
 
