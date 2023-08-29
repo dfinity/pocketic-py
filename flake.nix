@@ -70,7 +70,7 @@
       {
         packages.default = pocketic-py;
 
-        packages.pocket-ic = pkgs.pocket-ic;
+        packages.pocket-ic = pocket-ic;
 
         devShells.default = pkgs.mkShell {
           packages = [
