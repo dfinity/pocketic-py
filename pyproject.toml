@@ -1,21 +1,16 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "pocket_ic"
 version = "0.0.0"
-authors = [
-  { name = "Elias Datler", email = "elias.datler@dfinity.org" },
-  { name = "Michael Weigelt", email = "michael.weigelt@dfinity.org" },
-]
 description = "A canister testing library"
+authors = ["Elias Datler <elias.datler@dfinity.org>"]
+license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.7"
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache Software License",
-]
 
-[project.urls]
-"Homepage" = "https://github.com/dfinity/pocketic-py"
+[tool.poetry.dependencies]
+python = "^3.10"
+ic-py = "^1.0.1"
+requests = "^2.31.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
