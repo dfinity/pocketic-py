@@ -10,7 +10,6 @@ stdenv.mkDerivation {
     gunzip < $pocket_ic_gz > $out/bin/pocket-ic
     chmod +x $out/bin/pocket-ic
   '';
-  buildInputs = [ stdenv.cc.cc.lib ];
   preFixup =
     if stdenv.isDarwin
     then ''
