@@ -1,20 +1,20 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "pocket_ic"
 version = "0.0.0"
-authors = [
-  { name = "The Internet Computer Project Developers", email = "dept-testing_&_verification@dfinity.org" },
-]
 description = "A canister testing library"
+authors = ["The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>"]
+license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.7"
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache Software License",
-]
+homepage = "https://github.com/dfinity/pocketic-py/"
 
-[project.urls]
-"Homepage" = "https://github.com/dfinity/pocketic-py"
+[tool.poetry.dependencies]
+python = "^3.10"
+ic-py = "^1.0.1"
+requests = "^2.31.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

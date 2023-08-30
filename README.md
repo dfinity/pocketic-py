@@ -1,6 +1,7 @@
 # PocketIC: A Canister Testing Platform
 
-PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/). 
+PocketIC is a local testing platform for canisters on the [Internet Computer](https://internetcomputer.org/).
+
 
 Using PocketIC requires two components: A server and an integration library. 
 
@@ -41,7 +42,7 @@ MacOS:
 `https://download.dfinity.systems/ic/3f7ec0a56573e1e1408cb7b6fb5e6ddbb193cc7d/openssl-static-binaries/x86_64-darwin/pocket-ic.gz`
 
 Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g.,
- 
+
 ```bash
 mkdir ~/opt
 curl <url> --output ~/opt/pocket-ic.gz
@@ -200,5 +201,19 @@ If you need help with candid-encoding your `init_args`, canister call arguments 
 ### Using pytest
 Coming soon
 
+## Contributing
 
+First install [Nix](https://nixos.org/download.html) then bring the development
+environment into scope using either:
 
+* [direnv](https://direnv.net/) and
+  [nix-direnv](https://github.com/nix-community/nix-direnv).
+* `nix develop`.
+
+### Testing
+
+Run tests using:
+
+```
+$ poetry run pytest
+```

@@ -1,5 +1,5 @@
 """
-This module contains 'PocketIC', which is the only interface we expose to a test author. 
+This module contains 'PocketIC', which is the only interface we expose to a test author.
 """
 import base64
 from typing import Any, List, Optional
@@ -9,7 +9,6 @@ import requests
 from ic.candid import Types
 
 from pocket_ic.pocket_ic_server import PocketICServer
-
 
 class PocketIC:
     """

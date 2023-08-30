@@ -4,78 +4,58 @@ on: [push, pull_request, release]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        os:
+        - ubuntu-latest
+        - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install pylint
-        python3 -m pip install build
-        python3 -m pip install -r requirements.txt
-
-    - name: Analysing the code with pylint
-      run: python3 -m pylint --recursive yes .
-
-    - name: Run unittests 
-      run: echo "unittests TODO"
+    - uses: cachix/install-nix-action@v22
 
     - name: Build package
-      run: python3 -m build
+      id: release-build
+      run: |
+        dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
+        echo "dist=$dist" >> $GITHUB_OUTPUT
 
-    - name: Upload wheel file
+    - name: Test package
+      run: nix flake check --print-build-logs
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Upload wheel file
       uses: actions/upload-artifact@v3
       with:
         name: pocket_ic_${{ github.sha }}.whl
-        path: dist/*.whl
+        path: ${{ steps.release-build.outputs.dist }}/*.whl
 
-    - name: Upload sources
-      uses: actions/upload-artifact@v3
-      with:
-        name: pocket_ic_${{ github.sha }}.tar.gz
-        path: dist/*.tar.gz
-
-    - name: Run integration tests  # from examples directory
-      run: echo "integration tests TODO"
-  
-  release: 
+  release:
     needs: build
-    if: ${{ github.event_name == 'release' }} 
+    if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
     steps:
     - uses: actions/download-artifact@v3
       with: 
         name: pocket_ic_${{ github.sha }}.whl
-        
-    - uses: actions/download-artifact@v3
-      with: 
-        name: pocket_ic_${{ github.sha }}.tar.gz
-      
+
+    - name: Set tag
+      id: set_tag
+      run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+    - name: Set artifact name
+      id: set_name
+      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
+
+    - name: ls
+      run: echo `ls -la `
+
+    - name: rename artifact
+      run: mv pocket_ic*.whl ${{ steps.set_name.outputs.artifact_name }}
+
     - name: upload artifacts to release page
       uses: softprops/action-gh-release@master
-      with: 
+      with:
         files: |
-          pocket_ic-0.0.0-py3-none-any.whl
-          pocket_ic-0.0.0.tar.gz
-      
-    
-  publish: 
-    needs: release
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-    steps:
-    - run: echo "publishing TODO"
+          ${{ steps.set_name.outputs.artifact_name }}
