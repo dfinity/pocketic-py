@@ -8,7 +8,7 @@ from typing import List
 from tempfile import gettempdir
 import requests
 
-POCKET_IC_BIN = "./pocket-ic"
+POCKET_IC_BIN = "pocket-ic"
 
 
 class PocketICServer:

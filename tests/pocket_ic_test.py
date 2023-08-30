@@ -4,7 +4,6 @@ import sys
 import os
 import unittest
 import ic
-import time
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
