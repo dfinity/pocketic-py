@@ -10,6 +10,7 @@ from ic.candid import Types
 
 from pocket_ic.pocket_ic_server import PocketICServer
 
+
 class PocketIC:
     """
     An instance of this class represents an IC instance on the PocketIC server.
@@ -292,7 +293,7 @@ class PocketIC:
         self,
         candid: str,
         wasm_module: bytes,
-        init_args: list,
+        init_args: dict,
     ) -> ic.Canister:
         """Creates a canister, installs the provided WASM with the given init arguments. Returns a canister object.
         For an example on how to use the canister object, see `/examples/ledger_canister_test.py`.
@@ -300,7 +301,7 @@ class PocketIC:
         Args:
             candid (str): a valid candid file describing the canister interface
             wasm_module (bytes): the canister wasm as bytes
-            init_args (list): the init args as required by the candid file
+            init_args (dict): the init args as required by the candid file
 
         Raises:
             ValueError: can be raised on invalid candid files

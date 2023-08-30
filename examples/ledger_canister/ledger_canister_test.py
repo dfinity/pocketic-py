@@ -6,9 +6,7 @@ import ic
 # The example needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
 script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(
-    os.path.dirname(os.path.dirname(script_dir))
-)
+sys.path.append(os.path.dirname(os.path.dirname(script_dir)))
 
 from pocket_ic import PocketIC
 
@@ -21,7 +19,9 @@ class LedgerCanisterTests(unittest.TestCase):
         self.principal_b = ic.Principal.from_str("zzyfr-6yaaa-aaaar-aklsa-cai")
         self.principal_minting = ic.Principal.from_str("i3gqp-srkaa-aaaaa-aaaap-4ai")
 
-        with open(os.path.join(script_dir, "ledger.did"), "r", encoding="utf-8") as candid_file:
+        with open(
+            os.path.join(script_dir, "ledger.did"), "r", encoding="utf-8"
+        ) as candid_file:
             candid = candid_file.read()
 
         init_args = {
