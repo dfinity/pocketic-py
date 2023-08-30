@@ -64,8 +64,8 @@ This step is needed to bypass the developer verification from Apple, and only ne
 Alternatively, you can open the `pocket-ic` binary by right clicking on it in the Finder and selecting "Open" from the drop-down menu.
 Then, confirm opening this application by clicking "Open" again in the dialog that opened.
 
-You can test that everything is working by calling `pocket-ic` from any folder;
-PocketIC should start and tell you that you're missing the a required argument.
+You can test that everything is working by running `pocket-ic --help` from any folder;
+PocketIC should start and display its help message.
 
 ### PocketIC Testing Library (this repository)
 
