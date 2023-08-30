@@ -33,6 +33,14 @@ environment into scope using either:
   [nix-direnv](https://github.com/nix-community/nix-direnv).
 * `nix develop`.
 
+### Testing
+
+Run tests using:
+
+```
+$ poetry run pytest
+```
+
 ## Installation
 
 ### PocketIC Binary

@@ -21,6 +21,9 @@ jobs:
         dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
         echo "dist=$dist" >> $GITHUB_OUTPUT
 
+    - name: Test package
+      run: nix flake check --print-build-logs
+
     - if: matrix.os == 'ubuntu-latest'
       name: Upload wheel file
       uses: actions/upload-artifact@v3

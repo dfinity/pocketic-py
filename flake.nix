@@ -24,24 +24,25 @@
           inherit pocket-ic-darwin-gz pocket-ic-linux-gz;
         };
 
+        projectDir =
+          # Filter out files not needed by the Python library:
+          pkgs.lib.cleanSourceWith {
+            name = "pocketic-py-src";
+            src = ./.;
+            filter = path: _type:
+              ! (pkgs.lib.hasSuffix ".nix" path ||
+                pkgs.lib.hasSuffix "flake.lock" path ||
+                pkgs.lib.hasSuffix ".envrc" path ||
+                pkgs.lib.hasSuffix ".github" path ||
+                pkgs.lib.hasSuffix ".gitignore" path);
+          };
+
         # PocketIC Python library. Since we use poetry to specify our
         # Python dependencies we use poetry2nix to translate the
         # pyproject.toml and poetry.lock files to a set of Nix
         # derivations, one for each dependency.
         pocketic-py = pkgs.poetry2nix.mkPoetryApplication {
-          projectDir =
-            # Filter out files not needed by the Python library:
-            pkgs.lib.cleanSourceWith {
-              name = "pocketic-py-src";
-              src = ./.;
-              filter = path: _type:
-                ! (pkgs.lib.hasSuffix ".nix" path ||
-                  pkgs.lib.hasSuffix "flake.lock" path ||
-                  pkgs.lib.hasSuffix ".envrc" path ||
-                  pkgs.lib.hasSuffix ".github" path ||
-                  pkgs.lib.hasSuffix ".gitignore" path);
-            };
-
+          inherit projectDir;
           # Some dependencies of our library need some tweaks
           # to get them to build so we override them here.
           # Also see: https://github.com/nix-community/poetry2nix/blob/master/docs/edgecases.md
@@ -66,16 +67,26 @@
           # The following lets the library depend on the binary.
           propagatedBuildInputs = [ pocket-ic ];
         };
+
+        pytest = pkgs.python3Packages.pytest;
       in
       {
         packages.default = pocketic-py;
 
         packages.pocket-ic = pocket-ic;
 
+        checks.default = pkgs.runCommand "pocketic-py-tests" {
+          nativeBuildInputs = [ pytest pocketic-py pocket-ic ];
+          inherit projectDir;
+        } ''
+          pytest --override-ini=cache_dir=$TMP $projectDir | tee $out
+        '';
+
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.poetry
             pocketic-py
+            pytest
           ];
         };
 
