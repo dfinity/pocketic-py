@@ -63,6 +63,11 @@ class LedgerCanisterTests(unittest.TestCase):
         )
         return super().setUp()
 
+    def tearDown(self) -> None:
+        # Delete the current PocketIC instance after the test has executed.
+        self.pic.delete()
+        return super().tearDown()
+
     def test_get_name(self):
         res = self.ledger.icrc1_name()
         self.assertEqual(res, ["My Token"])

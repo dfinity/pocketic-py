@@ -30,6 +30,10 @@ class PocketIC:
         self.request_client = requests.session()
         self.sender = ic.Principal.anonymous()
 
+    def delete(self) -> None:
+        """Deletes this PocketIC instance."""
+        self.server.delete_instance(self.instance_id)
+
     def set_anonymous_sender(self) -> None:
         """Sets the new sender for all following calls to the IC to the anonymous principal."""
         self.sender = ic.Principal.anonymous()

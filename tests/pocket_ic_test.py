@@ -18,6 +18,11 @@ class PocketICTests(unittest.TestCase):
         self.pic = PocketIC()
         return super().setUp()
 
+    def tearDown(self) -> None:
+        # Delete the current PocketIC instance after the test has executed.
+        self.pic.delete()
+        return super().tearDown()
+
     def test_time(self):
         self.assertEqual(
             self.pic.get_time(),
@@ -33,6 +38,11 @@ class PocketICTests(unittest.TestCase):
             self.pic.get_time(),
             {"secs_since_epoch": 1704067200, "nanos_since_epoch": 999999999},
         )
+
+    def test_delete_instance(self):
+        self.assertEqual(len(self.pic.server.list_instances()), 1)
+        self.pic.delete()
+        self.assertEqual(len(self.pic.server.list_instances()), 0)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)

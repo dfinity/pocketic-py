@@ -60,4 +60,13 @@ class PocketICServer:
         Returns:
             List[str]: a list of instance names
         """
-        return self.request_client.get(f"{self.url}/instances").text.split(", ")
+        response = self.request_client.get(f"{self.url}/instances").text
+        return response.split(", ") if response else []
+
+    def delete_instance(self, instance_id: str):
+        """Deletes an instance from the PocketIC Server.
+
+        Args:
+            instance_id (str): the ID of the instance to delete
+        """
+        self.request_client.delete(f"{self.url}/instances/{instance_id}/delete")
