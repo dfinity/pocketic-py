@@ -4,6 +4,7 @@ import sys
 import os
 import unittest
 import ic
+import time
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
@@ -17,6 +18,11 @@ class PocketICTests(unittest.TestCase):
         # This is being run for every test independently.
         self.pic = PocketIC()
         return super().setUp()
+
+    def tearDown(self) -> None:
+        # Delete the current PocketIC instance after the test has executed.
+        self.pic.delete()
+        return super().tearDown()
 
     def test_time(self):
         self.assertEqual(
@@ -34,10 +40,10 @@ class PocketICTests(unittest.TestCase):
             {"secs_since_epoch": 1704067200, "nanos_since_epoch": 999999999},
         )
 
-    def test_delete_this_instance(self):
-        num_instances = len(self.pic.server.list_instances())
+    def test_delete_instance(self):
+        self.assertEqual(len(self.pic.server.list_instances()), 1)
         self.pic.delete()
-        self.assertEqual(len(self.pic.server.list_instances()), num_instances - 1)
+        self.assertEqual(len(self.pic.server.list_instances()), 0)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
