@@ -37,11 +37,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v3
-      with:
+      with: 
         name: pocket_ic_${{ github.sha }}.whl
+
+    - name: Set tag
+        id: set_tag
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+    - name: Set artifact name
+        id: set_name
+        run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
+
+    - name: ls
+      run: echo `ls -la `
+
+    - name: rename artifact
+      run: mv pocket_ic*.whl ${{ steps.set_name.outputs.artifact_name }}
 
     - name: upload artifacts to release page
       uses: softprops/action-gh-release@master
       with:
         files: |
-          pocket_ic-0.0.0-py3-none-any.whl
+          ${{ steps.set_name.outputs.artifact_name }}
