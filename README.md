@@ -70,7 +70,7 @@ or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/re
 
 See examples/
 
-## Development
+## Contributing
 
 First install [Nix](https://nixos.org/download.html) then bring the development
 environment into scope using either:
