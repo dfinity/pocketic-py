@@ -41,12 +41,12 @@ jobs:
         name: pocket_ic_${{ github.sha }}.whl
 
     - name: Set tag
-        id: set_tag
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      id: set_tag
+      run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
     - name: Set artifact name
-        id: set_name
-        run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
+      id: set_name
+      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
 
     - name: ls
       run: echo `ls -la `
