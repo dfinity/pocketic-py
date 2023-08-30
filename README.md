@@ -80,7 +80,7 @@ or download a .whl file from the [releases](https://github.com/dfinity/pocketic-
 
 Canister developers have several options to test their software, but there are tradeoffs: 
 - Install and test on the **mainnet**: The 'real' experience, but you pay with real cycles.
-- The **replica** provided by DFX: You get the complete stack of a single IC node. But therefore, you get no cross- or multisubnet functionality, and never will. Replica is quite heavyweight too, because the nonessential components are not abstracted away. 
+- The **replica** provided by DFX: You get the complete stack of a single IC node. But therefore, you get no cross- or multisubnet functionality, and likely never will. Replica is quite heavyweight too, because the nonessential components are not abstracted away. 
 - **`StateMachine`** test: More lightweight than replica, because it *simulates* a subnet. But it launches a process for every test, it uses difficult-to-trace stdio-IPC, and it is only integrated with Rust. 
 
 Enter **PocketIC**: 
@@ -105,10 +105,10 @@ This section assumes the following:
 
 ### Using PocketIC without a test framework
 
-It is straightforward to use PocketIC in a script or in the Python REPL. In a REPL session, the PocketIC server may shut down on you if it does not receive requests often enough to bump its time to live. We may add a launch mode to alleviate this. 
+It is straightforward to use PocketIC in a script or in the Python REPL. In a REPL session, the PocketIC server may shut down on you if it does not receive requests often enough to bump its time to live. In the future, we may add a keepalive launch mode to alleviate this. 
 
 For scripts, you should know that whenever you run the `PocketIC()` constructor, the following happens:
-- If no running PocketIC server is found, a new one is started. For one test *process*, there is only ever one running PocketIC server at a time. Most python test frameworks run in a single process. 
+- If no running PocketIC server is found, a new one is started. For one test *process*, there is only ever one running PocketIC server at a time. Most Python test frameworks run in a single process. 
 - When the PocketIC server has been launched or discovered, the `PocketIC()` constructor requests a new instance. This instance is bound to the `PocketIC` object you get. 
 
 The `PocketIC`'s interface closely resembles that of the [`StateMachine`](https://github.com/dfinity/test-state-machine-client), which itself is of course derived from the Internet Computer interface. 
@@ -118,6 +118,8 @@ You may share that `PocketIC` instance in your script however you like, and you 
 ### Using Python unittest 
 
 We can use Python's unittest package to group similar test cases into classes which inherit from `unittest.TestCase`. Thus, we can define unittest's `setUp` and `tearDown` functions. **These will be run before and after *every* test method of the class!** So we benefit the most if we define a `setUp` to build up an initial state for as many test cases as possible. 
+
+An alternative way is to use `setUpClass` and `tearDownClass` which are run once per class. In this case, all test methods share the IC instance(s) defined in `setUpClass`. 
 
 In this example, we `setUp` by simply installing the canister. Individual test methods will only rely on the canister being installed, and continue from there:
 
@@ -192,7 +194,7 @@ counter_canister.inc()
 assert(counter_canister.read() == 1) 
 ```
 
-If you need help with candid-encoding your `init_args`, canister call arguments and responses, check out the (inofficial) [Python-agent](https://github.com/rocklabs-io/ic-py), which offers some useful candid functionality.
+If you need help with candid-encoding your `init_args`, canister call arguments and responses, check out the community developed [Python-agent](https://github.com/rocklabs-io/ic-py), which offers some useful candid functionality.
 
 
 ### Using pytest
