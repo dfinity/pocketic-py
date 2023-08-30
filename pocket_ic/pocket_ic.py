@@ -3,10 +3,8 @@ This module contains 'PocketIC', which is the only interface we expose to a test
 """
 import base64
 from typing import Any, List, Optional
-
 import ic
 from ic.candid import Types
-
 from pocket_ic.pocket_ic_server import PocketICServer
 
 
