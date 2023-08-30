@@ -95,7 +95,7 @@ Enter **PocketIC**:
 
 ## How to use this library
 
-For full examples, see [examples/](https://github.com/dfinity/pocketic-py/tree/main/examples).
+For concrete, working code, see [examples/](https://github.com/dfinity/pocketic-py/tree/main/examples).
 
 This section assumes the following: 
 - You have written a canister for the Internet Computer, in any language
@@ -167,7 +167,7 @@ When this example is run, the following events happen in this order:
 
 Using the IC interface to create and call canisters is familiar to canister developers and resembles the real IC interface. 
 
-However, due to the dynamic nature of Python and the work of [RocketLab](https://github.com/rocklabs-io/ic-py), we offer a more convenient way to interact with your canisters. For this feature to work, you need a candid file which describes your canister's interface. 
+However, due to Python's ease of reflection and the work of [RocketLab](https://github.com/rocklabs-io/ic-py), we offer a more convenient way to interact with your canisters. For this feature to work, you need a candid file which describes your canister's interface. 
 
 ```python
 from pocket_ic import PocketIC
