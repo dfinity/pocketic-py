@@ -163,7 +163,7 @@ When this example is run, the following events happen in this order:
 - etc.
 - After the PocketIC server is idle for a while (30s), it shuts down.
 
----
+### Using the canister interface 
 
 Using the IC interface to create and call canisters is familiar to canister developers and resembles the real IC interface. 
 
