@@ -24,23 +24,6 @@ assert(counter_canister.read() == 1)
 
 For more detailed examples, see the section [below](#how-to-use-this-library) and the [examples](https://github.com/dfinity/pocketic-py/tree/main/examples).
 
-## Development
-
-First install [Nix](https://nixos.org/download.html) then bring the development
-environment into scope using either:
-
-* [direnv](https://direnv.net/) and
-  [nix-direnv](https://github.com/nix-community/nix-direnv).
-* `nix develop`.
-
-### Testing
-
-Run tests using:
-
-```
-$ poetry run pytest
-```
-
 ## Installation
 
 ### PocketIC Binary
@@ -85,6 +68,21 @@ or get a .whl file from the [releases](https://github.com/dfinity/pocketic-py/re
 
 ## How to use this library
 
-
-
 See examples/
+
+## Development
+
+First install [Nix](https://nixos.org/download.html) then bring the development
+environment into scope using either:
+
+* [direnv](https://direnv.net/) and
+  [nix-direnv](https://github.com/nix-community/nix-direnv).
+* `nix develop`.
+
+### Testing
+
+Run tests using:
+
+```
+$ poetry run pytest
+```
