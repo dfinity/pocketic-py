@@ -24,6 +24,11 @@ class CounterCanisterTests(unittest.TestCase):
 
         return super().setUp()
 
+    def tearDown(self) -> None:
+        # Delete the current PocketIC instance after the test has executed.
+        self.pic.delete()
+        return super().tearDown()
+
     def test_counter_canister(self):
         self.assertEqual(
             self.pic.update_call(self.canister_id, "read", ic.encode([])),

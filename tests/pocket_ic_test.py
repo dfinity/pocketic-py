@@ -34,6 +34,11 @@ class PocketICTests(unittest.TestCase):
             {"secs_since_epoch": 1704067200, "nanos_since_epoch": 999999999},
         )
 
+    def test_delete_this_instance(self):
+        num_instances = len(self.pic.server.list_instances())
+        self.pic.delete()
+        self.assertEqual(len(self.pic.server.list_instances()), num_instances - 1)
+
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
 

@@ -8,7 +8,7 @@ from typing import List
 from tempfile import gettempdir
 import requests
 
-POCKET_IC_BIN = "pocket-ic"
+POCKET_IC_BIN = "./pocket-ic"
 
 
 class PocketICServer:
@@ -61,3 +61,11 @@ class PocketICServer:
             List[str]: a list of instance names
         """
         return self.request_client.get(f"{self.url}/instances").text.split(", ")
+
+    def delete_instance(self, instance_id: str):
+        """Deletes an instance from the PocketIC Server.
+
+        Args:
+            instance_id (str): the ID of the instance to delete
+        """
+        self.request_client.delete(f"{self.url}/instances/{instance_id}/delete")
