@@ -16,7 +16,7 @@ pic.add_cycles(canister_id, 1_000_000)
 response = pic.update_call(canister_id, method="greeting", ...)
 assert(response == 'Hello, PocketIC!')
 ```
-...or even directly with a canister object:
+... or even directly with a canister object:
 ```python
 my_canister = pic.create_and_install_canister_with_candid(...)
 # call your canister functions with native Python syntax
