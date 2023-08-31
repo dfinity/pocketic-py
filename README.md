@@ -29,7 +29,7 @@ assert(response == 'Hello, PocketIC!')
 ### Quickstart
 * Download the **PocketIC binary** for [Linux](https://download.dfinity.systems/ic/71adba179679a1090baa26cadcceadec311f57b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz) or [macOS](https://download.dfinity.systems/ic/71adba179679a1090baa26cadcceadec311f57b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz).
 * Make sure the binary is available through your `$PATH` variable; you can verify that everything works by calling `pocket-ic --help` from your terminal.
-* Run `pip3 install pocketic-py` to get the Python library. 
+* Run `pip3 install pocketic-py` in your (virtual) environment to get the Python library. 
 * Use `from pocket_ic import PocketIC` in your Python code and start testing!
 
 For a more detailed installation guide, see [INSTALLATION.md](INSTALLATION.md).
@@ -44,6 +44,6 @@ To see some working code, see the [examples](examples/) folder, or check out the
 * [How to use this library](HOWTO.md)
 
 
-## Contributing to PocketIC
+## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md)
 
