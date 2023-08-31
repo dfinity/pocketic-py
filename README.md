@@ -1,7 +1,7 @@
 # PocketIC: A Canister Testing Platform
 
 PocketIC is a local canister testing platform for the [Internet Computer](https://internetcomputer.org/).  
-It consists of the PocketIC **binary**, which handles the different IC instances, and a **Python library** (this repo) which allows you to interact with your canisters and the IC itself.
+It consists of the PocketIC **binary**, which handles different IC instances, and a **Python library** (this repo) which allows you to interact with your canisters and the IC itself.
 
 With PocketIC, you can test your canisters with just a few lines of Python code:
 
