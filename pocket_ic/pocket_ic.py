@@ -3,11 +3,8 @@ This module contains 'PocketIC', which is the only interface we expose to a test
 """
 import base64
 from typing import Any, List, Optional
-
 import ic
-import requests
 from ic.candid import Types
-
 from pocket_ic.pocket_ic_server import PocketICServer
 
 
@@ -23,12 +20,19 @@ class PocketIC:
 
     def __init__(self) -> None:
         self.server = PocketICServer()
-        self.instance_id = self.server.request_client.post(
-            f"{self.server.url}/instances"
-        ).text
-        self.instance_url = f"{self.server.url}/instances/{self.instance_id}"
-        self.request_client = requests.session()
+        self.instance_id = self.server.new_instance()
         self.sender = ic.Principal.anonymous()
+
+    def send_request(self, body: Any) -> Any:
+        """Send a request to the IC.
+
+        Args:
+            body (Any): the payload for the IC request
+
+        Returns:
+            Any: a JSON encoded result, if the request contains a response
+        """
+        return self.server.send_request_to_instance(self.instance_id, body)
 
     def delete(self) -> None:
         """Deletes this PocketIC instance."""
@@ -45,25 +49,6 @@ class PocketIC:
             principal (ic.Principal): the principal to make calls from
         """
         self.sender = principal
-
-    def send_request(self, body: Any) -> Any:
-        """Send a request to the IC.
-
-        Args:
-            body (Any): the payload for the IC request
-
-        Raises:
-            ConnectionError: raised on response codes != 200
-
-        Returns:
-            Any: a JSON encoded result, if the request contains a response
-        """
-        result = self.request_client.post(self.instance_url, json=body)
-        if result.status_code != 200:
-            raise ConnectionError(
-                f'PocketIC HTTP request returned with status code {result.status_code}: "{result.reason}"'
-            )
-        return result.json()
 
     def _get_root_key(self) -> List[int]:
         return self.send_request("RootKey")
@@ -316,8 +301,7 @@ class PocketIC:
         if len(canister_arguments) == 0:
             arg = []
         elif len(canister_arguments) == 1:
-            type_ = canister_arguments[0]
-            arg = [{"type": type_, "value": init_args}]
+            arg = [{"type": canister_arguments[0], "value": init_args}]
         else:
             raise ValueError("The candid file appears to be malformed")
 
