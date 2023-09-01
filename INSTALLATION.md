@@ -5,10 +5,10 @@
 Download the latest stable PocketIC binary from the URL below:
 
 **Linux:**   
-https://download.dfinity.systems/ic/71adba179679a1090baa26cadcceadec311f57b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz
+https://download.dfinity.systems/ic/865a816108b31956bd449282e5803ce40007789f/openssl-static-binaries/x86_64-linux/pocket-ic.gz
 
 **macOS**:  
-https://download.dfinity.systems/ic/71adba179679a1090baa26cadcceadec311f57b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz
+https://download.dfinity.systems/ic/865a816108b31956bd449282e5803ce40007789f/openssl-static-binaries/x86_64-darwin/pocket-ic.gz
 
 Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g.,
 
