@@ -57,7 +57,7 @@ jobs:
       name: pypi
       url: https://pypi.org/p/pocket_ic
     permissions:
-      id-token: write
+      id-token: write-all
 
     steps:
     - uses: actions/download-artifact@v3
