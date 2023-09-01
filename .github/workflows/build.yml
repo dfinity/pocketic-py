@@ -16,9 +16,13 @@ jobs:
     - uses: cachix/install-nix-action@v22
 
     - name: Build package
+      run: |
+        nix build --no-link --print-out-paths --print-build-logs .#default
+
+    - name: Build distribution
       id: release-build
       run: |
-        dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
+        dist=$(nix build --no-link --print-out-paths --print-build-logs .#dist)
         echo "dist=$dist" >> $GITHUB_OUTPUT
 
     - name: Test package
@@ -30,7 +34,7 @@ jobs:
       with:
         name: pocket_ic_${{ github.sha }}.whl
         path: ${{ steps.release-build.outputs.dist }}/*.whl
-        
+
     - if: matrix.os == 'ubuntu-latest'
       name: Upload sources
       uses: actions/upload-artifact@v3
@@ -46,15 +50,15 @@ jobs:
       name: pypi
       url: https://pypi.org/p/pocket_ic
     permissions:
-      id-token: write 
-      
+      id-token: write
+
     steps:
     - uses: actions/download-artifact@v3
-      with: 
+      with:
         name: pocket_ic_${{ github.sha }}.whl
 
     - uses: actions/download-artifact@v3
-      with: 
+      with:
         name: pocket_ic_${{ github.sha }}.tar.gz
 
     - name: Set tag
@@ -64,7 +68,7 @@ jobs:
     - name: Set whl artifact name
       id: set_name_whl
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
-    
+
     - name: Set whl artifact name
       id: set_name_tar
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
@@ -89,6 +93,6 @@ jobs:
       with:
         files: |
           ${{ steps.set_name_whl.outputs.artifact_name }}
-      
+
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
