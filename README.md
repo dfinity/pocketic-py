@@ -37,7 +37,7 @@ For a more detailed installation guide, see [INSTALLATION.md](INSTALLATION.md).
 ### Examples
 
 To see some working code, see the [examples](examples/) folder, or check out the [how to use this library](HOWTO.md) guide.
-
+To run an example, clone this repo and run `python3 examples/counter_canister/counter_canister_test.py` from the repository's root directory.
 
 ## Documentation
 * [Why PocketIC](WHY.md)
