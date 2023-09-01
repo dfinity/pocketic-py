@@ -40,7 +40,7 @@ PocketIC should start and display its help message.
 
 This library is on PyPi, so you can install it using pip. For example, from your virtualenv:
 
-```python3 -m pip install pocketic-py```
+```python3 -m pip install pocket_ic```
 
 or download a .whl file from the [releases](https://github.com/dfinity/pocketic-py/releases) and call
 

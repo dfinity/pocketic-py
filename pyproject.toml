@@ -2,10 +2,13 @@
 name = "pocket_ic"
 version = "0.1.0"
 description = "A canister testing library"
-authors = ["The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>"]
+authors = [
+    "The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>",
+]
 license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/dfinity/pocketic-py/"
+include = ["tests", "examples"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

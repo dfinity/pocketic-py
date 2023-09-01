@@ -34,6 +34,13 @@ jobs:
       with:
         name: pocket_ic_${{ github.sha }}.whl
         path: ${{ steps.release-build.outputs.dist }}/*.whl
+        
+    - if: matrix.os == 'ubuntu-latest'
+      name: Upload sources
+      uses: actions/upload-artifact@v3
+      with:
+        name: pocket_ic_${{ github.sha }}.tar.gz
+        path: ${{ steps.release-build.outputs.dist }}/*.tar.gz
 
     - if: matrix.os == 'ubuntu-latest'
       name: Upload sources
@@ -68,7 +75,7 @@ jobs:
     - name: Set whl artifact name
       id: set_name_whl
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
-
+    
     - name: Set whl artifact name
       id: set_name_tar
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
