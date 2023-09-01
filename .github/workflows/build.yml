@@ -65,6 +65,7 @@ jobs:
         name: pocket_ic_${{ github.sha }}.whl
 
     - uses: actions/download-artifact@v3
+      with:
         name: pocket_ic_${{ github.sha }}.tar.gz
 
     - name: Set tag
