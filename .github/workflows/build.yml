@@ -30,32 +30,65 @@ jobs:
       with:
         name: pocket_ic_${{ github.sha }}.whl
         path: ${{ steps.release-build.outputs.dist }}/*.whl
+        
+    - if: matrix.os == 'ubuntu-latest'
+      name: Upload sources
+      uses: actions/upload-artifact@v3
+      with:
+        name: pocket_ic_${{ github.sha }}.tar.gz
+        path: ${{ steps.release-build.outputs.dist }}/*.tar.gz
 
   release:
     needs: build
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pocket_ic
+    permissions:
+      id-token: write 
+      
     steps:
     - uses: actions/download-artifact@v3
       with: 
         name: pocket_ic_${{ github.sha }}.whl
 
+    - uses: actions/download-artifact@v3
+      with: 
+        name: pocket_ic_${{ github.sha }}.tar.gz
+
     - name: Set tag
       id: set_tag
       run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
-    - name: Set artifact name
-      id: set_name
+    - name: Set whl artifact name
+      id: set_name_whl
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
+    
+    - name: Set whl artifact name
+      id: set_name_tar
+      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
 
     - name: ls
       run: echo `ls -la `
 
-    - name: rename artifact
-      run: mv pocket_ic*.whl ${{ steps.set_name.outputs.artifact_name }}
+    - name: rename whl artifact
+      run: mv pocket_ic*.whl ${{ steps.set_name_whl.outputs.artifact_name }}
+
+    - name: rename tar artifact
+      run: mv pocket_ic*.tar.gz ${{ steps.set_name_tar.outputs.artifact_name }}
+
+    - name: move artifacs to dist
+      run: |
+        mkdir dist
+        cp *.whl dist/
+        cp *.tar.gz dist/
 
     - name: upload artifacts to release page
       uses: softprops/action-gh-release@master
       with:
         files: |
-          ${{ steps.set_name.outputs.artifact_name }}
+          ${{ steps.set_name_whl.outputs.artifact_name }}
+      
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

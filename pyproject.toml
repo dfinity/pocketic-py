@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pocket_ic"
-version = "0.0.0"
+version = "0.1.0"
 description = "A canister testing library"
 authors = ["The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>"]
 license = "Apache-2.0"
