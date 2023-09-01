@@ -80,10 +80,6 @@ jobs:
       id: set_name_tar
       run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
 
-    - name: Set whl artifact name
-      id: set_name_tar
-      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
-
     - name: ls
       run: echo `ls -la `
 
