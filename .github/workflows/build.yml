@@ -82,12 +82,6 @@ jobs:
     - name: ls
       run: echo `ls -la `
 
-    - name: rename whl artifact
-      run: mv pocket_ic*.whl ${{ steps.set_name_whl.outputs.artifact_name }}
-
-    - name: rename tar artifact
-      run: mv pocket_ic*.tar.gz ${{ steps.set_name_tar.outputs.artifact_name }}
-
     - name: move artifacs to dist
       run: |
         mkdir dist
