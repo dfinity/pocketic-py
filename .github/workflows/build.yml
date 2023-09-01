@@ -18,7 +18,12 @@ jobs:
     - name: Build package
       id: release-build
       run: |
-        dist=$(nix build --no-link --print-out-paths --print-build-logs .#default.dist)
+        nix build --no-link --print-out-paths --print-build-logs .#default
+
+    - name: Build distribution
+      id: release-build
+      run: |
+        dist=$(nix build --no-link --print-out-paths --print-build-logs .#dist)
         echo "dist=$dist" >> $GITHUB_OUTPUT
 
     - name: Test package

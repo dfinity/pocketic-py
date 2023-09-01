@@ -75,6 +75,16 @@
 
         packages.pocket-ic = pocket-ic;
 
+        packages.dist = pkgs.runCommand "pocketic-py-dist" {
+          nativeBuildInputs = [ pkgs.poetry ];
+          inherit projectDir;
+        } ''
+          export HOME="$TMP"
+          cp -r $projectDir/* .
+          poetry build
+          mv dist $out
+        '';
+
         checks.default = pkgs.runCommand "pocketic-py-tests" {
           nativeBuildInputs = [ pytest pocketic-py pocket-ic ];
           inherit projectDir;
