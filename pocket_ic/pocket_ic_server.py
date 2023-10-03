@@ -83,9 +83,8 @@ class PocketICServer:
         Args:
             instance_id (str): the ID of the instance to delete
         """
-        url = f"{self.url}/instances/{instance_id}/delete"
-        response = self.request_client.delete(url, headers=HEADERS)
-        self._check_response(response)
+        url = f"{self.url}/instances/{instance_id}"
+        self.request_client.delete(url, headers=HEADERS)
 
     def instance_get(self, endpoint, instance_id):
         """HTTP get requests for instance endpoints"""
@@ -96,6 +95,8 @@ class PocketICServer:
     def instance_post(self, endpoint, instance_id, body):
         """HTTP post requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
+        print(url)
+        print("posting: \n" + str(body))
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
 

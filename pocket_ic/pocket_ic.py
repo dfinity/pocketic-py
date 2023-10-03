@@ -137,10 +137,8 @@ class PocketIC:
             int: the total amount of cycles the canister holds at after adding `amount`
         """
         payload = {
-            "AddCycles": {
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "amount": amount,
-            }
         }
         return self.instance_post("update/add_cycles", payload)
 
@@ -161,13 +159,21 @@ class PocketIC:
             list: a list of candid objects
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
+        # body = {
+        #     "RawCanisterCall": {
+        #         "sender": base64.b64encode(self.sender.bytes).decode(),
+        #         "canister_id": base64.b64encode(canister_id.bytes).decode(),
+        #         "method": method,
+        #         "payload": base64.b64encode(payload).decode(),
+        #     }
+        # }
         body = {
-            "CanisterUpdateCall": {
+            
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
-                "arg": base64.b64encode(payload).decode(),
-            }
+                "payload": base64.b64encode(payload).decode(),
+            
         }
         res = self.instance_post("update/execute_ingress_message", body)
         return self._get_ok_reply(res)
@@ -190,11 +196,11 @@ class PocketIC:
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         body = {
-            "CanisterQueryCall": {
+            "RawCanisterCall": {
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
-                "arg": base64.b64encode(payload).decode(),
+                "payload": base64.b64encode(payload).decode(),
             }
         }
         res = self.instance_post("read/query", body)
@@ -227,7 +233,9 @@ class PocketIC:
             {"type": record, "value": {"settings": settings if settings else []}}
         ]
 
-        request_result = self.update_call(None, "create_canister", ic.encode(payload))
+        request_result = self.update_call(None, "provisional_create_canister_with_cycles", ic.encode(payload))
+        print("rewuest rewust")
+        print(request_result)
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
         )
@@ -312,7 +320,12 @@ class PocketIC:
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:
             if "Reply" in request_result["Ok"]:
-                return request_result["Ok"]["Reply"]
+                result = request_result["Ok"]["Reply"]
+                maybe_candid = base64.b64decode(result)
+                # if we have a non-candid byte array, return that without decoding
+                if b'DIDL' in maybe_candid:
+                    return maybe_candid
+                return list(maybe_candid)
             raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
 
         if "Err" in request_result:
