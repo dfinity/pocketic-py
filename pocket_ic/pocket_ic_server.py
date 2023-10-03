@@ -30,7 +30,7 @@ class PocketICServer:
     def __init__(self) -> None:
         # Attempt to start the PocketIC server if it's not already running.
         pid = os.getpid()
-        os.system(f"{BINARY_NAME} --pid {pid} &")
+        os.system(f"{BINARY_NAME} --pid {pid} --log-level WARN &")
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
