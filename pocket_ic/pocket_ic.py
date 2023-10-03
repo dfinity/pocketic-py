@@ -2,7 +2,7 @@
 This module contains 'PocketIC', which is the only interface we expose to a test author.
 """
 import base64
-from typing import Any, List, Optional
+from typing import List, Optional
 import ic
 from ic.candid import Types
 from pocket_ic.pocket_ic_server import PocketICServer
@@ -159,14 +159,6 @@ class PocketIC:
             list: a list of candid objects
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
-        # body = {
-        #     "RawCanisterCall": {
-        #         "sender": base64.b64encode(self.sender.bytes).decode(),
-        #         "canister_id": base64.b64encode(canister_id.bytes).decode(),
-        #         "method": method,
-        #         "payload": base64.b64encode(payload).decode(),
-        #     }
-        # }
         body = {
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
