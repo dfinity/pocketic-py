@@ -27,7 +27,7 @@ class PocketICTests(unittest.TestCase):
     def test_time(self):
         self.assertEqual(
             self.pic.get_time(),
-            {"nanos_since_epoch": 0},
+            {"nanos_since_epoch": 1620328630000000000},
         )
         self.pic.set_time(1704067199999999999)
         self.assertEqual(
