@@ -74,8 +74,8 @@ class PocketICServer:
         """
         url = f"{self.url}/instances"
         response = self.request_client.get(url, headers=HEADERS)
-        self._check_response(response)
-        return response.text.split(", ") if response.text else []
+        response = self._check_response(response)
+        return response
 
     def delete_instance(self, instance_id: str):
         """Deletes an instance from the PocketIC Server.

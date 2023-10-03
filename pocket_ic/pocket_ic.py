@@ -56,7 +56,7 @@ class PocketIC:
         """Get the current time of the IC.
 
         Returns:
-            dict: {'secs_since_epoch': ..., 'nanos_since_epoch': ...}
+            dict: {'nanos_since_epoch': ...}
         """
         return self.instance_get("read/get_time")
 
@@ -74,9 +74,7 @@ class PocketIC:
             bool: `True` if the canister exists, `False` otherwise
         """
         payload = {
-            "CanisterExists": {
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
-            }
         }
         return self.instance_post("read/canister_exists", payload)
 
@@ -90,9 +88,7 @@ class PocketIC:
             int: the number of cycles the canister contains
         """
         payload = {
-            "CyclesBalance": {
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
-            }
         }
         return self.instance_post("read/get_cycles", payload)
 
@@ -103,10 +99,7 @@ class PocketIC:
             time_nanosec (int): the number of nanoseconds since epoch
         """
         payload = {
-            "SetTime": {
-                "secs_since_epoch": time_nanosec // 1_000_000_000,
-                "nanos_since_epoch": time_nanosec % 1_000_000_000,
-            }
+                "nanos_since_epoch": time_nanosec,
         }
         self.instance_post("update/set_time", payload)
 
@@ -116,15 +109,8 @@ class PocketIC:
         Args:
             nanosecs (int): number of nanoseconds to be added to the current time
         """
-        _payload = {
-            "AdvanceTime": {
-                "secs": nanosecs // 1_000_000_000,
-                "nanos": nanosecs % 1_000_000_000,
-            }
-        }
-        # return self.send_request(payload)
-        # TODO
-        raise NotImplementedError()
+        new_time = self.get_time()['nanos_since_epoch'] + nanosecs
+        self.set_time(new_time)
 
     def add_cycles(self, canister_id: ic.Principal, amount: int) -> int:
         """Add cycles to a specific canister.
