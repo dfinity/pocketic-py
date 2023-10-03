@@ -23,16 +23,14 @@ class PocketIC:
         self.instance_id = self.server.new_instance()
         self.sender = ic.Principal.anonymous()
 
-    def send_request(self, body: Any) -> Any:
-        """Send a request to the IC.
 
-        Args:
-            body (Any): the payload for the IC request
+    def instance_get(self, endpoint):
+        """HTTP get requests for instance endpoints"""
+        return self.server.instance_get(endpoint, self.instance_id)
 
-        Returns:
-            Any: a JSON encoded result, if the request contains a response
-        """
-        return self.server.send_request_to_instance(self.instance_id, body)
+    def instance_post(self, endpoint, body):
+        """HTTP post requests for instance endpoints"""
+        return self.server.instance_post(endpoint, self.instance_id, body)
 
     def delete(self) -> None:
         """Deletes this PocketIC instance."""
@@ -50,8 +48,9 @@ class PocketIC:
         """
         self.sender = principal
 
-    def _get_root_key(self) -> List[int]:
-        return self.send_request("RootKey")
+    def get_root_key(self) -> List[int]:
+        """Get the root key of this IC instance"""
+        return self.instance_get("read/root_key")
 
     def get_time(self) -> dict:
         """Get the current time of the IC.
@@ -59,11 +58,11 @@ class PocketIC:
         Returns:
             dict: {'secs_since_epoch': ..., 'nanos_since_epoch': ...}
         """
-        return self.send_request("Time")
+        return self.instance_get("read/get_time")
 
     def tick(self) -> None:
         """Make the IC produce and progress by one block."""
-        self.send_request("Tick")
+        self.instance_post("update/tick", "")
 
     def check_canister_exists(self, canister_id: ic.Principal) -> bool:
         """Check whether the provided canister exists.
@@ -79,7 +78,7 @@ class PocketIC:
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
             }
         }
-        return self.send_request(payload)
+        return self.instance_post("read/canister_exists", payload)
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
@@ -95,7 +94,7 @@ class PocketIC:
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
             }
         }
-        return self.send_request(payload)
+        return self.instance_post("read/get_cycles", payload)
 
     def set_time(self, time_nanosec: int) -> None:
         """Sets the current time of the IC.
@@ -109,7 +108,7 @@ class PocketIC:
                 "nanos_since_epoch": time_nanosec % 1_000_000_000,
             }
         }
-        self.send_request(payload)
+        self.instance_post("update/set_time", payload)
 
     def advance_time(self, nanosecs: int) -> None:
         """Advance the time on the IC by some nanoseconds.
@@ -117,13 +116,15 @@ class PocketIC:
         Args:
             nanosecs (int): number of nanoseconds to be added to the current time
         """
-        payload = {
+        _payload = {
             "AdvanceTime": {
                 "secs": nanosecs // 1_000_000_000,
                 "nanos": nanosecs % 1_000_000_000,
             }
         }
-        return self.send_request(payload)
+        # return self.send_request(payload)
+        # TODO
+        raise NotImplementedError()
 
     def add_cycles(self, canister_id: ic.Principal, amount: int) -> int:
         """Add cycles to a specific canister.
@@ -141,7 +142,7 @@ class PocketIC:
                 "amount": amount,
             }
         }
-        return self.send_request(payload)
+        return self.instance_post("update/add_cycles", payload)
 
     def update_call(
         self,
@@ -168,7 +169,7 @@ class PocketIC:
                 "arg": base64.b64encode(payload).decode(),
             }
         }
-        res = self.send_request(body)
+        res = self.instance_post("update/execute_ingress_message", body)
         return self._get_ok_reply(res)
 
     def query_call(
@@ -196,7 +197,7 @@ class PocketIC:
                 "arg": base64.b64encode(payload).decode(),
             }
         }
-        res = self.send_request(body)
+        res = self.instance_post("read/query", body)
         return self._get_ok_reply(res)
 
     def create_canister(self, settings: list = None) -> ic.Principal:
