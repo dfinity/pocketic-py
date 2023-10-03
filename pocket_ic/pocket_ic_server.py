@@ -95,8 +95,6 @@ class PocketICServer:
     def instance_post(self, endpoint, instance_id, body):
         """HTTP post requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
-        print(url)
-        print("posting: \n" + str(body))
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
 
@@ -114,5 +112,4 @@ class PocketICServer:
                 f'PocketIC Server returned status code {response.status_code}: "{response.reason}"'
             )
         res_json = response.json()
-        print(res_json)
         return res_json

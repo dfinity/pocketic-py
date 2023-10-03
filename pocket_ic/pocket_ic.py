@@ -168,12 +168,10 @@ class PocketIC:
         #     }
         # }
         body = {
-            
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
                 "payload": base64.b64encode(payload).decode(),
-            
         }
         res = self.instance_post("update/execute_ingress_message", body)
         return self._get_ok_reply(res)
@@ -196,12 +194,10 @@ class PocketIC:
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         body = {
-            "RawCanisterCall": {
                 "sender": base64.b64encode(self.sender.bytes).decode(),
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "method": method,
                 "payload": base64.b64encode(payload).decode(),
-            }
         }
         res = self.instance_post("read/query", body)
         return self._get_ok_reply(res)
@@ -234,8 +230,6 @@ class PocketIC:
         ]
 
         request_result = self.update_call(None, "provisional_create_canister_with_cycles", ic.encode(payload))
-        print("rewuest rewust")
-        print(request_result)
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
         )
