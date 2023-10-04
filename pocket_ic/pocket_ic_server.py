@@ -10,6 +10,7 @@ import requests
 
 BINARY_NAME = "pocket-ic"
 
+HEADERS = {"processing-timeout-ms": "300000"}
 
 class PocketICServer:
     """
@@ -61,9 +62,9 @@ class PocketICServer:
             str: the new instance ID
         """
         url = f"{self.url}/instances"
-        response = self.request_client.post(url)
-        self._check_response(response)
-        return response.text
+        response = self.request_client.post(url, headers=HEADERS)
+        res = self._check_response(response)
+        return res["Created"]["instance_id"]
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.
@@ -72,9 +73,9 @@ class PocketICServer:
             List[str]: a list of instance names
         """
         url = f"{self.url}/instances"
-        response = self.request_client.get(url)
-        self._check_response(response)
-        return response.text.split(", ") if response.text else []
+        response = self.request_client.get(url, headers=HEADERS)
+        response = self._check_response(response)
+        return response
 
     def delete_instance(self, instance_id: str):
         """Deletes an instance from the PocketIC Server.
@@ -82,24 +83,20 @@ class PocketICServer:
         Args:
             instance_id (str): the ID of the instance to delete
         """
-        url = f"{self.url}/instances/{instance_id}/delete"
-        response = self.request_client.delete(url)
-        self._check_response(response)
-
-    def send_request_to_instance(self, instance_id: str, body: Any) -> Any:
-        """Send a request to a specific PocketIC instance.
-
-        Args:
-            instance_id (str): the instance ID
-            body (Any): the payload for the IC request
-
-        Returns:
-            Any: a JSON encoded result, if the request contains a response
-        """
         url = f"{self.url}/instances/{instance_id}"
-        response = self.request_client.post(url, json=body)
-        self._check_response(response)
-        return response.json()
+        self.request_client.delete(url, headers=HEADERS)
+
+    def instance_get(self, endpoint, instance_id):
+        """HTTP get requests for instance endpoints"""
+        url = f"{self.url}/instances/{instance_id}/{endpoint}"
+        response = self.request_client.get(url, headers=HEADERS)
+        return self._check_response(response)
+
+    def instance_post(self, endpoint, instance_id, body):
+        """HTTP post requests for instance endpoints"""
+        url = f"{self.url}/instances/{instance_id}/{endpoint}"
+        response = self.request_client.post(url, json=body, headers=HEADERS)
+        return self._check_response(response)
 
     def _check_response(self, response):
         """Checks the response from the PocketIC server.
@@ -108,9 +105,11 @@ class PocketICServer:
             response (Response): the response from a call made with `requests`
 
         Raises:
-            ConnectionError: raised on response status codes != 200
+            ConnectionError: raised on response status codes not in [200, 201, 202]
         """
-        if response.status_code != 200:
+        if response.status_code not in [200, 201, 202]:
             raise ConnectionError(
                 f'PocketIC Server returned status code {response.status_code}: "{response.reason}"'
             )
+        res_json = response.json()
+        return res_json

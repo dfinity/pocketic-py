@@ -2,6 +2,7 @@
 
 import sys
 import os
+import time
 import unittest
 import ic
 
@@ -26,23 +27,23 @@ class PocketICTests(unittest.TestCase):
     def test_time(self):
         self.assertEqual(
             self.pic.get_time(),
-            {"secs_since_epoch": 1620328630, "nanos_since_epoch": 0},
+            {"nanos_since_epoch": 1620328630000000000},
         )
-        self.assertEqual(self.pic.set_time(1704067199999999999), None)
+        self.pic.set_time(1704067199999999999)
         self.assertEqual(
             self.pic.get_time(),
-            {"secs_since_epoch": 1704067199, "nanos_since_epoch": 999999999},
+            {"nanos_since_epoch": 1704067199999999999},
         )
-        self.assertEqual(self.pic.advance_time(1 * 1_000_000_000), None)
+        self.pic.advance_time(1_000_000_000)
         self.assertEqual(
             self.pic.get_time(),
-            {"secs_since_epoch": 1704067200, "nanos_since_epoch": 999999999},
+            {"nanos_since_epoch": 1704067200999999999},
         )
 
     def test_delete_instance(self):
-        self.assertEqual(len(self.pic.server.list_instances()), 1)
+        initial_num = self.pic.server.list_instances().count('Deleted')
         self.pic.delete()
-        self.assertEqual(len(self.pic.server.list_instances()), 0)
+        self.assertEqual(self.pic.server.list_instances().count('Deleted'), initial_num + 1)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
