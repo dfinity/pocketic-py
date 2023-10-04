@@ -59,7 +59,7 @@ class PocketICTests(unittest.TestCase):
     def test_cycles_balance(self):
         canister_id = self.pic.create_canister()
         self.pic.add_cycles(canister_id, 6_666)
-        self.assertEqual(self.pic.get_cycles_balance(canister_id)["cycles"], 6_666)
+        self.assertEqual(self.pic.get_cycles_balance(canister_id), 6_666)
 
 
 if __name__ == "__main__":

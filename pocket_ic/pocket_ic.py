@@ -24,11 +24,11 @@ class PocketIC:
         self.sender = ic.Principal.anonymous()
 
 
-    def instance_get(self, endpoint):
+    def _instance_get(self, endpoint):
         """HTTP get requests for instance endpoints"""
         return self.server.instance_get(endpoint, self.instance_id)
 
-    def instance_post(self, endpoint, body):
+    def _instance_post(self, endpoint, body):
         """HTTP post requests for instance endpoints"""
         return self.server.instance_post(endpoint, self.instance_id, body)
 
@@ -50,7 +50,7 @@ class PocketIC:
 
     def get_root_key(self) -> List[int]:
         """Get the root key of this IC instance"""
-        return self.instance_get("read/root_key")
+        return self._instance_get("read/root_key")
 
     def get_time(self) -> dict:
         """Get the current time of the IC.
@@ -58,11 +58,11 @@ class PocketIC:
         Returns:
             dict: {'nanos_since_epoch': ...}
         """
-        return self.instance_get("read/get_time")
+        return self._instance_get("read/get_time")
 
     def tick(self) -> None:
         """Make the IC produce and progress by one block."""
-        self.instance_post("update/tick", "")
+        self._instance_post("update/tick", "")
 
     def check_canister_exists(self, canister_id: ic.Principal) -> bool:
         """Check whether the provided canister exists.
@@ -76,7 +76,7 @@ class PocketIC:
         payload = {
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self.instance_post("read/canister_exists", payload)
+        return self._instance_post("read/canister_exists", payload)
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
@@ -90,7 +90,7 @@ class PocketIC:
         payload = {
                 "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self.instance_post("read/get_cycles", payload)
+        return self._instance_post("read/get_cycles", payload)["cycles"]
 
     def set_time(self, time_nanosec: int) -> None:
         """Sets the current time of the IC.
@@ -101,7 +101,7 @@ class PocketIC:
         payload = {
                 "nanos_since_epoch": time_nanosec,
         }
-        self.instance_post("update/set_time", payload)
+        self._instance_post("update/set_time", payload)
 
     def advance_time(self, nanosecs: int) -> None:
         """Advance the time on the IC by some nanoseconds.
@@ -126,7 +126,7 @@ class PocketIC:
                 "canister_id": base64.b64encode(canister_id.bytes).decode(),
                 "amount": amount,
         }
-        return self.instance_post("update/add_cycles", payload)
+        return self._instance_post("update/add_cycles", payload)["cycles"]
 
     def update_call(
         self,
@@ -151,7 +151,7 @@ class PocketIC:
                 "method": method,
                 "payload": base64.b64encode(payload).decode(),
         }
-        res = self.instance_post("update/execute_ingress_message", body)
+        res = self._instance_post("update/execute_ingress_message", body)
         return self._get_ok_reply(res)
 
     def query_call(
@@ -177,7 +177,7 @@ class PocketIC:
                 "method": method,
                 "payload": base64.b64encode(payload).decode(),
         }
-        res = self.instance_post("read/query", body)
+        res = self._instance_post("read/query", body)
         return self._get_ok_reply(res)
 
     def create_canister(self, settings: list = None) -> ic.Principal:
@@ -291,14 +291,14 @@ class PocketIC:
 
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:
-            if "Reply" in request_result["Ok"]:
-                result = request_result["Ok"]["Reply"]
-                maybe_candid = base64.b64decode(result)
-                # if we have a non-candid byte array, return that without decoding
-                if b'DIDL' in maybe_candid:
-                    return maybe_candid
-                return list(maybe_candid)
-            raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+            if "Reply" not in request_result["Ok"]:
+                raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+            result = request_result["Ok"]["Reply"]
+            maybe_candid = base64.b64decode(result)
+            # if we have a non-candid byte array, return that without decoding
+            if maybe_candid.startswith(b'DIDL'):
+                return maybe_candid
+            return list(maybe_candid)
 
         if "Err" in request_result:
             raise ValueError(f'Request returned "Err": {request_result["Err"]}')
