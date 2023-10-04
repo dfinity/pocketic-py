@@ -41,9 +41,9 @@ class PocketICTests(unittest.TestCase):
         )
 
     def test_delete_instance(self):
-        initial_num = self.pic.server.list_instances().count('Available')
+        initial_num = self.pic.server.list_instances().count('Deleted')
         self.pic.delete()
-        self.assertEqual(self.pic.server.list_instances().count('Available'), initial_num - 1)
+        self.assertEqual(self.pic.server.list_instances().count('Deleted'), initial_num + 1)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
