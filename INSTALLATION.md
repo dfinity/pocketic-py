@@ -2,39 +2,38 @@
 
 ## PocketIC Binary
 
-Download the latest stable PocketIC binary from the URL below:
-
-**Linux:**   
-https://download.dfinity.systems/ic/c7664b4829807a96ecf6a7fb97610f22b20b0911/openssl-static-binaries/x86_64-linux/pocket-ic.gz
-
-**macOS**:  
-https://download.dfinity.systems/ic/c7664b4829807a96ecf6a7fb97610f22b20b0911/openssl-static-binaries/x86_64-darwin/pocket-ic.gz
-
-Copy the binary to your preferred location, unpack it, make it executable and put it on the path. E.g.,
+Download the latest PocketIC binary for your platform:
 
 ```bash
-mkdir ~/opt
-curl <url> --output ~/opt/pocket-ic.gz
-gunzip ~/opt/pocket-ic.gz
-chmod +x ~/opt/pocket-ic
-export PATH="${HOME}/opt:${PATH}"
+# Linux
+curl -sLO https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz
 ```
 
-You can also add the last line to your `~/.bashrc` or `~/.zshrc`.
+```bash
+# macOS
+curl -sLO https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz
+```
 
-On macOS, run 
+And then run the following to unpack and make `pocket-ic` executable:
 
+```bash
+gzip -d pocket-ic.gz
+chmod +x pocket-ic
+```
+
+On **macOS**, you might have to additionally run
 ```bash
 xattr -dr com.apple.quarantine pocket-ic
 ```
-
-in the directory where you have placed the binary file.
-This step is needed to bypass the developer verification from Apple, and only needs to be run once.
+to bypass the developer verification from Apple.
 Alternatively, you can open the `pocket-ic` binary by right clicking on it in the Finder and selecting "Open" from the drop-down menu.
 Then, confirm opening this application by clicking "Open" again in the dialog that opened.
 
-You can test that everything is working by running `pocket-ic --help` from any folder;
-PocketIC should start and display its help message.
+By default, PocketIC will always search for the `pocket-ic` binary in the current directory; you can specify another path by setting the `POCKET_IC_BIN` environment variable, for example by prepending it to your `python3` invocation:
+
+```bash
+POCKET_IC_BIN=/path/to/pocket-ic python3 tests/pocket_ic_test.py
+```
 
 ## PocketIC Library (this repo)
 
