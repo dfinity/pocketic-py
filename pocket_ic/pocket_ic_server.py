@@ -4,11 +4,9 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 
 import os
 import time
-from typing import List, Any
+from typing import List
 from tempfile import gettempdir
 import requests
-
-BINARY_NAME = "pocket-ic"
 
 HEADERS = {"processing-timeout-ms": "300000"}
 
@@ -16,7 +14,8 @@ class PocketICServer:
     """
     An object of this class represents a running PocketIC server. During instantiation,
     a running server is discovered, or a new one is launched from the PocketIC binary,
-    which is assumed to be on the PATH.
+    which is assumed to be in your working directory or specified via the POCKET_IC_BIN
+    environment variable.
 
     All tests within a testsuite should use the same server, so the service
     discovery mechanism uses the current process id. This means that only the first
@@ -28,9 +27,23 @@ class PocketICServer:
     """
 
     def __init__(self) -> None:
-        # Attempt to start the PocketIC server if it's not already running.
         pid = os.getpid()
-        os.system(f"{BINARY_NAME} --pid {pid} &")
+        if 'POCKET_IC_BIN' in os.environ:
+            bin_path = os.environ['POCKET_IC_BIN']
+        else:
+            bin_path = "./pocket-ic"
+
+        if not os.path.isfile(bin_path):
+            raise FileNotFoundError(f"""Could not find the PocketIC binary. 
+                  
+I looked for it at "{bin_path}". You can specify another path 
+with the environment variable POCKET_IC_BIN (note that I run from "{os.getcwd()}").
+
+To get the PocketIC binary, see the instructions in the INSTALLATION.md file in the root of this repository.
+""")
+
+        # Attempt to start the PocketIC server if it's not already running.
+        os.system(f"{bin_path} --pid {pid} &")
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
