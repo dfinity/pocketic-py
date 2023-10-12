@@ -86,7 +86,8 @@
         '';
 
         checks.default = pkgs.runCommand "pocketic-py-tests" {
-          nativeBuildInputs = [ pytest pocketic-py pocket-ic ];
+          nativeBuildInputs = [ pytest pocketic-py];
+          POCKET_IC_BIN = "${pocket-ic}/bin/pocket-ic";
           inherit projectDir;
         } ''
           pytest --override-ini=cache_dir=$TMP $projectDir | tee $out
