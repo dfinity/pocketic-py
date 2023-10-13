@@ -34,12 +34,16 @@ class PocketICServer:
             bin_path = "./pocket-ic"
 
         if not os.path.isfile(bin_path):
-            raise FileNotFoundError(f"""Could not find the PocketIC binary. 
-                  
-I looked for it at "{bin_path}". You can specify another path 
-with the environment variable POCKET_IC_BIN (note that I run from "{os.getcwd()}").
+            raise FileNotFoundError(f"""Could not find the PocketIC binary.
 
-To get the PocketIC binary, see the instructions in the INSTALLATION.md file in the root of this repository.
+The PocketIC binary could not be found at "{bin_path}". Please specify the path to the binary with the POCKET_IC_BIN environment variable, \
+or place it in your current working directory (you are running PocketIC from {os.getcwd()}).
+
+Run the following commands to get the binary:
+    curl -sLO https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/$platform/pocket-ic.gz
+    gzip -d pocket-ic.gz
+    chmod +x pocket-ic
+where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosetta-enabled Darwin.
 """)
 
         # Attempt to start the PocketIC server if it's not already running.
