@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "pocket_ic"
-version = "1.0.0"
+version = "1.0.1"
 description = "A canister testing library"
 authors = [
     "The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>",
 ]
 license = "Apache-2.0"
+documentation = "https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md"
 readme = "README.md"
 homepage = "https://github.com/dfinity/pocketic-py/"
 include = ["tests", "examples"]

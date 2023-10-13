@@ -28,22 +28,22 @@ assert(response == 'Hello, PocketIC!')
 
 ### Quickstart
 * Download the **PocketIC binary** for [Linux](https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz) or [macOS](https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz), unzip and make it executable.
-* Leave the binary in your current working directory, or specify an alternative path with the `POCKET_IC_BIN` environment variable.
-* Run `python3 -m pip install pocket_ic` in your (virtual) environment to get the Python library. 
+* Leave the binary in your current working directory, or specify the path to the binary by setting the `POCKET_IC_BIN` environment variable before running your tests.
+* Run `pip3 install pocket_ic` in your (virtual) environment to get the Python library. 
 * Use `from pocket_ic import PocketIC` in your Python code and start testing!
 
-For a more detailed installation guide, see [INSTALLATION.md](INSTALLATION.md).
+For a more detailed installation guide, see [INSTALLATION.md](https://github.com/dfinity/pocketic-py/blob/main/INSTALLATION.md).
 
 ### Examples
 
-To see some working code, see the [examples](examples/) folder, or check out the [how to use this library](HOWTO.md) guide.
+To see some working code, see the [examples/](https://github.com/dfinity/pocketic-py/tree/main/examples) folder, or check out the [how to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md) guide.
 To run an example, clone this repo and run `python3 examples/counter_canister/counter_canister_test.py` from the repository's root directory.
 
 ## Documentation
-* [Why PocketIC](WHY.md)
-* [How to use this library](HOWTO.md)
+* [Why PocketIC](https://github.com/dfinity/pocketic-py/blob/main/WHY.md)
+* [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
 
 
 ## Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/dfinity/pocketic-py/blob/main/CONTRIBUTING.md)
 
