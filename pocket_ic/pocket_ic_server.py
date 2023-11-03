@@ -93,7 +93,7 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
-    
+
     def set_blob_store_entry(self, blob: bytes, compression) -> str:
         """Sets a blob store entry.
 
