@@ -25,11 +25,11 @@ class PocketIC:
 
 
     def _instance_get(self, endpoint):
-        """HTTP get requests for instance endpoints"""
+        """HTTP get requests for instance endpoints."""
         return self.server.instance_get(endpoint, self.instance_id)
 
     def _instance_post(self, endpoint, body):
-        """HTTP post requests for instance endpoints"""
+        """HTTP post requests for instance endpoints."""
         return self.server.instance_post(endpoint, self.instance_id, body)
 
     def delete(self) -> None:
@@ -49,7 +49,7 @@ class PocketIC:
         self.sender = principal
 
     def get_root_key(self) -> List[int]:
-        """Get the root key of this IC instance"""
+        """Get the root key of this IC instance."""
         return self._instance_get("read/root_key")
 
     def get_time(self) -> dict:
@@ -73,10 +73,10 @@ class PocketIC:
         Returns:
             bool: `True` if the canister exists, `False` otherwise
         """
-        payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode()
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self._instance_post("read/canister_exists", payload)
+        return self._instance_post("read/canister_exists", body)
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
@@ -87,10 +87,10 @@ class PocketIC:
         Returns:
             int: the number of cycles the canister contains
         """
-        payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode()
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self._instance_post("read/get_cycles", payload)["cycles"]
+        return self._instance_post("read/get_cycles", body)["cycles"]
 
     def set_time(self, time_nanosec: int) -> None:
         """Sets the current time of the IC.
@@ -98,10 +98,10 @@ class PocketIC:
         Args:
             time_nanosec (int): the number of nanoseconds since epoch
         """
-        payload = {
-                "nanos_since_epoch": time_nanosec,
+        body = {
+            "nanos_since_epoch": time_nanosec,
         }
-        self._instance_post("update/set_time", payload)
+        self._instance_post("update/set_time", body)
 
     def advance_time(self, nanosecs: int) -> None:
         """Advance the time on the IC by some nanoseconds.
@@ -122,12 +122,29 @@ class PocketIC:
         Returns:
             int: the total amount of cycles the canister holds at after adding `amount`
         """
-        payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "amount": amount,
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "amount": amount,
         }
-        return self._instance_post("update/add_cycles", payload)["cycles"]
+        return self._instance_post("update/add_cycles", body)["cycles"]
 
+    def get_stable_memory(self, canister_id: ic.Principal) -> bytes:
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+        }
+        response = self._instance_post("read/get_stable_memory", body)
+        return base64.b64decode(response["blob"])
+
+
+    def set_stable_memory(self, canister_id: ic.Principal, data: bytes, compression = None) -> None:
+        blob_id = self.server.set_blob_store_entry(data, compression)
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "blob_id": list(bytes.fromhex(blob_id)),
+        }
+            
+        self._instance_post("update/set_stable_memory", body)
+        
     def update_call(
         self,
         canister_id: Optional[ic.Principal],
@@ -146,10 +163,10 @@ class PocketIC:
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         body = {
-                "sender": base64.b64encode(self.sender.bytes).decode(),
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "method": method,
-                "payload": base64.b64encode(payload).decode(),
+            "sender": base64.b64encode(self.sender.bytes).decode(),
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "method": method,
+            "payload": base64.b64encode(payload).decode(),
         }
         res = self._instance_post("update/execute_ingress_message", body)
         return self._get_ok_reply(res)
@@ -172,10 +189,10 @@ class PocketIC:
         """
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         body = {
-                "sender": base64.b64encode(self.sender.bytes).decode(),
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "method": method,
-                "payload": base64.b64encode(payload).decode(),
+            "sender": base64.b64encode(self.sender.bytes).decode(),
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "method": method,
+            "payload": base64.b64encode(payload).decode(),
         }
         res = self._instance_post("read/query", body)
         return self._get_ok_reply(res)
