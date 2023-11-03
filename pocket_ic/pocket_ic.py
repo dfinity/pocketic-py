@@ -129,14 +129,28 @@ class PocketIC:
         return self._instance_post("update/add_cycles", body)["cycles"]
 
     def get_stable_memory(self, canister_id: ic.Principal) -> bytes:
+        """Gets the stable memory of a canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            bytes: the stable memory of the canister
+        """
         body = {
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
         }
         response = self._instance_post("read/get_stable_memory", body)
         return base64.b64decode(response["blob"])
 
-
     def set_stable_memory(self, canister_id: ic.Principal, data: bytes, compression = None) -> None:
+        """Sets the stable memory of a canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+            data (bytes): the data to set
+            compression (str, optional): optional gzip compression, efaults to None
+        """
         blob_id = self.server.set_blob_store_entry(data, compression)
         body = {
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
