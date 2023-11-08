@@ -62,7 +62,7 @@ class PocketIC:
         self.sender = principal
 
     def get_root_key(self) -> List[int]:
-        """Get the root key of this IC instance"""
+        """Get the root key of this IC instance."""
         return self._instance_get("read/root_key")
 
     def get_time(self) -> dict:
@@ -115,10 +115,10 @@ class PocketIC:
         Returns:
             int: the number of cycles the canister contains
         """
-        payload = {
+        body = {
             "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self._instance_post("read/get_cycles", payload)["cycles"]
+        return self._instance_post("read/get_cycles", body)["cycles"]
 
     def set_time(self, time_nanosec: int) -> None:
         """Sets the current time of the IC.
@@ -126,10 +126,10 @@ class PocketIC:
         Args:
             time_nanosec (int): the number of nanoseconds since epoch
         """
-        payload = {
+        body = {
             "nanos_since_epoch": time_nanosec,
         }
-        self._instance_post("update/set_time", payload)
+        self._instance_post("update/set_time", body)
 
     def advance_time(self, nanosecs: int) -> None:
         """Advance the time on the IC by some nanoseconds.
@@ -150,12 +150,43 @@ class PocketIC:
         Returns:
             int: the total amount of cycles the canister holds at after adding `amount`
         """
-        payload = {
+        body = {
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
             "amount": amount,
         }
-        return self._instance_post("update/add_cycles", payload)["cycles"]
+        return self._instance_post("update/add_cycles", body)["cycles"]
 
+    def get_stable_memory(self, canister_id: ic.Principal) -> bytes:
+        """Gets the stable memory of a canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            bytes: the stable memory of the canister
+        """
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+        }
+        response = self._instance_post("read/get_stable_memory", body)
+        return base64.b64decode(response["blob"])
+
+    def set_stable_memory(self, canister_id: ic.Principal, data: bytes, compression = None) -> None:
+        """Sets the stable memory of a canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+            data (bytes): the data to set
+            compression (str, optional): optional gzip compression, defaults to None
+        """
+        blob_id = self.server.set_blob_store_entry(data, compression)
+        body = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "blob_id": list(bytes.fromhex(blob_id)),
+        }
+            
+        self._instance_post("update/set_stable_memory", body)
+        
     def update_call(
         self,
         canister_id: Optional[ic.Principal],

@@ -97,6 +97,28 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
+
+    def set_blob_store_entry(self, blob: bytes, compression) -> str:
+        """Sets a blob store entry.
+
+        Args:
+            blob (bytes): the blob to set
+            compression (str/None): "gzip" or None
+
+        Returns:
+            str: the blob store key
+        """
+        url = f"{self.url}/blobstore"
+        if compression is None:
+            response = self.request_client.post(url, data=blob, headers=HEADERS)
+        elif compression == "gzip":
+            headers = HEADERS | {"Content-Encoding": "gzip"}
+            response = self.request_client.post(url, data=blob, headers=headers)
+        else:
+            raise ValueError(f'only "gzip" compression is supported')
+        
+        self._check_status_code(response)
+        return response.text
     
     def _get_url(self, pid: int) -> str:
         tmp_dir = gettempdir()
@@ -120,17 +142,12 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         return f"http://127.0.0.1:{port}"
 
     def _check_response(self, response):
-        """Checks the response from the PocketIC server.
-
-        Args:
-            response (Response): the response from a call made with `requests`
-
-        Raises:
-            ConnectionError: raised on response status codes not in [200, 201, 202]
-        """
-        if response.status_code not in [200, 201, 202]:
-            raise ConnectionError(
-                f'PocketIC Server returned status code {response.status_code}: "{response.reason}"'
-            )
+        self._check_status_code(response)
         res_json = response.json()
         return res_json
+    
+    def _check_status_code(self, response):
+        if response.status_code not in [200, 201, 202]:
+            raise ConnectionError(
+                f'PocketIC server returned status code {response.status_code}: "{response.reason}"'
+            )

@@ -4,6 +4,7 @@ import sys
 import os
 import unittest
 import ic
+import gzip
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
@@ -27,6 +28,26 @@ class PocketICTests(unittest.TestCase):
         config = [NNS, STANDARD]
         pic = PocketIC(config)
         id = pic.create_canister()
+
+    def test_set_get_stable_memory_no_compression(self):
+        canister_id = self.pic.create_canister()
+        self.pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
+
+        data = b"This will be stored in stable memory."
+        self.pic.set_stable_memory(canister_id, data)
+        memory = self.pic.get_stable_memory(canister_id)[:len(data)]
+        self.assertEqual(memory, data)
+
+    def test_set_get_stable_memory_with_compression(self):
+        canister_id = self.pic.create_canister()
+        self.pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
+
+        text = b"This will be compressed and sent, the server will decompress it."
+        compressed = gzip.compress(text)
+
+        self.pic.set_stable_memory(canister_id, compressed, compression="gzip")
+        memory = self.pic.get_stable_memory(canister_id)[:len(text)]
+        self.assertEqual(memory, text)
 
     def test_time(self):
         self.pic.set_time(1704067199999999999)
