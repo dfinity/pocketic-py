@@ -59,12 +59,9 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
             str: the new instance ID
         """
         url = f"{self.url}/instances"
-        
         response = self.request_client.post(url, headers=HEADERS, json=subnet_config)
-        res = self._check_response(response)
-        instance_id = res["Created"]["instance_id"]
-        topology = res["Created"]["topology"]
-        return instance_id, topology
+        res = self._check_response(response)["Created"]
+        return res["instance_id"], res["topology"]
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.
