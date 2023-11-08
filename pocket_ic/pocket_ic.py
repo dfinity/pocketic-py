@@ -3,10 +3,10 @@ This module contains 'PocketIC', which is the only interface we expose to a test
 """
 import base64
 import ic
+from enum import Enum
 from ic.candid import Types
 from typing import List, Optional
 from pocket_ic.pocket_ic_server import PocketICServer
-from enum import Enum
 
 
 class SubnetKind(Enum):

@@ -4,9 +4,9 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 
 import os
 import time
+import requests
 from typing import List, Tuple
 from tempfile import gettempdir
-import requests
 
 
 HEADERS = {"processing-timeout-ms": "300000"}
