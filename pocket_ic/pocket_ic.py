@@ -149,7 +149,7 @@ class PocketIC:
         Args:
             canister_id (ic.Principal): the ID of the canister
             data (bytes): the data to set
-            compression (str, optional): optional gzip compression, efaults to None
+            compression (str, optional): optional gzip compression, defaults to None
         """
         blob_id = self.server.set_blob_store_entry(data, compression)
         body = {
