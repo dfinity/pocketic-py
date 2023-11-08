@@ -4,7 +4,7 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 
 import os
 import time
-from typing import List
+from typing import List, Tuple
 from tempfile import gettempdir
 import requests
 
@@ -52,7 +52,7 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
-    def new_instance(self, subnet_config):
+    def new_instance(self, subnet_config) -> Tuple[int, dict]:
         """Creates a new PocketIC instance.
 
         Returns:
@@ -77,11 +77,11 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         response = self._check_response(response)
         return response
 
-    def delete_instance(self, instance_id: str):
+    def delete_instance(self, instance_id: int):
         """Deletes an instance from the PocketIC Server.
 
         Args:
-            instance_id (str): the ID of the instance to delete
+            instance_id (int): the ID of the instance to delete
         """
         url = f"{self.url}/instances/{instance_id}"
         self.request_client.delete(url, headers=HEADERS)
