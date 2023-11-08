@@ -82,7 +82,10 @@ class PocketIC:
             "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
         res = self._instance_post("read/canister_exists", payload)
-        return ic.Principal.from_str(res["subnet_id"]) if res is not None else None
+        if res:
+            b = base64.b64decode(res["canister_id"])
+            return ic.Principal(b)
+        return None
 
     def check_canister_exists(self, canister_id: ic.Principal) -> bool:
         """Check whether the provided canister exists.
@@ -240,7 +243,7 @@ class PocketIC:
             {"type": record, "value": {"settings": settings if settings else []}}
         ]
 
-        request_result = self._canister_call("update/execute_ingress_message", None, {"SubnetId": subnet.to_str()} if subnet else None, "provisional_create_canister_with_cycles", ic.encode(payload))
+        request_result = self._canister_call("update/execute_ingress_message", None, {"SubnetId": list(bytes(subnet.bytes))} if subnet else None, "provisional_create_canister_with_cycles", ic.encode(payload))
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
         )

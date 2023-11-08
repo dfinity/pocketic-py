@@ -24,10 +24,17 @@ class PocketICTests(unittest.TestCase):
         del self.pic
         return super().tearDown()
     
-    def test_basic_multi_subnet(self):
+    def test_install_canister_on_subnet(self):
         config = [NNS, STANDARD]
         pic = PocketIC(config)
-        id = pic.create_canister()
+        
+        canister_1 = pic.create_canister(subnet=ic.Principal.from_str("fscpm-uiaaa-aaaaa-aaaap-yai"))
+        canister_2 = pic.create_canister(subnet=ic.Principal.from_str("yndj2-3ybaa-aaaaa-aaaap-yai"))
+
+        subnet_1 = pic.get_subnet_of_canister(canister_1)
+        print(subnet_1)
+        subnet_2 = pic.get_subnet_of_canister(canister_2)
+        print(subnet_2)
 
     def test_set_get_stable_memory_no_compression(self):
         canister_id = self.pic.create_canister()
@@ -76,7 +83,7 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(self.pic.check_canister_exists(canister_id), True)
 
     def test_canister_exists_negative(self):
-        canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
+        canister_id = ic.Principal.anonymous()
         self.assertEqual(self.pic.check_canister_exists(canister_id), False)
 
     def test_cycles_balance(self):
