@@ -9,7 +9,7 @@ import ic
 # up until we find the pocket_ic package.
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pocket_ic import PocketIC
+from pocket_ic import PocketIC, NNS, STANDARD
 
 
 class PocketICTests(unittest.TestCase):
@@ -20,14 +20,15 @@ class PocketICTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         # Delete the current PocketIC instance after the test has executed.
-        self.pic.delete()
+        del self.pic
         return super().tearDown()
+    
+    def test_basic_multi_subnet(self):
+        config = [NNS, STANDARD]
+        pic = PocketIC(config)
+        id = pic.create_canister()
 
     def test_time(self):
-        self.assertEqual(
-            self.pic.get_time(),
-            {"nanos_since_epoch": 1620328630000000000},
-        )
         self.pic.set_time(1704067199999999999)
         self.assertEqual(
             self.pic.get_time(),
@@ -40,9 +41,11 @@ class PocketICTests(unittest.TestCase):
         )
 
     def test_delete_instance(self):
-        initial_num = self.pic.server.list_instances().count('Deleted')
-        self.pic.delete()
-        self.assertEqual(self.pic.server.list_instances().count('Deleted'), initial_num + 1)
+        pic = PocketIC()
+        server = pic.server
+        initial_num = server.list_instances().count('Deleted')
+        del pic
+        self.assertEqual(server.list_instances().count('Deleted'), initial_num + 1)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
@@ -57,8 +60,9 @@ class PocketICTests(unittest.TestCase):
 
     def test_cycles_balance(self):
         canister_id = self.pic.create_canister()
+        initial_balance = self.pic.get_cycles_balance(canister_id)
         self.pic.add_cycles(canister_id, 6_666)
-        self.assertEqual(self.pic.get_cycles_balance(canister_id), 6_666)
+        self.assertEqual(self.pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import time
 from typing import List
 from tempfile import gettempdir
 import requests
+import json
 
 HEADERS = {"processing-timeout-ms": "300000"}
 
@@ -51,37 +52,19 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
-    def _get_url(self, pid: int) -> str:
-        tmp_dir = gettempdir()
-        ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
-        port_file_path = f"{tmp_dir}/pocket_ic_{pid}.port"
-
-        stop_at = time.time() + 10  # Wait for the ready file for 10 seconds
-
-        while not os.path.exists(ready_file_path):
-            if time.time() < stop_at:
-                time.sleep(0.1)  # 100ms
-            else:
-                raise TimeoutError("PocketIC failed to start")
-
-        if os.path.isfile(ready_file_path):
-            with open(port_file_path, "r", encoding="utf-8") as port_file:
-                port = port_file.readline().strip()
-        else:
-            raise ValueError(f"{ready_file_path} is not a file!")
-
-        return f"http://127.0.0.1:{port}"
-
-    def new_instance(self) -> str:
+    def new_instance(self, subnet_config):
         """Creates a new PocketIC instance.
 
         Returns:
             str: the new instance ID
         """
         url = f"{self.url}/instances"
-        response = self.request_client.post(url, headers=HEADERS)
+        
+        response = self.request_client.post(url, headers=HEADERS, json=subnet_config)
         res = self._check_response(response)
-        return res["Created"]["instance_id"]
+        instance_id = res["Created"]["instance_id"]
+        topology = res["Created"]["topology"]
+        return instance_id, topology
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.
@@ -114,6 +97,27 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
+    
+    def _get_url(self, pid: int) -> str:
+        tmp_dir = gettempdir()
+        ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
+        port_file_path = f"{tmp_dir}/pocket_ic_{pid}.port"
+
+        stop_at = time.time() + 10  # Wait for the ready file for 10 seconds
+
+        while not os.path.exists(ready_file_path):
+            if time.time() < stop_at:
+                time.sleep(0.1)  # 100ms
+            else:
+                raise TimeoutError("PocketIC failed to start")
+
+        if os.path.isfile(ready_file_path):
+            with open(port_file_path, "r", encoding="utf-8") as port_file:
+                port = port_file.readline().strip()
+        else:
+            raise ValueError(f"{ready_file_path} is not a file!")
+
+        return f"http://127.0.0.1:{port}"
 
     def _check_response(self, response):
         """Checks the response from the PocketIC server.

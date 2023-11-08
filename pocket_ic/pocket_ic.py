@@ -2,11 +2,28 @@
 This module contains 'PocketIC', which is the only interface we expose to a test author.
 """
 import base64
-from typing import List, Optional
 import ic
 from ic.candid import Types
+from typing import List, Optional
 from pocket_ic.pocket_ic_server import PocketICServer
+from enum import Enum
 
+
+class SubnetKind(Enum):
+    APPLICATION = "Application"
+    NNS = "NNS"
+    SYSTEM = "System"
+
+class SubnetConfig:
+    def __init__(self, subnet_kind: SubnetKind, size: int) -> None:
+        self.subnet_type = subnet_kind.value
+        self.size = size
+
+STANDARD = SubnetConfig(SubnetKind.APPLICATION, 13)
+NNS = SubnetConfig(SubnetKind.NNS, 40)
+FIDUCIARY = SubnetConfig(SubnetKind.APPLICATION, 28)
+SNS = SubnetConfig(SubnetKind.APPLICATION, 34)
+II = SubnetConfig(SubnetKind.SYSTEM, 13)
 
 class PocketIC:
     """
@@ -18,22 +35,18 @@ class PocketIC:
     TODO: describe return types and error states
     """
 
-    def __init__(self) -> None:
+    def __init__(self, subnet_config: Optional[List[SubnetConfig]] = None) -> None:
+        """_summary_
+
+        Args:
+            subnet_config (Optional[List[SubnetConfig]], optional): _description_. Defaults to None.
+        """
         self.server = PocketICServer()
-        self.instance_id = self.server.new_instance()
+        subnet_config = subnet_config if subnet_config else [STANDARD]
+        self.instance_id, self.topology = self.server.new_instance(list(map(lambda x: x.__dict__ , subnet_config)))
         self.sender = ic.Principal.anonymous()
 
-
-    def _instance_get(self, endpoint):
-        """HTTP get requests for instance endpoints"""
-        return self.server.instance_get(endpoint, self.instance_id)
-
-    def _instance_post(self, endpoint, body):
-        """HTTP post requests for instance endpoints"""
-        return self.server.instance_post(endpoint, self.instance_id, body)
-
-    def delete(self) -> None:
-        """Deletes this PocketIC instance."""
+    def __del__(self) -> None:
         self.server.delete_instance(self.instance_id)
 
     def set_anonymous_sender(self) -> None:
@@ -74,9 +87,24 @@ class PocketIC:
             bool: `True` if the canister exists, `False` otherwise
         """
         payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode()
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
-        return self._instance_post("read/canister_exists", payload)
+        return self._instance_post("read/canister_exists", payload) is not None
+    
+    def get_subnet_of_canister(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
+        """Check whether the provided canister exists.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            bool: `True` if the canister exists, `False` otherwise
+        """
+        payload = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
+        }
+        res = self._instance_post("read/canister_exists", payload)
+        return ic.Principal.from_str(res["subnet_id"]) if res is not None else None
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
@@ -88,7 +116,7 @@ class PocketIC:
             int: the number of cycles the canister contains
         """
         payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode()
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
         }
         return self._instance_post("read/get_cycles", payload)["cycles"]
 
@@ -99,7 +127,7 @@ class PocketIC:
             time_nanosec (int): the number of nanoseconds since epoch
         """
         payload = {
-                "nanos_since_epoch": time_nanosec,
+            "nanos_since_epoch": time_nanosec,
         }
         self._instance_post("update/set_time", payload)
 
@@ -123,8 +151,8 @@ class PocketIC:
             int: the total amount of cycles the canister holds at after adding `amount`
         """
         payload = {
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "amount": amount,
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "amount": amount,
         }
         return self._instance_post("update/add_cycles", payload)["cycles"]
 
@@ -144,15 +172,8 @@ class PocketIC:
         Returns:
             list: a list of candid objects
         """
-        canister_id = canister_id if canister_id else ic.Principal.management_canister()
-        body = {
-                "sender": base64.b64encode(self.sender.bytes).decode(),
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "method": method,
-                "payload": base64.b64encode(payload).decode(),
-        }
-        res = self._instance_post("update/execute_ingress_message", body)
-        return self._get_ok_reply(res)
+        
+        return self._canister_call("update/execute_ingress_message", canister_id, None, method, payload)
 
     def query_call(
         self,
@@ -170,17 +191,9 @@ class PocketIC:
         Returns:
             list: a list of candid objects
         """
-        canister_id = canister_id if canister_id else ic.Principal.management_canister()
-        body = {
-                "sender": base64.b64encode(self.sender.bytes).decode(),
-                "canister_id": base64.b64encode(canister_id.bytes).decode(),
-                "method": method,
-                "payload": base64.b64encode(payload).decode(),
-        }
-        res = self._instance_post("read/query", body)
-        return self._get_ok_reply(res)
+        return self._canister_call("read/query", canister_id, None, method, payload)
 
-    def create_canister(self, settings: list = None) -> ic.Principal:
+    def create_canister(self, settings: Optional[list] = None, subnet: Optional[ic.Principal] = None) -> ic.Principal:
         """Creates an empty canister.
 
         Args:
@@ -207,7 +220,7 @@ class PocketIC:
             {"type": record, "value": {"settings": settings if settings else []}}
         ]
 
-        request_result = self.update_call(None, "provisional_create_canister_with_cycles", ic.encode(payload))
+        request_result = self._canister_call("update/execute_ingress_message", None, {"SubnetId": subnet.to_str()} if subnet else None, "provisional_create_canister_with_cycles", ic.encode(payload))
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
         )
@@ -288,6 +301,26 @@ class PocketIC:
 
         self.install_code(canister_id, wasm_module, arg)
         return canister
+    
+    def _canister_call(
+        self,
+        endpoint: str,
+        canister_id: Optional[ic.Principal],
+        effective_principal: Optional[ic.Principal],
+        method: str,
+        payload: bytes,
+    ) -> list:
+        canister_id = canister_id if canister_id else ic.Principal.management_canister()
+        body = {
+            "sender": base64.b64encode(self.sender.bytes).decode(),
+            "effective_principal": effective_principal if effective_principal else "None",
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "method": method,
+            "payload": base64.b64encode(payload).decode(),
+        }
+
+        res = self._instance_post(endpoint, body)
+        return self._get_ok_reply(res)
 
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:
@@ -304,6 +337,14 @@ class PocketIC:
             raise ValueError(f'Request returned "Err": {request_result["Err"]}')
 
         raise ValueError(f"Malformed response: {request_result}")
+    
+    def _instance_get(self, endpoint):
+        """HTTP get requests for instance endpoints"""
+        return self.server.instance_get(endpoint, self.instance_id)
+
+    def _instance_post(self, endpoint, body):
+        """HTTP post requests for instance endpoints"""
+        return self.server.instance_post(endpoint, self.instance_id, body)
 
     ############### For compatibility with ic-py's `ic.Agent` class;  #########
     ############### the `ic.Canister` interface requires these two methods. ###
