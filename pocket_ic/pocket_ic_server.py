@@ -7,7 +7,7 @@ import time
 from typing import List
 from tempfile import gettempdir
 import requests
-import json
+
 
 HEADERS = {"processing-timeout-ms": "300000"}
 

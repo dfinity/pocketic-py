@@ -77,6 +77,13 @@ class PocketIC:
         """Make the IC produce and progress by one block."""
         self._instance_post("update/tick", "")
 
+    def get_subnet_of_canister(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
+        payload = {
+            "canister_id": base64.b64encode(canister_id.bytes).decode()
+        }
+        res = self._instance_post("read/canister_exists", payload)
+        return ic.Principal.from_str(res["subnet_id"]) if res is not None else None
+
     def check_canister_exists(self, canister_id: ic.Principal) -> bool:
         """Check whether the provided canister exists.
 
@@ -86,25 +93,7 @@ class PocketIC:
         Returns:
             bool: `True` if the canister exists, `False` otherwise
         """
-        payload = {
-            "canister_id": base64.b64encode(canister_id.bytes).decode()
-        }
-        return self._instance_post("read/canister_exists", payload) is not None
-    
-    def get_subnet_of_canister(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
-        """Check whether the provided canister exists.
-
-        Args:
-            canister_id (ic.Principal): the ID of the canister
-
-        Returns:
-            bool: `True` if the canister exists, `False` otherwise
-        """
-        payload = {
-            "canister_id": base64.b64encode(canister_id.bytes).decode()
-        }
-        res = self._instance_post("read/canister_exists", payload)
-        return ic.Principal.from_str(res["subnet_id"]) if res is not None else None
+        return self.get_subnet_of_canister(canister_id) is not None
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
