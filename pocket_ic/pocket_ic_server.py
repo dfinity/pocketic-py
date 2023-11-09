@@ -11,6 +11,7 @@ from tempfile import gettempdir
 
 HEADERS = {"processing-timeout-ms": "300000"}
 
+
 class PocketICServer:
     """
     An object of this class represents a running PocketIC server. During instantiation,
@@ -29,13 +30,14 @@ class PocketICServer:
 
     def __init__(self) -> None:
         pid = os.getpid()
-        if 'POCKET_IC_BIN' in os.environ:
-            bin_path = os.environ['POCKET_IC_BIN']
+        if "POCKET_IC_BIN" in os.environ:
+            bin_path = os.environ["POCKET_IC_BIN"]
         else:
             bin_path = "./pocket-ic"
 
         if not os.path.isfile(bin_path):
-            raise FileNotFoundError(f"""Could not find the PocketIC binary.
+            raise FileNotFoundError(
+                f"""Could not find the PocketIC binary.
 
 The PocketIC binary could not be found at "{bin_path}". Please specify the path to the binary with the POCKET_IC_BIN environment variable, \
 or place it in your current working directory (you are running PocketIC from {os.getcwd()}).
@@ -45,7 +47,8 @@ Run the following commands to get the binary:
     gzip -d pocket-ic.gz
     chmod +x pocket-ic
 where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosetta-enabled Darwin.
-""")
+"""
+            )
 
         # Attempt to start the PocketIC server if it's not already running.
         os.system(f"{bin_path} --pid {pid} &")
@@ -113,10 +116,10 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
             response = self.request_client.post(url, data=blob, headers=headers)
         else:
             raise ValueError(f'only "gzip" compression is supported')
-        
+
         self._check_status_code(response)
         return response.text
-    
+
     def _get_url(self, pid: int) -> str:
         tmp_dir = gettempdir()
         ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
@@ -142,7 +145,7 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         self._check_status_code(response)
         res_json = response.json()
         return res_json
-    
+
     def _check_status_code(self, response):
         if response.status_code not in [200, 201, 202]:
             raise ConnectionError(
