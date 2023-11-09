@@ -40,8 +40,6 @@ class PocketIC:
 
     The interface of this class is derived from the StateMachine testing framework,
     which presents a blocking API to the user.
-
-    TODO: describe return types and error states
     """
 
     def __init__(self, subnet_config: Optional[List[SubnetConfig]] = None) -> None:

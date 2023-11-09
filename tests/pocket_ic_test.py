@@ -29,14 +29,11 @@ class PocketICTests(unittest.TestCase):
             for k, v in pic.topology.items()
             if v.subnet_kind == SubnetKind.APPLICATION
         )
+        nns_canister = pic.create_canister(subnet=nns_subnet)
+        app_canister = pic.create_canister(subnet=app_subnet)
 
-        canister_1 = pic.create_canister(subnet=nns_subnet)
-        canister_2 = pic.create_canister(subnet=app_subnet)
-
-        subnet_1 = pic.get_subnet_of_canister(canister_1)
-        self.assertEqual(subnet_1.bytes, nns_subnet.bytes)
-        subnet_2 = pic.get_subnet_of_canister(canister_2)
-        self.assertEqual(subnet_2.bytes, app_subnet.bytes)
+        self.assertEqual(pic.get_subnet_of_canister(nns_canister), nns_subnet)
+        self.assertEqual(pic.get_subnet_of_canister(app_canister), app_subnet)
 
     def test_set_get_stable_memory_no_compression(self):
         canister_id = self.pic.create_canister()

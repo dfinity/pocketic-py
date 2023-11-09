@@ -8,7 +8,7 @@ import ic
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(script_dir)))
 
-from pocket_ic import PocketIC, NNS, STANDARD
+from pocket_ic import PocketIC, NNS
 
 
 class LedgerCanisterTests(unittest.TestCase):
