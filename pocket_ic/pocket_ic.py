@@ -1,5 +1,7 @@
 """
-This module contains 'PocketIC', which is the only interface we expose to a test author.
+This module contains 'PocketIC', which is the main interface we expose to a test author.
+It also contains 'SubnetConfig' and 'SubnetKind', which are used to configure the
+subnets of a PocketIC instance.
 """
 import base64
 import ic
@@ -10,23 +12,34 @@ from pocket_ic.pocket_ic_server import PocketICServer
 
 
 class SubnetKind(Enum):
+    """The type of a subnet."""
+
     APPLICATION = "Application"
     NNS = "NNS"
     SYSTEM = "System"
 
 
 class SubnetConfig:
+    """A subnet configuration consisting of a subnet kind and a subnet size."""
+
     def __init__(self, subnet_kind: SubnetKind, size: int) -> None:
+        """Creates a new subnet configuration.
+
+        Args:
+            subnet_kind (SubnetKind): the subnet type: either application, NNS or system
+            size (int): the size or replication factor of the subnet
+        """
         self.subnet_kind = subnet_kind
         self.size = size
 
     def __repr__(self) -> str:
         return f"SubnetConfig({self.subnet_kind.value}, {self.size})"
 
-    def json(self) -> dict:
+    def _json(self) -> dict:
         return {"subnet_type": self.subnet_kind.value, "size": self.size}
 
 
+# Useful pre-defined subnet configurations
 STANDARD = SubnetConfig(SubnetKind.APPLICATION, 13)
 NNS = SubnetConfig(SubnetKind.NNS, 40)
 FIDUCIARY = SubnetConfig(SubnetKind.APPLICATION, 28)
@@ -47,12 +60,12 @@ class PocketIC:
 
         Args:
             subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet
-            configurations, defaults to a single application subnet
+                configurations, defaults to a single application subnet
         """
         self.server = PocketICServer()
         subnet_config = subnet_config if subnet_config else [STANDARD]
         self.instance_id, topology = self.server.new_instance(
-            list(map(lambda x: x.json(), subnet_config))
+            list(map(lambda x: x._json(), subnet_config))
         )
         self.topology = self._generate_topology(topology)
         self.sender = ic.Principal.anonymous()
@@ -189,7 +202,7 @@ class PocketIC:
         Args:
             canister_id (ic.Principal): the ID of the canister
             data (bytes): the data to set
-            compression (str, optional): optional gzip compression, defaults to None
+            compression (str, optional): optional gzip compression, defaults to `None`
         """
         blob_id = self.server.set_blob_store_entry(data, compression)
         body = {
@@ -243,10 +256,12 @@ class PocketIC:
         """Creates an empty canister.
 
         Args:
-            settings (list, optional): optional list of settings, defaults to `None`
+            settings (Optional[list], optional): optional list of settings, defaults to `None`
+            subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
+                canister, defaults to `None`
 
         Returns:
-            ic.Principal: the canister ID of the new canister
+            ic.Principal: the ID of the created canister
         """
         record = Types.Record(
             {
@@ -341,7 +356,8 @@ class PocketIC:
             candid (str): a valid candid file describing the canister interface
             wasm_module (bytes): the canister wasm as bytes
             init_args (dict): the init args as required by the candid file
-            subnet (Optional[ic.Principal], optional): optional subnet ID, defaults to None
+            subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
+                canister, defaults to `None`
 
         Raises:
             ValueError: can be raised on invalid candid files
