@@ -13,11 +13,6 @@ from pocket_ic import PocketIC, SubnetKind, NNS, STANDARD
 
 
 class PocketICTests(unittest.TestCase):
-    def setUp(self) -> None:
-        # This is being run for every test independently.
-        self.pic = PocketIC()
-        return super().setUp()
-
     def test_multiple_nns_subnets_are_deduplicated(self):
         subnet_config = [NNS, NNS]
         pic = PocketIC(subnet_config)
@@ -45,34 +40,37 @@ class PocketICTests(unittest.TestCase):
         )
 
     def test_set_get_stable_memory_no_compression(self):
-        canister_id = self.pic.create_canister()
-        self.pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
 
         data = b"This will be stored in stable memory."
-        self.pic.set_stable_memory(canister_id, data)
-        memory = self.pic.get_stable_memory(canister_id)[: len(data)]
+        pic.set_stable_memory(canister_id, data)
+        memory = pic.get_stable_memory(canister_id)[: len(data)]
         self.assertEqual(memory, data)
 
     def test_set_get_stable_memory_with_compression(self):
-        canister_id = self.pic.create_canister()
-        self.pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
 
         text = b"This will be compressed and sent, the server will decompress it."
         compressed = gzip.compress(text)
 
-        self.pic.set_stable_memory(canister_id, compressed, compression="gzip")
-        memory = self.pic.get_stable_memory(canister_id)[: len(text)]
+        pic.set_stable_memory(canister_id, compressed, compression="gzip")
+        memory = pic.get_stable_memory(canister_id)[: len(text)]
         self.assertEqual(memory, text)
 
     def test_time(self):
-        self.pic.set_time(1704067199999999999)
+        pic = PocketIC()
+        pic.set_time(1704067199999999999)
         self.assertEqual(
-            self.pic.get_time(),
+            pic.get_time(),
             {"nanos_since_epoch": 1704067199999999999},
         )
-        self.pic.advance_time(1_000_000_000)
+        pic.advance_time(1_000_000_000)
         self.assertEqual(
-            self.pic.get_time(),
+            pic.get_time(),
             {"nanos_since_epoch": 1704067200999999999},
         )
 
@@ -84,7 +82,8 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(server.list_instances().count("Deleted"), initial_num + 1)
 
     def test_tick(self):
-        self.assertEqual(self.pic.tick(), None)
+        pic = PocketIC()
+        self.assertEqual(pic.tick(), None)
 
     def test_get_root_key(self):
         pic = PocketIC([STANDARD])
@@ -94,20 +93,21 @@ class PocketICTests(unittest.TestCase):
         self.assertTrue(pic.get_root_key() is not None)
 
     def test_canister_exists(self):
-        canister_id = self.pic.create_canister()
-        self.assertEqual(self.pic.check_canister_exists(canister_id), True)
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        self.assertEqual(pic.check_canister_exists(canister_id), True)
 
     def test_canister_exists_negative(self):
+        pic = PocketIC()
         canister_id = ic.Principal.anonymous()
-        self.assertEqual(self.pic.check_canister_exists(canister_id), False)
+        self.assertEqual(pic.check_canister_exists(canister_id), False)
 
     def test_cycles_balance(self):
-        canister_id = self.pic.create_canister()
-        initial_balance = self.pic.get_cycles_balance(canister_id)
-        self.pic.add_cycles(canister_id, 6_666)
-        self.assertEqual(
-            self.pic.get_cycles_balance(canister_id), initial_balance + 6_666
-        )
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        initial_balance = pic.get_cycles_balance(canister_id)
+        pic.add_cycles(canister_id, 6_666)
+        self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
 
 if __name__ == "__main__":
