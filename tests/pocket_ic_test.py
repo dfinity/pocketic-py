@@ -18,7 +18,12 @@ class PocketICTests(unittest.TestCase):
         self.pic = PocketIC()
         return super().setUp()
 
-    def test_install_canister_on_subnet(self):
+    def test_multiple_nns_subnets_are_deduplicated(self):
+        subnet_config = [NNS, NNS]
+        pic = PocketIC(subnet_config)
+        self.assertEqual(len(pic.topology), 1)
+
+    def test_install_canister_on_subnet_and_get_subnet_of_canister(self):
         subnet_config = [NNS, STANDARD]
         pic = PocketIC(subnet_config)
         nns_subnet = next(
@@ -80,6 +85,13 @@ class PocketICTests(unittest.TestCase):
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
+
+    def test_get_root_key(self):
+        pic = PocketIC([STANDARD])
+        self.assertTrue(pic.get_root_key() is None)
+
+        pic = PocketIC([NNS, STANDARD])
+        self.assertTrue(pic.get_root_key() is not None)
 
     def test_canister_exists(self):
         canister_id = self.pic.create_canister()

@@ -57,6 +57,7 @@ class PocketIC:
 
     def __init__(self, subnet_config: Optional[List[SubnetConfig]] = None) -> None:
         """Creates a new PocketIC instance with an optional list of subnet configurations.
+        Note that there can be at most one NNS subnet, mutliple NNS subnets are deduplicated.
 
         Args:
             subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet
@@ -86,9 +87,21 @@ class PocketIC:
         """
         self.sender = principal
 
-    def get_root_key(self) -> List[int]:
-        """Get the root key of this IC instance."""
-        return self._instance_get("read/root_key")
+    def get_root_key(self) -> Optional[bytes]:
+        """Get the root key of the IC. If there is no NNS subnet, returns `None`.
+
+        Returns:
+            Optional[bytes]: the root key of the IC
+        """
+        nns_subnet = [
+            k for k, v in self.topology.items() if v.subnet_kind == SubnetKind.NNS
+        ]
+        if not nns_subnet:
+            return None
+        body = {
+            "subnet_id": base64.b64encode(nns_subnet[0].bytes).decode(),
+        }
+        return bytes(self._instance_post("read/pub_key", body))
 
     def get_time(self) -> dict:
         """Get the current time of the IC.
@@ -97,6 +110,26 @@ class PocketIC:
             dict: {'nanos_since_epoch': ...}
         """
         return self._instance_get("read/get_time")
+
+    def set_time(self, time_nanosec: int) -> None:
+        """Sets the current time of the IC.
+
+        Args:
+            time_nanosec (int): the number of nanoseconds since epoch
+        """
+        body = {
+            "nanos_since_epoch": time_nanosec,
+        }
+        self._instance_post("update/set_time", body)
+
+    def advance_time(self, nanosecs: int) -> None:
+        """Advance the time on the IC by some nanoseconds.
+
+        Args:
+            nanosecs (int): number of nanoseconds to be added to the current time
+        """
+        new_time = self.get_time()["nanos_since_epoch"] + nanosecs
+        self.set_time(new_time)
 
     def tick(self) -> None:
         """Make the IC produce and progress by one block."""
@@ -142,26 +175,6 @@ class PocketIC:
         """
         body = {"canister_id": base64.b64encode(canister_id.bytes).decode()}
         return self._instance_post("read/get_cycles", body)["cycles"]
-
-    def set_time(self, time_nanosec: int) -> None:
-        """Sets the current time of the IC.
-
-        Args:
-            time_nanosec (int): the number of nanoseconds since epoch
-        """
-        body = {
-            "nanos_since_epoch": time_nanosec,
-        }
-        self._instance_post("update/set_time", body)
-
-    def advance_time(self, nanosecs: int) -> None:
-        """Advance the time on the IC by some nanoseconds.
-
-        Args:
-            nanosecs (int): number of nanoseconds to be added to the current time
-        """
-        new_time = self.get_time()["nanos_since_epoch"] + nanosecs
-        self.set_time(new_time)
 
     def add_cycles(self, canister_id: ic.Principal, amount: int) -> int:
         """Add cycles to a specific canister.
