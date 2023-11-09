@@ -8,9 +8,8 @@ import gzip
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pocket_ic import PocketIC, NNS, STANDARD
+from pocket_ic import PocketIC, SubnetKind, NNS, STANDARD
 
 
 class PocketICTests(unittest.TestCase):
@@ -19,22 +18,25 @@ class PocketICTests(unittest.TestCase):
         self.pic = PocketIC()
         return super().setUp()
 
-    def tearDown(self) -> None:
-        # Delete the current PocketIC instance after the test has executed.
-        del self.pic
-        return super().tearDown()
-    
     def test_install_canister_on_subnet(self):
-        config = [NNS, STANDARD]
-        pic = PocketIC(config)
-        
-        canister_1 = pic.create_canister(subnet=ic.Principal.from_str("fscpm-uiaaa-aaaaa-aaaap-yai"))
-        canister_2 = pic.create_canister(subnet=ic.Principal.from_str("yndj2-3ybaa-aaaaa-aaaap-yai"))
+        subnet_config = [NNS, STANDARD]
+        pic = PocketIC(subnet_config)
+        nns_subnet = next(
+            k for k, v in pic.topology.items() if v.subnet_kind == SubnetKind.NNS
+        )
+        app_subnet = next(
+            k
+            for k, v in pic.topology.items()
+            if v.subnet_kind == SubnetKind.APPLICATION
+        )
+
+        canister_1 = pic.create_canister(subnet=nns_subnet)
+        canister_2 = pic.create_canister(subnet=app_subnet)
 
         subnet_1 = pic.get_subnet_of_canister(canister_1)
-        print(subnet_1)
+        self.assertEqual(subnet_1.bytes, nns_subnet.bytes)
         subnet_2 = pic.get_subnet_of_canister(canister_2)
-        print(subnet_2)
+        self.assertEqual(subnet_2.bytes, app_subnet.bytes)
 
     def test_set_get_stable_memory_no_compression(self):
         canister_id = self.pic.create_canister()
@@ -42,7 +44,7 @@ class PocketICTests(unittest.TestCase):
 
         data = b"This will be stored in stable memory."
         self.pic.set_stable_memory(canister_id, data)
-        memory = self.pic.get_stable_memory(canister_id)[:len(data)]
+        memory = self.pic.get_stable_memory(canister_id)[: len(data)]
         self.assertEqual(memory, data)
 
     def test_set_get_stable_memory_with_compression(self):
@@ -53,7 +55,7 @@ class PocketICTests(unittest.TestCase):
         compressed = gzip.compress(text)
 
         self.pic.set_stable_memory(canister_id, compressed, compression="gzip")
-        memory = self.pic.get_stable_memory(canister_id)[:len(text)]
+        memory = self.pic.get_stable_memory(canister_id)[: len(text)]
         self.assertEqual(memory, text)
 
     def test_time(self):
@@ -71,9 +73,9 @@ class PocketICTests(unittest.TestCase):
     def test_delete_instance(self):
         pic = PocketIC()
         server = pic.server
-        initial_num = server.list_instances().count('Deleted')
+        initial_num = server.list_instances().count("Deleted")
         del pic
-        self.assertEqual(server.list_instances().count('Deleted'), initial_num + 1)
+        self.assertEqual(server.list_instances().count("Deleted"), initial_num + 1)
 
     def test_tick(self):
         self.assertEqual(self.pic.tick(), None)
@@ -90,7 +92,9 @@ class PocketICTests(unittest.TestCase):
         canister_id = self.pic.create_canister()
         initial_balance = self.pic.get_cycles_balance(canister_id)
         self.pic.add_cycles(canister_id, 6_666)
-        self.assertEqual(self.pic.get_cycles_balance(canister_id), initial_balance + 6_666)
+        self.assertEqual(
+            self.pic.get_cycles_balance(canister_id), initial_balance + 6_666
+        )
 
 
 if __name__ == "__main__":

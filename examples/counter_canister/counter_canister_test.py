@@ -12,37 +12,29 @@ from pocket_ic import PocketIC
 
 
 class CounterCanisterTests(unittest.TestCase):
-    def setUp(self) -> None:
-        # This is being run for every test independently.
-        self.pic = PocketIC()
-        self.canister_id = self.pic.create_canister()
-        self.pic.add_cycles(self.canister_id, 1_000_000_000_000_000_000)
+    def test_counter_canister(self):
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        pic.add_cycles(canister_id, 1_000_000_000_000_000_000)
+
         with open(os.path.join(script_dir, "counter.wasm"), "rb") as wasm_file:
             wasm_module = wasm_file.read()
-        self.pic.install_code(self.canister_id, bytes(wasm_module), [])
+        pic.install_code(canister_id, bytes(wasm_module), [])
 
-        return super().setUp()
-
-    def tearDown(self) -> None:
-        # Delete the current PocketIC instance after the test has executed.
-        self.pic.delete()
-        return super().tearDown()
-
-    def test_counter_canister(self):
         self.assertEqual(
-            self.pic.update_call(self.canister_id, "read", ic.encode([])),
+            pic.update_call(canister_id, "read", ic.encode([])),
             [0, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.update_call(self.canister_id, "write", ic.encode([])),
+            pic.update_call(canister_id, "write", ic.encode([])),
             [1, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.update_call(self.canister_id, "write", ic.encode([])),
+            pic.update_call(canister_id, "write", ic.encode([])),
             [2, 0, 0, 0],
         )
         self.assertEqual(
-            self.pic.update_call(self.canister_id, "read", ic.encode([])),
+            pic.update_call(canister_id, "read", ic.encode([])),
             [2, 0, 0, 0],
         )
 

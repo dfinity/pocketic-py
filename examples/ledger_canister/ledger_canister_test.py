@@ -8,22 +8,24 @@ import ic
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(script_dir)))
 
-from pocket_ic import PocketIC
+from pocket_ic import PocketIC, NNS, STANDARD, SubnetKind
 
 
 class LedgerCanisterTests(unittest.TestCase):
     def setUp(self) -> None:
         # This is run for every test individually.
-        self.pic = PocketIC()
-        self.principal_a = ic.Principal.from_str("2222s-4iaaa-aaaaf-ax2uq-cai")
-        self.principal_b = ic.Principal.from_str("zzyfr-6yaaa-aaaar-aklsa-cai")
-        self.principal_minting = ic.Principal.from_str("i3gqp-srkaa-aaaaa-aaaap-4ai")
+        # We create a new PocketIC with a single NNS subnet.
+        self.pic = PocketIC(subnet_config=[NNS, STANDARD])
+        self.principal_a = ic.Principal(b"A")
+        self.principal_b = ic.Principal(b"B")
+        self.principal_minting = ic.Principal(b"MINTER")
 
         with open(
             os.path.join(script_dir, "ledger.did"), "r", encoding="utf-8"
         ) as candid_file:
             candid = candid_file.read()
 
+        # Specify the init args for the ledger canister.
         init_args = {
             "Init": {
                 "decimals": [],
@@ -58,15 +60,15 @@ class LedgerCanisterTests(unittest.TestCase):
         with open(os.path.join(script_dir, "ledger_canister.wasm"), "rb") as wasm_file:
             wasm_module = wasm_file.read()
 
+        # Install the ledger canister on the NNS subnet.
+        nns_subnet = next(
+            k for k, v in self.pic.topology.items() if v.subnet_kind == SubnetKind.NNS
+        )
+
         self.ledger: ic.Canister = self.pic.create_and_install_canister_with_candid(
-            candid, wasm_module, init_args
+            candid, wasm_module, init_args, nns_subnet
         )
         return super().setUp()
-
-    def tearDown(self) -> None:
-        # Delete the current PocketIC instance after the test has executed.
-        self.pic.delete()
-        return super().tearDown()
 
     def test_get_name(self):
         res = self.ledger.icrc1_name()

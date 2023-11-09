@@ -5,7 +5,7 @@ import base64
 import ic
 from enum import Enum
 from ic.candid import Types
-from typing import List, Optional
+from typing import List, Optional, Any
 from pocket_ic.pocket_ic_server import PocketICServer
 
 
@@ -14,16 +14,25 @@ class SubnetKind(Enum):
     NNS = "NNS"
     SYSTEM = "System"
 
+
 class SubnetConfig:
     def __init__(self, subnet_kind: SubnetKind, size: int) -> None:
-        self.subnet_type = subnet_kind.value
+        self.subnet_kind = subnet_kind
         self.size = size
+
+    def __repr__(self) -> str:
+        return f"SubnetConfig({self.subnet_kind.value}, {self.size})"
+
+    def json(self) -> dict:
+        return {"subnet_type": self.subnet_kind.value, "size": self.size}
+
 
 STANDARD = SubnetConfig(SubnetKind.APPLICATION, 13)
 NNS = SubnetConfig(SubnetKind.NNS, 40)
 FIDUCIARY = SubnetConfig(SubnetKind.APPLICATION, 28)
 SNS = SubnetConfig(SubnetKind.APPLICATION, 34)
 II = SubnetConfig(SubnetKind.SYSTEM, 13)
+
 
 class PocketIC:
     """
@@ -36,17 +45,21 @@ class PocketIC:
     """
 
     def __init__(self, subnet_config: Optional[List[SubnetConfig]] = None) -> None:
-        """_summary_
+        """Creates a new PocketIC instance with an optional list of subnet configurations.
 
         Args:
-            subnet_config (Optional[List[SubnetConfig]], optional): _description_. Defaults to None.
+            subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet configurations, defaults to None
         """
         self.server = PocketICServer()
         subnet_config = subnet_config if subnet_config else [STANDARD]
-        self.instance_id, self.topology = self.server.new_instance(list(map(lambda x: x.__dict__ , subnet_config)))
+        self.instance_id, topology = self.server.new_instance(
+            list(map(lambda x: x.json(), subnet_config))
+        )
+        self.topology = self._generate_topology(topology)
         self.sender = ic.Principal.anonymous()
 
     def __del__(self) -> None:
+        """Deletes the instance from the PocketIC server."""
         self.server.delete_instance(self.instance_id)
 
     def set_anonymous_sender(self) -> None:
@@ -77,10 +90,18 @@ class PocketIC:
         """Make the IC produce and progress by one block."""
         self._instance_post("update/tick", "")
 
-    def get_subnet_of_canister(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
-        payload = {
-            "canister_id": base64.b64encode(canister_id.bytes).decode()
-        }
+    def get_subnet_of_canister(
+        self, canister_id: ic.Principal
+    ) -> Optional[ic.Principal]:
+        """Get the subnet ID of the subnet that contains the given canister.
+
+        Args:
+            canister_id (ic.Principal): the ID of the canister
+
+        Returns:
+            Optional[ic.Principal]: the ID of the subnet that contains the canister, or `None` if the canister does not exist
+        """
+        payload = {"canister_id": base64.b64encode(canister_id.bytes).decode()}
         res = self._instance_post("read/canister_exists", payload)
         if res:
             b = base64.b64decode(res["canister_id"])
@@ -107,9 +128,7 @@ class PocketIC:
         Returns:
             int: the number of cycles the canister contains
         """
-        body = {
-            "canister_id": base64.b64encode(canister_id.bytes).decode()
-        }
+        body = {"canister_id": base64.b64encode(canister_id.bytes).decode()}
         return self._instance_post("read/get_cycles", body)["cycles"]
 
     def set_time(self, time_nanosec: int) -> None:
@@ -129,7 +148,7 @@ class PocketIC:
         Args:
             nanosecs (int): number of nanoseconds to be added to the current time
         """
-        new_time = self.get_time()['nanos_since_epoch'] + nanosecs
+        new_time = self.get_time()["nanos_since_epoch"] + nanosecs
         self.set_time(new_time)
 
     def add_cycles(self, canister_id: ic.Principal, amount: int) -> int:
@@ -163,7 +182,9 @@ class PocketIC:
         response = self._instance_post("read/get_stable_memory", body)
         return base64.b64decode(response["blob"])
 
-    def set_stable_memory(self, canister_id: ic.Principal, data: bytes, compression = None) -> None:
+    def set_stable_memory(
+        self, canister_id: ic.Principal, data: bytes, compression=None
+    ) -> None:
         """Sets the stable memory of a canister.
 
         Args:
@@ -176,15 +197,15 @@ class PocketIC:
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
             "blob_id": list(bytes.fromhex(blob_id)),
         }
-            
+
         self._instance_post("update/set_stable_memory", body)
-        
+
     def update_call(
         self,
         canister_id: Optional[ic.Principal],
         method: str,
         payload: bytes,
-    ) -> list:
+    ) -> Any:
         """Makes an update call to a canister with the given ID. If the ID is not provided, calls the management canister.
 
         Args:
@@ -195,15 +216,16 @@ class PocketIC:
         Returns:
             list: a list of candid objects
         """
-        
-        return self._canister_call("update/execute_ingress_message", canister_id, None, method, payload)
+        return self._update_call_with_effective_principal(
+            canister_id, None, method, payload
+        )
 
     def query_call(
         self,
         canister_id: Optional[ic.Principal],
         method: str,
         payload: bytes,
-    ) -> list:
+    ) -> Any:
         """Makes a query call to a canister with the given ID. If the ID is not provided, calls the management canister.
 
         Args:
@@ -216,7 +238,9 @@ class PocketIC:
         """
         return self._canister_call("read/query", canister_id, None, method, payload)
 
-    def create_canister(self, settings: Optional[list] = None, subnet: Optional[ic.Principal] = None) -> ic.Principal:
+    def create_canister(
+        self, settings: Optional[list] = None, subnet: Optional[ic.Principal] = None
+    ) -> ic.Principal:
         """Creates an empty canister.
 
         Args:
@@ -243,7 +267,15 @@ class PocketIC:
             {"type": record, "value": {"settings": settings if settings else []}}
         ]
 
-        request_result = self._canister_call("update/execute_ingress_message", None, {"SubnetId": list(bytes(subnet.bytes))} if subnet else None, "provisional_create_canister_with_cycles", ic.encode(payload))
+        effective_principal = (
+            {"SubnetId": list(bytes(subnet.bytes))} if subnet else None
+        )
+        request_result = self._update_call_with_effective_principal(
+            None,
+            effective_principal,
+            "provisional_create_canister_with_cycles",
+            ic.encode(payload),
+        )
         candid = ic.decode(
             bytes(request_result), Types.Record({"canister_id": Types.Principal})
         )
@@ -289,13 +321,17 @@ class PocketIC:
             }
         ]
 
-        self.update_call(None, "install_code", ic.encode(payload))
+        effective_principal = {"CanisterId": list(bytes(canister_id.bytes))}
+        self._update_call_with_effective_principal(
+            None, effective_principal, "install_code", ic.encode(payload)
+        )
 
     def create_and_install_canister_with_candid(
         self,
         candid: str,
         wasm_module: bytes,
         init_args: dict,
+        subnet: Optional[ic.Principal] = None,
     ) -> ic.Canister:
         """Creates a canister, installs the provided WASM with the given init arguments. Returns a canister object.
         For an example on how to use the canister object, see `/examples/ledger_canister_test.py`.
@@ -304,6 +340,7 @@ class PocketIC:
             candid (str): a valid candid file describing the canister interface
             wasm_module (bytes): the canister wasm as bytes
             init_args (dict): the init args as required by the candid file
+            subnet (Optional[ic.Principal], optional): optional subnet ID, defaults to None
 
         Raises:
             ValueError: can be raised on invalid candid files
@@ -311,7 +348,7 @@ class PocketIC:
         Returns:
             ic.Canister: the canister object
         """
-        canister_id = self.create_canister()
+        canister_id = self.create_canister(subnet=subnet)
         canister = ic.Canister(self, canister_id, candid)
 
         canister_arguments = canister.actor["arguments"]
@@ -324,19 +361,20 @@ class PocketIC:
 
         self.install_code(canister_id, wasm_module, arg)
         return canister
-    
+
     def _canister_call(
         self,
         endpoint: str,
         canister_id: Optional[ic.Principal],
-        effective_principal: Optional[ic.Principal],
+        effective_principal: Optional[Any],
         method: str,
         payload: bytes,
-    ) -> list:
+    ):
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
+        effective_principal = effective_principal if effective_principal else "None"
         body = {
             "sender": base64.b64encode(self.sender.bytes).decode(),
-            "effective_principal": effective_principal if effective_principal else "None",
+            "effective_principal": effective_principal,
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
             "method": method,
             "payload": base64.b64encode(payload).decode(),
@@ -345,14 +383,41 @@ class PocketIC:
         res = self._instance_post(endpoint, body)
         return self._get_ok_reply(res)
 
+    def _update_call_with_effective_principal(
+        self,
+        canister_id: Optional[ic.Principal],
+        effective_principal: Optional[dict],
+        method: str,
+        payload: bytes,
+    ):
+        return self._canister_call(
+            "update/execute_ingress_message",
+            canister_id,
+            effective_principal,
+            method,
+            payload,
+        )
+
+    def _generate_topology(self, topology):
+        t = dict()
+        for subnet, (_, subnet_config) in topology.items():
+            subnet_id = ic.Principal.from_str(subnet)
+            subnet_config = SubnetConfig(
+                SubnetKind(subnet_config["subnet_type"]), subnet_config["size"]
+            )
+            t.update({subnet_id: subnet_config})
+        return t
+
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:
             if "Reply" not in request_result["Ok"]:
-                raise ValueError(f'Request contains no key "Reply": {request_result["Ok"]}')
+                raise ValueError(
+                    f'Request contains no key "Reply": {request_result["Ok"]}'
+                )
             result = request_result["Ok"]["Reply"]
             maybe_candid = base64.b64decode(result)
             # if we have a non-candid byte array, return that without decoding
-            if maybe_candid.startswith(b'DIDL'):
+            if maybe_candid.startswith(b"DIDL"):
                 return maybe_candid
             return list(maybe_candid)
 
@@ -360,7 +425,7 @@ class PocketIC:
             raise ValueError(f'Request returned "Err": {request_result["Err"]}')
 
         raise ValueError(f"Malformed response: {request_result}")
-    
+
     def _instance_get(self, endpoint):
         """HTTP get requests for instance endpoints"""
         return self.server.instance_get(endpoint, self.instance_id)
