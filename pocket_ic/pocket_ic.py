@@ -46,7 +46,8 @@ class PocketIC:
         """Creates a new PocketIC instance with an optional list of subnet configurations.
 
         Args:
-            subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet configurations, defaults to None
+            subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet
+            configurations, defaults to a single application subnet
         """
         self.server = PocketICServer()
         subnet_config = subnet_config if subnet_config else [STANDARD]
@@ -100,9 +101,9 @@ class PocketIC:
             Optional[ic.Principal]: the ID of the subnet that contains the canister, or `None` if the canister does not exist
         """
         payload = {"canister_id": base64.b64encode(canister_id.bytes).decode()}
-        res = self._instance_post("read/canister_exists", payload)
+        res = self._instance_post("read/subnet_of_canister", payload)
         if res:
-            b = base64.b64decode(res["canister_id"])
+            b = base64.b64decode(res["subnet_id"])
             return ic.Principal(b)
         return None
 
@@ -193,7 +194,7 @@ class PocketIC:
         blob_id = self.server.set_blob_store_entry(data, compression)
         body = {
             "canister_id": base64.b64encode(canister_id.bytes).decode(),
-            "blob_id": list(bytes.fromhex(blob_id)),
+            "blob_id": base64.b64encode(bytes.fromhex(blob_id)).decode(),
         }
 
         self._instance_post("update/set_stable_memory", body)
@@ -266,7 +267,7 @@ class PocketIC:
         ]
 
         effective_principal = (
-            {"SubnetId": list(bytes(subnet.bytes))} if subnet else None
+            {"SubnetId": base64.b64encode(subnet.bytes).decode()} if subnet else None
         )
         request_result = self._update_call_with_effective_principal(
             None,
@@ -319,7 +320,9 @@ class PocketIC:
             }
         ]
 
-        effective_principal = {"CanisterId": list(bytes(canister_id.bytes))}
+        effective_principal = {
+            "CanisterId": base64.b64encode(canister_id.bytes).decode()
+        }
         self._update_call_with_effective_principal(
             None, effective_principal, "install_code", ic.encode(payload)
         )

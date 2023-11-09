@@ -51,7 +51,10 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
             )
 
         # Attempt to start the PocketIC server if it's not already running.
-        os.system(f"{bin_path} --pid {pid} &")
+        mute = (
+            "1> /dev/null 2> /dev/null" if "POCKET_IC_MUTE_SERVER" in os.environ else ""
+        )
+        os.system(f"{bin_path} --pid {pid} {mute} &")
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
