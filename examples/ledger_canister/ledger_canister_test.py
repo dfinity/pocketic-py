@@ -8,14 +8,14 @@ import ic
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(script_dir)))
 
-from pocket_ic import PocketIC, NNS, STANDARD, SubnetKind
+from pocket_ic import PocketIC, NNS, STANDARD
 
 
 class LedgerCanisterTests(unittest.TestCase):
     def setUp(self) -> None:
         # This is run for every test individually.
         # We create a new PocketIC with a single NNS subnet.
-        self.pic = PocketIC(subnet_config=[NNS, STANDARD])
+        self.pic = PocketIC(subnet_config=[NNS])
         self.principal_a = ic.Principal(b"A")
         self.principal_b = ic.Principal(b"B")
         self.principal_minting = ic.Principal(b"MINTER")
@@ -61,12 +61,8 @@ class LedgerCanisterTests(unittest.TestCase):
             wasm_module = wasm_file.read()
 
         # Install the ledger canister on the NNS subnet.
-        nns_subnet = next(
-            k for k, v in self.pic.topology.items() if v.subnet_kind == SubnetKind.NNS
-        )
-
         self.ledger: ic.Canister = self.pic.create_and_install_canister_with_candid(
-            candid, wasm_module, init_args, nns_subnet
+            candid, wasm_module, init_args
         )
         return super().setUp()
 
