@@ -241,7 +241,7 @@ class PocketIC:
         Returns:
             list: a list of candid objects
         """
-        return self._update_call_with_effective_principal(
+        return self.update_call_with_effective_principal(
             canister_id, None, method, payload
         )
 
@@ -297,7 +297,7 @@ class PocketIC:
         effective_principal = (
             {"SubnetId": base64.b64encode(subnet.bytes).decode()} if subnet else None
         )
-        request_result = self._update_call_with_effective_principal(
+        request_result = self.update_call_with_effective_principal(
             None,
             effective_principal,
             "provisional_create_canister_with_cycles",
@@ -351,7 +351,7 @@ class PocketIC:
         effective_principal = {
             "CanisterId": base64.b64encode(canister_id.bytes).decode()
         }
-        self._update_call_with_effective_principal(
+        self.update_call_with_effective_principal(
             None, effective_principal, "install_code", ic.encode(payload)
         )
 
@@ -392,6 +392,31 @@ class PocketIC:
         self.install_code(canister_id, wasm_module, arg)
         return canister
 
+    def update_call_with_effective_principal(
+        self,
+        canister_id: Optional[ic.Principal],
+        effective_principal: Optional[dict],
+        method: str,
+        payload: bytes,
+    ):
+        """Make an update call with the effective principal specified.
+
+        Args:
+            canister_id (Optional[ic.Principal]): canister ID of the canister to call. If
+                `None`, calls the management canister.
+            effective_principal (Optional[dict]): the effective principal to use. Either
+                specify {"CanisterId": ...} or {"SubnetId": ...}, where the IDs are base64
+                encoded, or `None`.
+            method (str): the method to call
+            payload (bytes): the candid encoded payload"""
+        return self._canister_call(
+            "update/execute_ingress_message",
+            canister_id,
+            effective_principal,
+            method,
+            payload,
+        )
+
     def _canister_call(
         self,
         endpoint: str,
@@ -412,21 +437,6 @@ class PocketIC:
 
         res = self._instance_post(endpoint, body)
         return self._get_ok_reply(res)
-
-    def _update_call_with_effective_principal(
-        self,
-        canister_id: Optional[ic.Principal],
-        effective_principal: Optional[dict],
-        method: str,
-        payload: bytes,
-    ):
-        return self._canister_call(
-            "update/execute_ingress_message",
-            canister_id,
-            effective_principal,
-            method,
-            payload,
-        )
 
     def _generate_topology(self, topology):
         t = dict()
