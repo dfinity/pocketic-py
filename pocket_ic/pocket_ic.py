@@ -147,7 +147,7 @@ class PocketIC:
             Optional[ic.Principal]: the ID of the subnet that contains the canister, or `None` if the canister does not exist
         """
         payload = {"canister_id": base64.b64encode(canister_id.bytes).decode()}
-        res = self._instance_post("read/subnet_of_canister", payload)
+        res = self._instance_post("read/get_subnet", payload)
         if res:
             b = base64.b64decode(res["subnet_id"])
             return ic.Principal(b)
