@@ -6,7 +6,7 @@ subnets of a PocketIC instance.
 import base64
 import ic
 from enum import Enum
-from ic.candid import Types, OptClass
+from ic.candid import Types
 from typing import List, Optional, Any
 from pocket_ic.pocket_ic_server import PocketICServer
 
