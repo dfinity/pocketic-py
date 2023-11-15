@@ -6,16 +6,20 @@ subnets of a PocketIC instance.
 import base64
 import ic
 from enum import Enum
-from ic.candid import Types
+from ic.candid import Types, OptClass
 from typing import List, Optional, Any
 from pocket_ic.pocket_ic_server import PocketICServer
 
 
 class SubnetKind(Enum):
-    """The type of a subnet."""
+    """The kind of subnet."""
 
     APPLICATION = "Application"
+    BITCOIN = "Bitcoin"
+    FIDUCIARY = "Fiduciary"
+    II = "II"
     NNS = "NNS"
+    SNS = "SNS"
     SYSTEM = "System"
 
 
@@ -36,15 +40,34 @@ class SubnetConfig:
         return f"SubnetConfig({self.subnet_kind.value}, {self.size})"
 
     def _json(self) -> dict:
-        return {"subnet_type": self.subnet_kind.value, "size": self.size}
+        return {"subnet_kind": self.subnet_kind.value, "size": self.size}
 
 
-# Useful pre-defined subnet configurations
-STANDARD = SubnetConfig(SubnetKind.APPLICATION, 13)
+################## Useful pre-defined subnet configurations ###################
+
+# A plain application subnet with 13 nodes. This is the recommended
+# subnet configuration for most tests.
+APPLICATION = SubnetConfig(SubnetKind.APPLICATION, 13)
+
+# The Bitcoin subnet with canister ranges like on mainnet.
+BITCOIN = SubnetConfig(SubnetKind.BITCOIN, 13)
+
+# The Fiduciary subnet with canister ranges like on mainnet.
+FIDUCIARY = SubnetConfig(SubnetKind.FIDUCIARY, 28)
+
+# The Internet Identity subnet with canister ranges like on mainnet.
+II = SubnetConfig(SubnetKind.II, 28)
+
+# The NNS subnet with canister ranges like on mainnet.
 NNS = SubnetConfig(SubnetKind.NNS, 40)
-FIDUCIARY = SubnetConfig(SubnetKind.APPLICATION, 28)
-SNS = SubnetConfig(SubnetKind.APPLICATION, 34)
-II = SubnetConfig(SubnetKind.SYSTEM, 13)
+
+# The SNS subnet with canister ranges like on mainnet.
+SNS = SubnetConfig(SubnetKind.SNS, 34)
+
+# A plain system subnet with 13 nodes.
+SYSTEM = SubnetConfig(SubnetKind.SYSTEM, 13)
+
+###############################################################################
 
 
 class PocketIC:
@@ -64,7 +87,7 @@ class PocketIC:
                 configurations, defaults to a single application subnet
         """
         self.server = PocketICServer()
-        subnet_config = subnet_config if subnet_config else [STANDARD]
+        subnet_config = subnet_config if subnet_config else [APPLICATION]
         self.instance_id, topology = self.server.new_instance(
             list(map(lambda x: x._json(), subnet_config))
         )
@@ -264,7 +287,10 @@ class PocketIC:
         return self._canister_call("read/query", canister_id, None, method, payload)
 
     def create_canister(
-        self, settings: Optional[list] = None, subnet: Optional[ic.Principal] = None
+        self,
+        settings: Optional[list] = None,
+        subnet: Optional[ic.Principal] = None,
+        canister_id: Optional[ic.Principal] = None,
     ) -> ic.Principal:
         """Creates an empty canister.
 
@@ -272,6 +298,11 @@ class PocketIC:
             settings (Optional[list], optional): optional list of settings, defaults to `None`
             subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
                 canister, defaults to `None`
+            canister_id (Optional[ic.Principal], optional): optional canister ID of the canister
+            to be created, defaults to `None`
+
+        Raises:
+            ValueError: can be raised if the canister already exists
 
         Returns:
             ic.Principal: the ID of the created canister
@@ -287,11 +318,19 @@ class PocketIC:
                             "freezing_threshold": Types.Opt(Types.Nat),
                         }
                     )
-                )
+                ),
+                "specified_id": Types.Opt(Types.Principal),
             }
         )
+
         payload = [
-            {"type": record, "value": {"settings": settings if settings else []}}
+            {
+                "type": record,
+                "value": {
+                    "settings": [settings] if settings else [],
+                    "specified_id": [canister_id.bytes] if canister_id else [],
+                },
+            }
         ]
 
         effective_principal = (
@@ -443,7 +482,7 @@ class PocketIC:
         for subnet, (_, subnet_config) in topology.items():
             subnet_id = ic.Principal.from_str(subnet)
             subnet_config = SubnetConfig(
-                SubnetKind(subnet_config["subnet_type"]), subnet_config["size"]
+                SubnetKind(subnet_config["subnet_kind"]), subnet_config["size"]
             )
             t.update({subnet_id: subnet_config})
         return t

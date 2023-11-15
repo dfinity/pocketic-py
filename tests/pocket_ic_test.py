@@ -9,7 +9,7 @@ import gzip
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from pocket_ic import PocketIC, SubnetKind, NNS, STANDARD
+from pocket_ic import PocketIC, SubnetKind, NNS, APPLICATION, BITCOIN, SYSTEM
 
 
 class PocketICTests(unittest.TestCase):
@@ -18,8 +18,46 @@ class PocketICTests(unittest.TestCase):
         pic = PocketIC(subnet_config)
         self.assertEqual(len(pic.topology), 1)
 
+    def test_create_canister_with_id(self):
+        subnet_config = [APPLICATION]
+        pic = PocketIC(subnet_config)
+        canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
+        actual_canister_id = pic.create_canister(canister_id=canister_id)
+        self.assertEqual(actual_canister_id.bytes, canister_id.bytes)
+
+        # Creating a new canister with the same ID fails.
+        self.assertRaises(ValueError, pic.create_canister, canister_id=canister_id)
+
+        # Creating a new canister with any ID works, gets a new ID.
+        new_canister_id = pic.create_canister()
+        self.assertNotEqual(new_canister_id.bytes, canister_id.bytes)
+
+    def test_large_config_and_deduplication(self):
+        subnet_config = [APPLICATION] * 2
+        subnet_config += [NNS, BITCOIN] * 2
+        subnet_config += [SYSTEM] * 3
+        pic = PocketIC(subnet_config)
+        app_subnets = [
+            k
+            for k, v in pic.topology.items()
+            if v.subnet_kind == SubnetKind.APPLICATION
+        ]
+        self.assertEqual(len(app_subnets), 2)
+        nns_subnets = [
+            k for k, v in pic.topology.items() if v.subnet_kind == SubnetKind.NNS
+        ]
+        self.assertEqual(len(nns_subnets), 1)
+        bitcoin_subnets = [
+            k for k, v in pic.topology.items() if v.subnet_kind == SubnetKind.BITCOIN
+        ]
+        self.assertEqual(len(bitcoin_subnets), 1)
+        system_subnets = [
+            k for k, v in pic.topology.items() if v.subnet_kind == SubnetKind.SYSTEM
+        ]
+        self.assertEqual(len(system_subnets), 3)
+
     def test_install_canister_on_subnet_and_get_subnet_of_canister(self):
-        subnet_config = [NNS, STANDARD]
+        subnet_config = [NNS, APPLICATION]
         pic = PocketIC(subnet_config)
         nns_subnet = next(
             k for k, v in pic.topology.items() if v.subnet_kind == SubnetKind.NNS
@@ -86,10 +124,10 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(pic.tick(), None)
 
     def test_get_root_key(self):
-        pic = PocketIC([STANDARD])
+        pic = PocketIC([APPLICATION])
         self.assertTrue(pic.get_root_key() is None)
 
-        pic = PocketIC([NNS, STANDARD])
+        pic = PocketIC([NNS, APPLICATION])
         self.assertTrue(pic.get_root_key() is not None)
 
     def test_canister_exists(self):
