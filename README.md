@@ -1,7 +1,7 @@
 # PocketIC Python: A Canister Testing Library for PocketIC
 
 PocketIC is a local canister testing solution for the [Internet Computer](https://internetcomputer.org/).  
-This Python testing library works together with the **PocketIC server**, allowing you to interact with your local IC instances and the canisters thereon. 
+This testing library works together with the **PocketIC server**, allowing you to interact with your local IC instances and the canisters thereon. 
 
 With PocketIC Python, you can test your canisters with just a few lines of code, either by interacting with an IC instance:
 
