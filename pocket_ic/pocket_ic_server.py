@@ -43,10 +43,10 @@ The PocketIC binary could not be found at "{bin_path}". Please specify the path 
 or place it in your current working directory (you are running PocketIC from {os.getcwd()}).
 
 Run the following commands to get the binary:
-    curl -sLO https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/$platform/pocket-ic.gz
+    curl -sLO https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-$platform/pocket-ic.gz
     gzip -d pocket-ic.gz
     chmod +x pocket-ic
-where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosetta-enabled Darwin.
+where $platform is 'linux' for Linux and 'darwin' for Intel/rosetta-enabled Darwin.
 """
             )
 

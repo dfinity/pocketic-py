@@ -15,14 +15,15 @@ from pocket_ic import PocketIC, SubnetKind, SubnetConfig
 class PocketICTests(unittest.TestCase):
     def test_create_canister_with_id_failures(self):
         pic = PocketIC(SubnetConfig(application=1))
-        canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
+        existing_canister_id = pic.create_canister()
         with self.assertRaises(ValueError) as ex:
-            pic.create_canister(canister_id=canister_id)
+            pic.create_canister(canister_id=existing_canister_id)
         self.assertEqual(
             ex.exception.args[0],
             "Creating a canister with ID is only supported on Bitcoin, Fiduciary, II, SNS and NNS subnets",
         )
 
+        pic = PocketIC(SubnetConfig(nns=True))
         canister_id = ic.Principal.anonymous()
         with self.assertRaises(ValueError) as ex:
             pic.create_canister(canister_id=canister_id)
@@ -88,6 +89,7 @@ class PocketICTests(unittest.TestCase):
     def test_set_get_stable_memory_no_compression(self):
         pic = PocketIC()
         canister_id = pic.create_canister()
+        pic.add_cycles(canister_id, 20_000_000_000_000)
         pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
 
         data = b"This will be stored in stable memory."
@@ -98,6 +100,7 @@ class PocketICTests(unittest.TestCase):
     def test_set_get_stable_memory_with_compression(self):
         pic = PocketIC()
         canister_id = pic.create_canister()
+        pic.add_cycles(canister_id, 20_000_000_000_000)
         pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
 
         text = b"This will be compressed and sent, the server will decompress it."
