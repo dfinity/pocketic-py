@@ -8,14 +8,14 @@ import ic
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(script_dir)))
 
-from pocket_ic import PocketIC, NNS
+from pocket_ic import PocketIC, SubnetConfig
 
 
 class LedgerCanisterTests(unittest.TestCase):
     def setUp(self) -> None:
         # This is run for every test individually.
         # We create a new PocketIC with a single NNS subnet.
-        self.pic = PocketIC(subnet_config=[NNS])
+        self.pic = PocketIC(SubnetConfig(nns=True))
         self.principal_a = ic.Principal(b"A")
         self.principal_b = ic.Principal(b"B")
         self.principal_minting = ic.Principal(b"MINTER")

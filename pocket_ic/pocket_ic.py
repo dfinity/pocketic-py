@@ -24,50 +24,62 @@ class SubnetKind(Enum):
 
 
 class SubnetConfig:
-    """A subnet configuration consisting of a subnet kind and a subnet size."""
+    """The configuration of subnets for a PocketIC instance."""
 
-    def __init__(self, subnet_kind: SubnetKind, size: int) -> None:
-        """Creates a new subnet configuration.
-
-        Args:
-            subnet_kind (SubnetKind): the subnet type: either application, NNS or system
-            size (int): the size or replication factor of the subnet
-        """
-        self.subnet_kind = subnet_kind
-        self.size = size
+    def __init__(
+        self,
+        application=0,
+        bitcoin=False,
+        fiduciary=False,
+        ii=False,
+        nns=False,
+        sns=False,
+        system=0,
+    ) -> None:
+        self.application = application
+        self.bitcoin = bitcoin
+        self.fiduciary = fiduciary
+        self.ii = ii
+        self.nns = nns
+        self.sns = sns
+        self.system = system
 
     def __repr__(self) -> str:
-        return f"SubnetConfig({self.subnet_kind.value}, {self.size})"
+        return f"SubnetConfigSet(application={self.application}, bitcoin={self.bitcoin}, fiduciary={self.fiduciary}, ii={self.ii}, nns={self.nns}, sns={self.sns}, system={self.system})"
+
+    def validate(self) -> None:
+        """Validates the subnet configuration.
+
+        Raises:
+            ValueError: if no subnet is configured or if the number of application or system
+                subnets is negative
+        """
+        if not (
+            self.bitcoin
+            or self.fiduciary
+            or self.ii
+            or self.nns
+            or self.sns
+            or self.system
+            or self.application
+        ):
+            raise ValueError("At least one subnet must be configured.")
+
+        if self.application < 0 or self.system < 0:
+            raise ValueError(
+                "The number of application and system subnets must be non-negative."
+            )
 
     def _json(self) -> dict:
-        return {"subnet_kind": self.subnet_kind.value, "size": self.size}
-
-
-################## Useful pre-defined subnet configurations ###################
-
-# A plain application subnet with 13 nodes. This is the recommended
-# subnet configuration for most tests.
-APPLICATION = SubnetConfig(SubnetKind.APPLICATION, 13)
-
-# The Bitcoin subnet with canister ranges like on mainnet.
-BITCOIN = SubnetConfig(SubnetKind.BITCOIN, 13)
-
-# The Fiduciary subnet with canister ranges like on mainnet.
-FIDUCIARY = SubnetConfig(SubnetKind.FIDUCIARY, 28)
-
-# The Internet Identity subnet with canister ranges like on mainnet.
-II = SubnetConfig(SubnetKind.II, 28)
-
-# The NNS subnet with canister ranges like on mainnet.
-NNS = SubnetConfig(SubnetKind.NNS, 40)
-
-# The SNS subnet with canister ranges like on mainnet.
-SNS = SubnetConfig(SubnetKind.SNS, 34)
-
-# A plain system subnet with 13 nodes.
-SYSTEM = SubnetConfig(SubnetKind.SYSTEM, 13)
-
-###############################################################################
+        return {
+            "application": self.application,
+            "bitcoin": self.bitcoin,
+            "fiduciary": self.fiduciary,
+            "ii": self.ii,
+            "nns": self.nns,
+            "sns": self.sns,
+            "system": self.system,
+        }
 
 
 class PocketIC:
@@ -78,19 +90,17 @@ class PocketIC:
     which presents a blocking API to the user.
     """
 
-    def __init__(self, subnet_config: Optional[List[SubnetConfig]] = None) -> None:
-        """Creates a new PocketIC instance with an optional list of subnet configurations.
-        Note that there can be at most one NNS subnet, mutliple NNS subnets are deduplicated.
+    def __init__(self, subnet_config: Optional[SubnetConfig] = None) -> None:
+        """Creates a new PocketIC instance with an optional subnet configuration.
 
         Args:
-            subnet_config (Optional[List[SubnetConfig]], optional): a list of subnet
-                configurations, defaults to a single application subnet
+            subnet_config (Optional[SubnetConfig], optional): the subnet configuration to use,
+              defaults to one application subnet
         """
         self.server = PocketICServer()
-        subnet_config = subnet_config if subnet_config else [APPLICATION]
-        self.instance_id, topology = self.server.new_instance(
-            list(map(lambda x: x._json(), subnet_config))
-        )
+        subnet_config = subnet_config if subnet_config else SubnetConfig(application=1)
+        subnet_config.validate()
+        self.instance_id, topology = self.server.new_instance(subnet_config._json())
         self.topology = self._generate_topology(topology)
         self.sender = ic.Principal.anonymous()
 
@@ -116,9 +126,7 @@ class PocketIC:
         Returns:
             Optional[bytes]: the root key of the IC
         """
-        nns_subnet = [
-            k for k, v in self.topology.items() if v.subnet_kind == SubnetKind.NNS
-        ]
+        nns_subnet = [k for k, v in self.topology.items() if v == SubnetKind.NNS]
         if not nns_subnet:
             return None
         body = {
@@ -479,12 +487,10 @@ class PocketIC:
 
     def _generate_topology(self, topology):
         t = dict()
-        for subnet, (_, subnet_config) in topology.items():
-            subnet_id = ic.Principal.from_str(subnet)
-            subnet_config = SubnetConfig(
-                SubnetKind(subnet_config["subnet_kind"]), subnet_config["size"]
-            )
-            t.update({subnet_id: subnet_config})
+        for subnet_id, config in topology.items():
+            subnet_id = ic.Principal.from_str(subnet_id)
+            subnet_kind = SubnetKind(config["subnet_kind"])
+            t.update({subnet_id: subnet_kind})
         return t
 
     def _get_ok_reply(self, request_result):
