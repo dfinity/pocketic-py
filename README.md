@@ -41,6 +41,7 @@ To run an example, clone this repo and run `python3 examples/counter_canister/co
 * [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
 * [PocketIC repo](https://github.com/dfinity/pocketic)
 * [Why PocketIC](https://github.com/dfinity/pocketic#why-pocketic)
+* [Changelog of PocketIC Python](https://github.com/dfinity/pocketic-py/blob/main/CHANGELOG.md)
 
 
 ## Contributing

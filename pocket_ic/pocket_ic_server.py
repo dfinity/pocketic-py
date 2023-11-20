@@ -5,7 +5,7 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 import os
 import time
 import requests
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from tempfile import gettempdir
 
 
@@ -58,7 +58,7 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
-    def new_instance(self, subnet_config) -> Tuple[int, dict]:
+    def new_instance(self, subnet_config: dict) -> Tuple[int, dict]:
         """Creates a new PocketIC instance.
 
         Returns:
@@ -89,19 +89,19 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         url = f"{self.url}/instances/{instance_id}"
         self.request_client.delete(url, headers=HEADERS)
 
-    def instance_get(self, endpoint, instance_id):
+    def instance_get(self, endpoint: str, instance_id: int):
         """HTTP get requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.get(url, headers=HEADERS)
         return self._check_response(response)
 
-    def instance_post(self, endpoint, instance_id, body):
+    def instance_post(self, endpoint: str, instance_id: int, body: Optional[dict]):
         """HTTP post requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
 
-    def set_blob_store_entry(self, blob: bytes, compression) -> str:
+    def set_blob_store_entry(self, blob: bytes, compression: Optional[str]) -> str:
         """Sets a blob store entry.
 
         Args:
