@@ -1,6 +1,6 @@
 # PocketIC Python: A Canister Testing Library
 
-PocketIC is a local canister testing solution for the [Internet Computer](https://internetcomputer.org/).  
+[PocketIC](https://github.com/dfinity/pocketic) is a local canister testing solution for the [Internet Computer](https://internetcomputer.org/).  
 This testing library works together with the **PocketIC server**, allowing you to interact with your local IC instances and the canisters thereon. 
 
 With PocketIC Python, you can test your canisters with just a few lines of code, either by interacting with an IC instance:
@@ -38,9 +38,9 @@ To see some working code, see the [examples/](https://github.com/dfinity/pocketi
 To run an example, clone this repo and run `python3 examples/counter_canister/counter_canister_test.py` from the repository's root directory.
 
 ## Documentation
-* [Why PocketIC](https://github.com/dfinity/pocketic-py/blob/main/WHY.md)
 * [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
 * [PocketIC repo](https://github.com/dfinity/pocketic)
+* [Why PocketIC](https://github.com/dfinity/pocketic#why-pocketic)
 
 
 ## Contributing
