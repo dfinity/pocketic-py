@@ -10,6 +10,7 @@ from pocket_ic import PocketIC
 
 pic = PocketIC()
 canister_id = pic.create_canister()
+pic.add_cycles(canister_id, 2_000_000_000_000)
 
 # make canister calls
 response = pic.update_call(canister_id, method="greeting", ...)
