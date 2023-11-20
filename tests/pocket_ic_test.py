@@ -13,6 +13,23 @@ from pocket_ic import PocketIC, SubnetKind, SubnetConfig
 
 
 class PocketICTests(unittest.TestCase):
+    def test_create_canister_with_id_failures(self):
+        pic = PocketIC(SubnetConfig(application=1))
+        canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
+        with self.assertRaises(ValueError) as ex:
+            pic.create_canister(canister_id=canister_id)
+        self.assertEqual(
+            ex.exception.args[0],
+            "Creating a canister with ID is only supported on Bitcoin, Fiduciary, II, SNS and NNS subnets",
+        )
+
+        canister_id = ic.Principal.anonymous()
+        with self.assertRaises(ValueError) as ex:
+            pic.create_canister(canister_id=canister_id)
+        self.assertEqual(
+            ex.exception.args[0], "Canister ID not contained in any subnet"
+        )
+
     def test_create_canister_with_id(self):
         pic = PocketIC(SubnetConfig(nns=True))
         canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
@@ -20,7 +37,12 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(actual_canister_id.bytes, canister_id.bytes)
 
         # Creating a new canister with the same ID fails.
-        self.assertRaises(ValueError, pic.create_canister, canister_id=canister_id)
+        with self.assertRaises(ValueError) as ex:
+            pic.create_canister(canister_id=canister_id)
+        self.assertIn(
+            "CanisterAlreadyInstalled",
+            ex.exception.args[0],
+        )
 
         # Creating a new canister with any ID works, gets a new ID.
         new_canister_id = pic.create_canister()
@@ -60,12 +82,8 @@ class PocketICTests(unittest.TestCase):
         nns_canister = pic.create_canister(subnet=nns_subnet)
         app_canister = pic.create_canister(subnet=app_subnet)
 
-        self.assertEqual(
-            pic.get_subnet_of_canister(nns_canister).bytes, nns_subnet.bytes
-        )
-        self.assertEqual(
-            pic.get_subnet_of_canister(app_canister).bytes, app_subnet.bytes
-        )
+        self.assertEqual(pic.get_subnet(nns_canister).bytes, nns_subnet.bytes)
+        self.assertEqual(pic.get_subnet(app_canister).bytes, app_subnet.bytes)
 
     def test_set_get_stable_memory_no_compression(self):
         pic = PocketIC()

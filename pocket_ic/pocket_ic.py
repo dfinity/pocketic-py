@@ -166,9 +166,7 @@ class PocketIC:
         """Make the IC produce and progress by one block."""
         self._instance_post("update/tick", "")
 
-    def get_subnet_of_canister(
-        self, canister_id: ic.Principal
-    ) -> Optional[ic.Principal]:
+    def get_subnet(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
         """Get the subnet ID of the subnet that contains the given canister.
 
         Args:
@@ -193,7 +191,7 @@ class PocketIC:
         Returns:
             bool: `True` if the canister exists, `False` otherwise
         """
-        return self.get_subnet_of_canister(canister_id) is not None
+        return self.get_subnet(canister_id) is not None
 
     def get_cycles_balance(self, canister_id: ic.Principal) -> int:
         """Get the cycles balance of a canister.
@@ -307,14 +305,33 @@ class PocketIC:
             subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
                 canister, defaults to `None`
             canister_id (Optional[ic.Principal], optional): optional canister ID of the canister
-            to be created, defaults to `None`
+                to be created, defaults to `None`. Can only be used on Bitcoin, Fiduciary, II, SNS
+                and NNS subnets
 
         Raises:
-            ValueError: can be raised if the canister already exists
+            ValueError: can be raised if the canister already exists, `canister_id` is
+                not contained in any subnet, or if `canister_id` is on an application or
+                system subnet
 
         Returns:
             ic.Principal: the ID of the created canister
         """
+
+        if canister_id:
+            subnet_id = self.get_subnet(canister_id)
+            if not subnet_id:
+                raise ValueError("Canister ID not contained in any subnet")
+
+            topology = {k.to_str(): v for k, v in self.topology.items()}
+            subnet_kind = topology[subnet_id.to_str()]
+            if (
+                subnet_kind == SubnetKind.APPLICATION
+                or subnet_kind == SubnetKind.SYSTEM
+            ):
+                raise ValueError(
+                    "Creating a canister with ID is only supported on Bitcoin, Fiduciary, II, SNS and NNS subnets"
+                )
+
         record = Types.Record(
             {
                 "settings": Types.Opt(
