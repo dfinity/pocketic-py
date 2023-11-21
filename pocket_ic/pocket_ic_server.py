@@ -4,11 +4,13 @@ This module contains the 'PocketICServer', which starts or discovers a PocketIC 
 
 import os
 import time
-from typing import List
-from tempfile import gettempdir
 import requests
+from typing import List, Tuple, Optional
+from tempfile import gettempdir
+
 
 HEADERS = {"processing-timeout-ms": "300000"}
+
 
 class PocketICServer:
     """
@@ -28,39 +30,44 @@ class PocketICServer:
 
     def __init__(self) -> None:
         pid = os.getpid()
-        if 'POCKET_IC_BIN' in os.environ:
-            bin_path = os.environ['POCKET_IC_BIN']
+        if "POCKET_IC_BIN" in os.environ:
+            bin_path = os.environ["POCKET_IC_BIN"]
         else:
             bin_path = "./pocket-ic"
 
         if not os.path.isfile(bin_path):
-            raise FileNotFoundError(f"""Could not find the PocketIC binary.
+            raise FileNotFoundError(
+                f"""Could not find the PocketIC binary.
 
 The PocketIC binary could not be found at "{bin_path}". Please specify the path to the binary with the POCKET_IC_BIN environment variable, \
 or place it in your current working directory (you are running PocketIC from {os.getcwd()}).
 
 Run the following commands to get the binary:
-    curl -sLO https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/$platform/pocket-ic.gz
+    curl -sLO https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-$platform/pocket-ic.gz
     gzip -d pocket-ic.gz
     chmod +x pocket-ic
-where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosetta-enabled Darwin.
-""")
+where $platform is 'linux' for Linux and 'darwin' for Intel/rosetta-enabled Darwin.
+"""
+            )
 
         # Attempt to start the PocketIC server if it's not already running.
-        os.system(f"{bin_path} --pid {pid} &")
+        mute = (
+            "1> /dev/null 2> /dev/null" if "POCKET_IC_MUTE_SERVER" in os.environ else ""
+        )
+        os.system(f"{bin_path} --pid {pid} {mute} &")
         self.url = self._get_url(pid)
         self.request_client = requests.session()
 
-    def new_instance(self) -> str:
+    def new_instance(self, subnet_config: dict) -> Tuple[int, dict]:
         """Creates a new PocketIC instance.
 
         Returns:
             str: the new instance ID
         """
         url = f"{self.url}/instances"
-        response = self.request_client.post(url, headers=HEADERS)
-        res = self._check_response(response)
-        return res["Created"]["instance_id"]
+        response = self.request_client.post(url, headers=HEADERS, json=subnet_config)
+        res = self._check_response(response)["Created"]
+        return res["instance_id"], res["topology"]
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.
@@ -73,28 +80,28 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         response = self._check_response(response)
         return response
 
-    def delete_instance(self, instance_id: str):
+    def delete_instance(self, instance_id: int):
         """Deletes an instance from the PocketIC Server.
 
         Args:
-            instance_id (str): the ID of the instance to delete
+            instance_id (int): the ID of the instance to delete
         """
         url = f"{self.url}/instances/{instance_id}"
         self.request_client.delete(url, headers=HEADERS)
 
-    def instance_get(self, endpoint, instance_id):
+    def instance_get(self, endpoint: str, instance_id: int):
         """HTTP get requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.get(url, headers=HEADERS)
         return self._check_response(response)
 
-    def instance_post(self, endpoint, instance_id, body):
+    def instance_post(self, endpoint: str, instance_id: int, body: Optional[dict]):
         """HTTP post requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
         response = self.request_client.post(url, json=body, headers=HEADERS)
         return self._check_response(response)
 
-    def set_blob_store_entry(self, blob: bytes, compression) -> str:
+    def set_blob_store_entry(self, blob: bytes, compression: Optional[str]) -> str:
         """Sets a blob store entry.
 
         Args:
@@ -112,10 +119,10 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
             response = self.request_client.post(url, data=blob, headers=headers)
         else:
             raise ValueError(f'only "gzip" compression is supported')
-        
+
         self._check_status_code(response)
         return response.text
-    
+
     def _get_url(self, pid: int) -> str:
         tmp_dir = gettempdir()
         ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
@@ -141,7 +148,7 @@ where $platform is 'x86_64-linux' for Linux and 'x86_64-darwin' for Intel/rosett
         self._check_status_code(response)
         res_json = response.json()
         return res_json
-    
+
     def _check_status_code(self, response):
         if response.status_code not in [200, 201, 202]:
             raise ConnectionError(

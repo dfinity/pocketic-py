@@ -37,25 +37,25 @@
     "pocket-ic-darwin-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-TjjcGYBbPG8Q1oBak6K6hq2eoOe4aSNSu1FVSFcfmTg=",
+        "narHash": "sha256-gU4J+PPxCQGMmvN1QeIZRxd1NF4RxoIMOkikD3gd9d8=",
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+        "url": "https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+        "url": "https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
       }
     },
     "pocket-ic-linux-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-sq7RXjAQyd4t14Gsh/toK2g1kqEZwdX0wb/aHs2rHl8=",
+        "narHash": "sha256-z2+qgQsL02jpzPed+XarcYGZ4S4j/xEKkb84WIEuDa8=",
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+        "url": "https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/307d5847c1d2fe1f5e19181c7d0fcec23f4658b3/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+        "url": "https://download.dfinity.systems/ic/29ec86dc9f9ca4691d4d4386c8b2aa41e14d9d16/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
       }
     },
     "root": {
