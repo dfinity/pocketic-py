@@ -316,22 +316,6 @@ class PocketIC:
         Returns:
             ic.Principal: the ID of the created canister
         """
-
-        if canister_id:
-            subnet_id = self.get_subnet(canister_id)
-            if not subnet_id:
-                raise ValueError("Canister ID not contained in any subnet")
-
-            topology = {k.to_str(): v for k, v in self.topology.items()}
-            subnet_kind = topology[subnet_id.to_str()]
-            if (
-                subnet_kind == SubnetKind.APPLICATION
-                or subnet_kind == SubnetKind.SYSTEM
-            ):
-                raise ValueError(
-                    "Creating a canister with ID is only supported on Bitcoin, Fiduciary, II, SNS and NNS subnets"
-                )
-
         record = Types.Record(
             {
                 "settings": Types.Opt(
