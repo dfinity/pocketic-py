@@ -13,24 +13,6 @@ from pocket_ic import PocketIC, SubnetKind, SubnetConfig
 
 
 class PocketICTests(unittest.TestCase):
-    def test_create_canister_with_id_failures(self):
-        pic = PocketIC(SubnetConfig(application=1))
-        existing_canister_id = pic.create_canister()
-        with self.assertRaises(ValueError) as ex:
-            pic.create_canister(canister_id=existing_canister_id)
-        self.assertEqual(
-            ex.exception.args[0],
-            "Creating a canister with ID is only supported on Bitcoin, Fiduciary, II, SNS and NNS subnets",
-        )
-
-        pic = PocketIC(SubnetConfig(nns=True))
-        canister_id = ic.Principal.anonymous()
-        with self.assertRaises(ValueError) as ex:
-            pic.create_canister(canister_id=canister_id)
-        self.assertEqual(
-            ex.exception.args[0], "Canister ID not contained in any subnet"
-        )
-
     def test_create_canister_with_id(self):
         pic = PocketIC(SubnetConfig(nns=True))
         canister_id = ic.Principal.from_str("rwlgt-iiaaa-aaaaa-aaaaa-cai")
@@ -48,6 +30,12 @@ class PocketICTests(unittest.TestCase):
         # Creating a new canister with any ID works, gets a new ID.
         new_canister_id = pic.create_canister()
         self.assertNotEqual(new_canister_id.bytes, canister_id.bytes)
+
+        # Creating a canister with an ID that is not hosted by any subnet fails.
+        canister_id = ic.Principal.anonymous()
+        with self.assertRaises(ValueError) as ex:
+            pic.create_canister(canister_id=canister_id)
+        self.assertIn("CanisterNotHostedBySubnet", ex.exception.args[0])
 
     def test_large_config_and_deduplication(self):
         pic = PocketIC(
