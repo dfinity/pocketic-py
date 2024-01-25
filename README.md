@@ -10,17 +10,18 @@ from pocket_ic import PocketIC
 
 pic = PocketIC()
 canister_id = pic.create_canister()
-pic.add_cycles(canister_id, 2_000_000_000_000)
+pic.add_cycles(canister_id, 2_000_000_000_000)  # 2T cycles
+pic.install_code(...)
 
 # make canister calls
-response = pic.update_call(canister_id, method="greeting", ...)
+response = pic.update_call(canister_id, method="greet", ...)
 assert(response == 'Hello, PocketIC!')
 ```
 ... or even directly with a canister object:
 ```python
 my_canister = pic.create_and_install_canister_with_candid(...)
 # call your canister methods with native Python syntax
-respone = my_canister.greeting()
+response = my_canister.greet()
 assert(response == 'Hello, PocketIC!')
 ```
 

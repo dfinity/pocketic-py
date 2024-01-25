@@ -407,16 +407,17 @@ class PocketIC:
         self,
         candid: str,
         wasm_module: bytes,
-        init_args: dict,
+        init_args: Optional[dict] = None,
         subnet: Optional[ic.Principal] = None,
     ) -> ic.Canister:
-        """Creates a canister, installs the provided WASM with the given init arguments. Returns a canister object.
-        For an example on how to use the canister object, see `/examples/ledger_canister_test.py`.
+        """Creates a canister, charges it with 2T cycles and installs the provided WASM with the given init arguments.
+        Returns a canister object. For an example on how to use the canister object,
+        see `/examples/ledger_canister/ledger_canister_test.py`.
 
         Args:
             candid (str): a valid candid file describing the canister interface
             wasm_module (bytes): the canister wasm as bytes
-            init_args (dict): the init args as required by the candid file
+            init_args (Optional[dict], optional): the init args as required by the candid file, defaults to `None`
             subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
                 canister, defaults to `None`
 
@@ -436,7 +437,8 @@ class PocketIC:
             arg = [{"type": canister_arguments[0], "value": init_args}]
         else:
             raise ValueError("The candid file appears to be malformed")
-
+        
+        self.add_cycles(canister_id, 2_000_000_000_000)
         self.install_code(canister_id, wasm_module, arg)
         return canister
 

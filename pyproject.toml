@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pocket_ic"
-version = "2.0.1"
+version = "2.0.2"
 description = "PocketIC: A Canister Smart Contract Testing Platform"
 authors = [
     "The Internet Computer Project Developers <dept-testing_&_verification@dfinity.org>",
