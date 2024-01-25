@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## 2.0.2 - 2024-01-25
+
+### Fixed
+- Fixed a bug in `create_and_install_canister_with_candid()` on application subnets by adding 2T cycles to the 
+canister before installing a Wasm
+
+
 ## 2.0.1 - 2023-11-23
 
 ### Added
@@ -14,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - When the PocketIC binary is not found, the error now points to the PocketIC repo instead of the download link
-
 
 
 ## 2.0.0 - 2023-11-21
