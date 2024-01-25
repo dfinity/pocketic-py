@@ -417,7 +417,7 @@ class PocketIC:
         Args:
             candid (str): a valid candid file describing the canister interface
             wasm_module (bytes): the canister wasm as bytes
-            init_args (Optional[dict]): the init args as required by the candid file, defaults to `None`
+            init_args (Optional[dict], optional): the init args as required by the candid file, defaults to `None`
             subnet (Optional[ic.Principal], optional): optional subnet ID where to install the
                 canister, defaults to `None`
 
