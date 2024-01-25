@@ -5,11 +5,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pocket-ic-darwin-gz = {
-      url = "https://download.dfinity.systems/ic/865a816108b31956bd449282e5803ce40007789f/openssl-static-binaries/x86_64-darwin/pocket-ic.gz";
+      url = "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-darwin/pocket-ic.gz";
       flake = false;
     };
     pocket-ic-linux-gz = {
-      url = "https://download.dfinity.systems/ic/865a816108b31956bd449282e5803ce40007789f/openssl-static-binaries/x86_64-linux/pocket-ic.gz";
+      url = "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-linux/pocket-ic.gz";
       flake = false;
     };
   };
@@ -86,7 +86,8 @@
         '';
 
         checks.default = pkgs.runCommand "pocketic-py-tests" {
-          nativeBuildInputs = [ pytest pocketic-py pocket-ic ];
+          nativeBuildInputs = [ pytest pocketic-py];
+          POCKET_IC_BIN = "${pocket-ic}/bin/pocket-ic";
           inherit projectDir;
         } ''
           pytest --override-ini=cache_dir=$TMP $projectDir | tee $out
