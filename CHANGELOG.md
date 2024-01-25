@@ -19,7 +19,6 @@ canister before installing a Wasm
 ### Added
 - Support for PocketIC server version 2.0.1
 
-
 ### Changed
 - When the PocketIC binary is not found, the error now points to the PocketIC repo instead of the download link
 
