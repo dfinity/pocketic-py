@@ -72,13 +72,13 @@ class SubnetConfig:
 
     def _json(self) -> dict:
         return {
-            "application": self.application,
-            "bitcoin": self.bitcoin,
-            "fiduciary": self.fiduciary,
-            "ii": self.ii,
-            "nns": self.nns,
-            "sns": self.sns,
-            "system": self.system,
+            "application": self.application * ["New"],
+            "bitcoin": "New" if self.bitcoin else None,
+            "fiduciary": "New" if self.fiduciary else None,
+            "ii": "New" if self.ii else None,
+            "nns": "New" if self.nns else None,
+            "sns": "New" if self.sns else None,
+            "system": self.system * ["New"],
         }
 
 

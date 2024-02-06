@@ -15,7 +15,7 @@ class CounterCanisterTests(unittest.TestCase):
     def test_counter_canister(self):
         pic = PocketIC()
         canister_id = pic.create_canister()
-        pic.add_cycles(canister_id, 1_000_000_000_000_000_000)
+        pic.add_cycles(canister_id, 2_000_000_000_000)  # 2T cycles
 
         with open(os.path.join(script_dir, "counter.wasm"), "rb") as wasm_file:
             wasm_module = wasm_file.read()
