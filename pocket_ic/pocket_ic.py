@@ -75,8 +75,8 @@ class SubnetConfig:
         self.nns = (state_dir_path, nns_subnet_id)
 
     def _json(self) -> dict:
-        if self.nns is tuple:
-            nns = f"FromPath({self.nns[0]}, {self.nns[1]})"
+        if isinstance(self.nns, tuple):
+            nns = {"FromPath": (self.nns[0], {"subnet_id": self.nns[1]})}
         elif self.nns:
             nns = "New"
         else:

@@ -146,6 +146,12 @@ class PocketICTests(unittest.TestCase):
         pic.add_cycles(canister_id, 6_666)
         self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
+    def test_nns_state(self):
+        pic = PocketIC(SubnetConfig(nns=("/home/mwe/dummy",  "0000000000000000000000000001")))
+        #self.assertIn("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv", str(pic.topology))
+        [(k,v)] = pic.topology.items()
+        self.assertEqual(k, ic.Principal.from_str("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"))
+        self.assertEqual(v, SubnetKind.NNS)
 
 if __name__ == "__main__":
     unittest.main()
