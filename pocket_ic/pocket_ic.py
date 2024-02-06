@@ -70,13 +70,23 @@ class SubnetConfig:
                 "The number of application and system subnets must be non-negative."
             )
 
+    def with_nns_state(self, state_dir_path: str, nns_subnet_id: str):
+        """Provide an NNS state directory and subnet id. """
+        self.nns = (state_dir_path, nns_subnet_id)
+
     def _json(self) -> dict:
+        if self.nns is tuple:
+            nns = f"FromPath({self.nns[0]}, {self.nns[1]})"
+        elif self.nns:
+            nns = "New"
+        else:
+            nns = None
         return {
             "application": self.application * ["New"],
             "bitcoin": "New" if self.bitcoin else None,
             "fiduciary": "New" if self.fiduciary else None,
             "ii": "New" if self.ii else None,
-            "nns": "New" if self.nns else None,
+            "nns": nns,
             "sns": "New" if self.sns else None,
             "system": self.system * ["New"],
         }
