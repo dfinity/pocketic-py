@@ -2,6 +2,7 @@
 
 import sys
 import os
+import tempfile
 import unittest
 import ic
 import gzip
@@ -147,11 +148,13 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
     def test_nns_state(self):
-        pic = PocketIC(SubnetConfig(nns=("/home/mwe/dummy",  "0000000000000000000000000001")))
-        #self.assertIn("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv", str(pic.topology))
-        [(k,v)] = pic.topology.items()
-        self.assertEqual(k, ic.Principal.from_str("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"))
+        principal = "6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"
+        tmp_dir = tempfile.mkdtemp()
+        pic = PocketIC(SubnetConfig(nns=(tmp_dir,  ic.Principal.from_str(principal))))
+        (k,v) = list(pic.topology.items())[0]
+        self.assertEqual(str(k), principal)
         self.assertEqual(v, SubnetKind.NNS)
+        os.rmdir(tmp_dir)
 
 if __name__ == "__main__":
     unittest.main()

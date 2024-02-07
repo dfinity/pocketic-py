@@ -70,13 +70,14 @@ class SubnetConfig:
                 "The number of application and system subnets must be non-negative."
             )
 
-    def with_nns_state(self, state_dir_path: str, nns_subnet_id: str):
+    def with_nns_state(self, state_dir_path: str, nns_subnet_id: ic.Principal):
         """Provide an NNS state directory and subnet id. """
         self.nns = (state_dir_path, nns_subnet_id)
 
     def _json(self) -> dict:
         if isinstance(self.nns, tuple):
-            nns = {"FromPath": (self.nns[0], {"subnet_id": self.nns[1]})}
+            raw_subnet_id = base64.b64encode(self.nns[1].bytes).decode()
+            nns = {"FromPath": (self.nns[0], {"subnet_id": raw_subnet_id})}
         elif self.nns:
             nns = "New"
         else:
