@@ -5,11 +5,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pocket-ic-darwin-gz = {
-      url = "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-darwin/pocket-ic.gz";
+      url = "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-darwin.gz";
       flake = false;
     };
     pocket-ic-linux-gz = {
-      url = "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-linux/pocket-ic.gz";
+      url = "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-linux.gz";
       flake = false;
     };
   };

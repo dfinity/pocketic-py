@@ -37,25 +37,25 @@
     "pocket-ic-darwin-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-vIfxWmM5nOFel+vHhYnJ/ZCYvjcWxb5ZrjS5dpc6bpQ=",
+        "narHash": "sha256-UeL22508hfmzsigWY6QiN1j1TTdgLazj3wxFyUcwvWY=",
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-darwin.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-darwin/pocket-ic.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-darwin.gz"
       }
     },
     "pocket-ic-linux-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-4XnFOZFapWFEfm7VrSWJeOcFvtRX76iaMfR2FeiIA78=",
+        "narHash": "sha256-45s5IPV4JoCA06ZgZHzHgmsVNxQtIRrbTIkR2VATJVU=",
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-linux.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/openssl-static-binaries/x86_64-linux/pocket-ic.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/3.0.0/pocket-ic-x86_64-linux.gz"
       }
     },
     "root": {

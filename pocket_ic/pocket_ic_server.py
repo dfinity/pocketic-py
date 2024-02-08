@@ -114,7 +114,7 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
             headers = HEADERS | {"Content-Encoding": "gzip"}
             response = self.request_client.post(url, data=blob, headers=headers)
         else:
-            raise ValueError(f'only "gzip" compression is supported')
+            raise ValueError('only "gzip" compression is supported')
 
         self._check_status_code(response)
         return response.text
