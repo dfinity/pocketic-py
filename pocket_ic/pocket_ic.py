@@ -71,7 +71,7 @@ class SubnetConfig:
             )
 
     def with_nns_state(self, state_dir_path: str, nns_subnet_id: ic.Principal):
-        """Provide an NNS state directory and subnet id. """
+        """Provide an NNS state directory and a subnet id. """
         self.nns = (state_dir_path, nns_subnet_id)
 
     def _json(self) -> dict:

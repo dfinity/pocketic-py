@@ -150,7 +150,7 @@ class PocketICTests(unittest.TestCase):
     def test_nns_state(self):
         principal = "6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"
         tmp_dir = tempfile.mkdtemp()
-        pic = PocketIC(SubnetConfig(nns=(tmp_dir,  ic.Principal.from_str(principal))))
+        pic = PocketIC(SubnetConfig(nns=(tmp_dir, ic.Principal.from_str(principal))))
         (k,v) = list(pic.topology.items())[0]
         self.assertEqual(str(k), principal)
         self.assertEqual(v, SubnetKind.NNS)
