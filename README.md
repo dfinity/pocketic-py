@@ -37,7 +37,7 @@ assert(response == 'Hello, PocketIC!')
 
 To see some working code, see the [examples/](https://github.com/dfinity/pocketic-py/tree/main/examples) folder, or check out the [how to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md) guide.
 To run an example, clone this repo and run `python3 examples/counter_canister/counter_canister_test.py` from the repository's root directory.
-To see a minimalistic setup of PocketIC in a Motoko project, check out the [ICP Hello World Motoko](https://github.com/dfinity/icp-hello-world-motoko/blob/main/README.md#testing-your-project) project. 
+To see a minimalistic setup of PocketIC in a Motoko project, check out the [ICP Hello World Motoko](https://github.com/dfinity/icp-hello-world-motoko/blob/main/README.md#testing-your-project) repository. 
 
 ## Documentation
 * [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
