@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## 2.1.0 - 2024-02-8
+## Unreleased
+
+
+## 2.1.0 - 2024-02-08
 
 ### Added
 - Added support for PocketIC server version 3.0.0
-- Added with_nns_state to create an instance from existing NNS state
+- Added `with_nns_state` to create an instance from existing NNS state
+
 
 
 ## 2.0.2 - 2024-01-25
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 canister before installing a Wasm
 
 
+
 ## 2.0.1 - 2023-11-23
 
 ### Added
@@ -27,6 +32,7 @@ canister before installing a Wasm
 
 ### Changed
 - When the PocketIC binary is not found, the error now points to the PocketIC repo instead of the download link
+
 
 
 ## 2.0.0 - 2023-11-21
@@ -51,16 +57,20 @@ canister before installing a Wasm
 - `delete()` method, superseded by `__del__`
 
 
+
 ## 1.0.1 - 2023-10-13
 
 ### Fixed
 - Fixed broken links on PyPi
 
 
+
 ## 1.0.0 - 2023-10-12
 
 ### Added
 - Blocking REST-API: Encode IC-call in endpoint, not in body
+
+
 
 ## 0.1.0 - 2023-09-01
 
