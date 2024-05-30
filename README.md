@@ -42,6 +42,7 @@ To see a minimalistic setup of PocketIC in a Motoko project, check out the [ICP 
 ## Documentation
 * [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
 * [PocketIC repo](https://github.com/dfinity/pocketic)
+* [PocketIC server compatibility](https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU/edit?usp=sharing)
 * [Why PocketIC](https://github.com/dfinity/pocketic#why-pocketic)
 * [Changelog of PocketIC Python](https://github.com/dfinity/pocketic-py/blob/main/CHANGELOG.md)
 
