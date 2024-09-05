@@ -28,7 +28,7 @@ assert(response == 'Hello, PocketIC!')
 ## Getting Started
 
 ### Quickstart
-* Download the latest **PocketIC server** from the [PocketIC repo](https://github.com/dfinity/pocketic).
+* Download the latest **PocketIC server** from the [PocketIC repo](https://github.com/dfinity/pocketic) that is [compatible](https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU) with the library version you're using.
 * Leave the binary in your current working directory, or specify the path to the binary by setting the `POCKET_IC_BIN` environment variable before running your tests.
 * Run `pip3 install pocket-ic` in your (virtual) environment to get the Python library. 
 * Use `from pocket_ic import PocketIC` in your Python code and start testing!
@@ -42,7 +42,7 @@ To see a minimalistic setup of PocketIC in a Motoko project, check out the [ICP 
 ## Documentation
 * [How to use this library](https://github.com/dfinity/pocketic-py/blob/main/HOWTO.md)
 * [PocketIC repo](https://github.com/dfinity/pocketic)
-* [PocketIC server compatibility](https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU/edit?usp=sharing)
+* [PocketIC server compatibility](https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU)
 * [Why PocketIC](https://github.com/dfinity/pocketic#why-pocketic)
 * [Changelog of PocketIC Python](https://github.com/dfinity/pocketic-py/blob/main/CHANGELOG.md)
 
