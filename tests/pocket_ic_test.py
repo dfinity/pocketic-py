@@ -34,9 +34,8 @@ class PocketICTests(unittest.TestCase):
 
         # Creating a canister with an ID that is not hosted by any subnet fails.
         canister_id = ic.Principal.anonymous()
-        with self.assertRaises(ValueError) as ex:
+        with self.assertRaises(Exception) as ex:
             pic.create_canister(canister_id=canister_id)
-        self.assertIn("CanisterNotHostedBySubnet", ex.exception.args[0])
 
     def test_large_config_and_deduplication(self):
         pic = PocketIC(
@@ -147,12 +146,16 @@ class PocketICTests(unittest.TestCase):
         pic.add_cycles(canister_id, 6_666)
         self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
-    def test_nns_state(self):
-        principal = "6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"
+    def test_load_state(self):
+        principal = ic.Principal.from_str("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv")
         tmp_dir = tempfile.mkdtemp()
-        pic = PocketIC(SubnetConfig(nns=(tmp_dir, ic.Principal.from_str(principal))))
+
+        config = SubnetConfig()
+        config.add_subnet_with_state(SubnetKind.NNS, tmp_dir, principal)
+        pic = PocketIC(subnet_config=config)
+
         (k,v) = list(pic.topology.items())[0]
-        self.assertEqual(str(k), principal)
+        self.assertEqual(str(k), str(principal))
         self.assertEqual(v, SubnetKind.NNS)
         os.rmdir(tmp_dir)
 

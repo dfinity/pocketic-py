@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 
+## 3.0.0 - 2024-11-19
+
+### Added 
+- Support for PocketIC server version 7.0.0
+- Load a state directory for any subnet kind with `SubnetConfig.add_subnet_with_state`
+- Verified Application subnet type
+
+### Removed
+- `with_nns_state`. Use `SubnetConfig.add_subnet_with_state` instead
+
+
+
 ## 2.1.0 - 2024-02-08
 
 ### Added
