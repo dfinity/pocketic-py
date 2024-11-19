@@ -91,7 +91,10 @@ class SubnetConfig:
 
         `subnet_id` should be the subnet ID of the subnet in the state to be loaded"""
 
-        raw_subnet_id = base64.b64encode(subnet_id.bytes).decode()
+        raw_subnet_id_bytes = base64.b64encode(
+            subnet_id.bytes
+        )  # convert bytes to base64 bytes
+        raw_subnet_id = raw_subnet_id_bytes.decode()  # convert bytes to str
 
         new_from_path = {
             "state_config": {
