@@ -1,5 +1,5 @@
 {
-  description = "PocketIC Python Libary";
+  description = "PocketIC Python Library";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -98,6 +98,7 @@
             pkgs.poetry
             pocketic-py
             pytest
+            pkgs.cacert # Here we added ca-certificates
           ];
         };
 
