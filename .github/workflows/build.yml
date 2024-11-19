@@ -16,7 +16,7 @@ jobs:
     steps:
     - if: matrix.os == 'ubuntu-latest'
       name: Install certificates
-      run: sudo apt-get install ca-certificates
+      run: sudo apt install ca-certificates
 
     - uses: actions/checkout@v3
 
