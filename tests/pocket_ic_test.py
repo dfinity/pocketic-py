@@ -34,7 +34,7 @@ class PocketICTests(unittest.TestCase):
 
         # Creating a canister with an ID that is not hosted by any subnet fails.
         canister_id = ic.Principal.anonymous()
-        with self.assertRaises(Exception) as ex:
+        with self.assertRaises(Exception):
             pic.create_canister(canister_id=canister_id)
 
     def test_large_config_and_deduplication(self):
