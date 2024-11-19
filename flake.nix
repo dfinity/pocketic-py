@@ -86,7 +86,7 @@
         '';
 
         checks.default = pkgs.runCommand "pocketic-py-tests" {
-          nativeBuildInputs = [ pytest pocketic-py];
+          nativeBuildInputs = [ pytest pocketic-py cacert];
           POCKET_IC_BIN = "${pocket-ic}/bin/pocket-ic";
           inherit projectDir;
         } ''
@@ -98,7 +98,6 @@
             pkgs.poetry
             pocketic-py
             pytest
-            pkgs.cacert # Here we added ca-certificates
           ];
         };
 
