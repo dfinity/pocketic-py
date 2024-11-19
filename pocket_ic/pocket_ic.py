@@ -39,34 +39,15 @@ class SubnetConfig:
         system=0,
         verified_application=0,
     ) -> None:
-        self.application = [
-            {"state_config": "New", "instruction_config": "Production"}
-        ] * application
-        self.bitcoin = (
-            {"state_config": "New", "instruction_config": "Production"}
-            if bitcoin
-            else None
-        )
-        self.fiduciary = (
-            {"state_config": "New", "instruction_config": "Production"}
-            if fiduciary
-            else None
-        )
-        self.ii = (
-            {"state_config": "New", "instruction_config": "Production"} if ii else None
-        )
-        self.nns = (
-            {"state_config": "New", "instruction_config": "Production"} if nns else None
-        )
-        self.sns = (
-            {"state_config": "New", "instruction_config": "Production"} if sns else None
-        )
-        self.system = [
-            {"state_config": "New", "instruction_config": "Production"}
-        ] * system
-        self.verified_application = [
-            {"state_config": "New", "instruction_config": "Production"}
-        ] * verified_application
+        new = {"state_config": "New", "instruction_config": "Production"}
+        self.application = [new] * application
+        self.bitcoin = new if bitcoin else None
+        self.fiduciary = new if fiduciary else None
+        self.ii = new if ii else None
+        self.nns = new if nns else None
+        self.sns = new if sns else None
+        self.system = [new] * system
+        self.verified_application = [new] * verified_application
 
     def __repr__(self) -> str:
         return f"SubnetConfigSet(application={self.application}, bitcoin={self.bitcoin}, fiduciary={self.fiduciary}, ii={self.ii}, nns={self.nns}, sns={self.sns}, system={self.system}, verified_application={self.verified_application})"
@@ -90,7 +71,7 @@ class SubnetConfig:
             raise ValueError("At least one subnet must be configured.")
 
     def add_subnet_with_state(
-        self, subnet_type: SubnetKind, state_dir_path: str, nns_subnet_id: ic.Principal
+        self, subnet_type: SubnetKind, state_dir_path: str, subnet_id: ic.Principal
     ):
         """Add a subnet with state loaded form the given state directory.
         Note that the provided path must be accessible for the PocketIC server process.
@@ -110,71 +91,32 @@ class SubnetConfig:
 
         `subnet_id` should be the subnet ID of the subnet in the state to be loaded"""
 
-        raw_subnet_id = base64.b64encode(nns_subnet_id.bytes).decode()
+        raw_subnet_id = base64.b64encode(subnet_id.bytes).decode()
+
+        new_from_path = {
+            "state_config": {
+                "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+            },
+            "instruction_config": "Production",
+        }
 
         match subnet_type:
             case SubnetKind.APPLICATION:
-                self.application.append(
-                    {
-                        "state_config": {
-                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                        },
-                        "instruction_config": "Production",
-                    }
-                )
+                self.application.append(new_from_path)
             case SubnetKind.BITCOIN:
-                self.bitcoin = {
-                    "state_config": {
-                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                    },
-                    "instruction_config": "Production",
-                }
+                self.bitcoin = new_from_path
             case SubnetKind.FIDUCIARY:
-                self.fiduciary = {
-                    "state_config": {
-                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                    },
-                    "instruction_config": "Production",
-                }
+                self.fiduciary = new_from_path
             case SubnetKind.II:
-                self.ii = {
-                    "state_config": {
-                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                    },
-                    "instruction_config": "Production",
-                }
+                self.ii = new_from_path
             case SubnetKind.NNS:
-                self.nns = {
-                    "state_config": {
-                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                    },
-                    "instruction_config": "Production",
-                }
+                self.nns = new_from_path
             case SubnetKind.SNS:
-                self.sns = {
-                    "state_config": {
-                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                    },
-                    "instruction_config": "Production",
-                }
+                self.sns = new_from_path
             case SubnetKind.SYSTEM:
-                self.system.append(
-                    {
-                        "state_config": {
-                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                        },
-                        "instruction_config": "Production",
-                    }
-                )
+                self.system.append(new_from_path)
             case SubnetKind.VERIFIED_APPLICATION:
-                self.verified_application.append(
-                    {
-                        "state_config": {
-                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
-                        },
-                        "instruction_config": "Production",
-                    }
-                )
+                self.verified_application.append(new_from_path)
 
     def _json(self) -> dict:
         return {
