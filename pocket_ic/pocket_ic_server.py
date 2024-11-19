@@ -120,14 +120,14 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
         return response.text
 
     def _get_url(self, port_file_path: int) -> str:
-        stop_at = time.time() + 10  # Wait for the ready file for 10 seconds
+        stop_at = time.time() + 10  # Wait for the port file for 10 seconds
 
         while True:
             if os.path.isfile(port_file_path):
                 with open(port_file_path, "r", encoding="utf-8") as port_file:
-                    port = port_file.readline().strip()
-                if port:
-                    return f"http://127.0.0.1:{port}"
+                    port = port_file.readline()
+                if "\n" in port:
+                    return f"http://127.0.0.1:{port.strip()}"
 
             time.sleep(0.02)  # wait for 20ms
 
