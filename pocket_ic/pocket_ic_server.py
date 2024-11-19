@@ -129,8 +129,8 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
                 if port:
                     return f"http://127.0.0.1:{port}"
 
-            time.sleep(0.02) # wait for 20ms
-           
+            time.sleep(0.02)  # wait for 20ms
+
             if time.time() > stop_at:
                 raise TimeoutError("PocketIC failed to start")
 

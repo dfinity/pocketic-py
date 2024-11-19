@@ -3,6 +3,7 @@ This module contains 'PocketIC', which is the main interface we expose to a test
 It also contains 'SubnetConfig' and 'SubnetKind', which are used to configure the
 subnets of a PocketIC instance.
 """
+
 import base64
 import ic
 from enum import Enum
@@ -21,7 +22,8 @@ class SubnetKind(Enum):
     NNS = "NNS"
     SNS = "SNS"
     SYSTEM = "System"
-    VERIFIED_APPLICATION = "VerifiedApplication"  
+    VERIFIED_APPLICATION = "VerifiedApplication"
+
 
 class SubnetConfig:
     """The configuration of subnets for a PocketIC instance."""
@@ -37,14 +39,34 @@ class SubnetConfig:
         system=0,
         verified_application=0,
     ) -> None:
-        self.application = [{ "state_config": "New", "instruction_config": "Production" }] * application
-        self.bitcoin = { "state_config": "New", "instruction_config": "Production" } if bitcoin else None
-        self.fiduciary = { "state_config": "New", "instruction_config": "Production" } if fiduciary else None
-        self.ii = { "state_config": "New", "instruction_config": "Production" } if ii else None
-        self.nns = { "state_config": "New", "instruction_config": "Production" } if nns else None
-        self.sns = { "state_config": "New", "instruction_config": "Production" } if sns else None
-        self.system = [{ "state_config": "New", "instruction_config": "Production" }] * system
-        self.verified_application = [{ "state_config": "New", "instruction_config": "Production" }] * verified_application
+        self.application = [
+            {"state_config": "New", "instruction_config": "Production"}
+        ] * application
+        self.bitcoin = (
+            {"state_config": "New", "instruction_config": "Production"}
+            if bitcoin
+            else None
+        )
+        self.fiduciary = (
+            {"state_config": "New", "instruction_config": "Production"}
+            if fiduciary
+            else None
+        )
+        self.ii = (
+            {"state_config": "New", "instruction_config": "Production"} if ii else None
+        )
+        self.nns = (
+            {"state_config": "New", "instruction_config": "Production"} if nns else None
+        )
+        self.sns = (
+            {"state_config": "New", "instruction_config": "Production"} if sns else None
+        )
+        self.system = [
+            {"state_config": "New", "instruction_config": "Production"}
+        ] * system
+        self.verified_application = [
+            {"state_config": "New", "instruction_config": "Production"}
+        ] * verified_application
 
     def __repr__(self) -> str:
         return f"SubnetConfigSet(application={self.application}, bitcoin={self.bitcoin}, fiduciary={self.fiduciary}, ii={self.ii}, nns={self.nns}, sns={self.sns}, system={self.system}, verified_application={self.verified_application})"
@@ -67,12 +89,14 @@ class SubnetConfig:
         ):
             raise ValueError("At least one subnet must be configured.")
 
-    def add_subnet_with_state(self, subnet_type: SubnetKind, state_dir_path: str, nns_subnet_id: ic.Principal):
+    def add_subnet_with_state(
+        self, subnet_type: SubnetKind, state_dir_path: str, nns_subnet_id: ic.Principal
+    ):
         """Add a subnet with state loaded form the given state directory.
         Note that the provided path must be accessible for the PocketIC server process.
 
         `state_dir` should point to a directory which is expected to have the following structure:
-       
+
         state_dir/
          |-- backups
          |-- checkpoints
@@ -83,28 +107,74 @@ class SubnetConfig:
          |-- states_metadata.pbuf
          |-- tip
          `-- tmp
-       
+
         `subnet_id` should be the subnet ID of the subnet in the state to be loaded"""
 
         raw_subnet_id = base64.b64encode(nns_subnet_id.bytes).decode()
 
         match subnet_type:
             case SubnetKind.APPLICATION:
-                self.application.append({"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" })
+                self.application.append(
+                    {
+                        "state_config": {
+                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                        },
+                        "instruction_config": "Production",
+                    }
+                )
             case SubnetKind.BITCOIN:
-                self.bitcoin = {"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" }
+                self.bitcoin = {
+                    "state_config": {
+                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                    },
+                    "instruction_config": "Production",
+                }
             case SubnetKind.FIDUCIARY:
-                self.fiduciary = {"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" }
+                self.fiduciary = {
+                    "state_config": {
+                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                    },
+                    "instruction_config": "Production",
+                }
             case SubnetKind.II:
-                self.ii = {"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" }
+                self.ii = {
+                    "state_config": {
+                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                    },
+                    "instruction_config": "Production",
+                }
             case SubnetKind.NNS:
-                self.nns = {"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" }
+                self.nns = {
+                    "state_config": {
+                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                    },
+                    "instruction_config": "Production",
+                }
             case SubnetKind.SNS:
-                self.sns = {"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" }
+                self.sns = {
+                    "state_config": {
+                        "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                    },
+                    "instruction_config": "Production",
+                }
             case SubnetKind.SYSTEM:
-                self.system.append({"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" })
+                self.system.append(
+                    {
+                        "state_config": {
+                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                        },
+                        "instruction_config": "Production",
+                    }
+                )
             case SubnetKind.VERIFIED_APPLICATION:
-                self.verified_application.append({"state_config": {"FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]}, "instruction_config": "Production" })
+                self.verified_application.append(
+                    {
+                        "state_config": {
+                            "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+                        },
+                        "instruction_config": "Production",
+                    }
+                )
 
     def _json(self) -> dict:
         return {
@@ -121,7 +191,7 @@ class SubnetConfig:
             "state_dir": None,
             "nonmainnet_features": False,
             "log_level": None,
-            "bitcoind_addr": None
+            "bitcoind_addr": None,
         }
 
 
@@ -480,7 +550,7 @@ class PocketIC:
             arg = [{"type": canister_arguments[0], "value": init_args}]
         else:
             raise ValueError("The candid file appears to be malformed")
-        
+
         self.add_cycles(canister_id, 2_000_000_000_000)
         self.install_code(canister_id, wasm_module, arg)
         return canister
@@ -533,7 +603,7 @@ class PocketIC:
 
     def _generate_topology(self, topology):
         t = dict()
-        subnets = topology['subnet_configs']
+        subnets = topology["subnet_configs"]
         for subnet_id, config in subnets.items():
             subnet_id = ic.Principal.from_str(subnet_id)
             subnet_kind = SubnetKind(config["subnet_kind"])

@@ -147,17 +147,20 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
     def test_load_state(self):
-        principal = ic.Principal.from_str("6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv")
+        principal = ic.Principal.from_str(
+            "6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"
+        )
         tmp_dir = tempfile.mkdtemp()
 
         config = SubnetConfig()
         config.add_subnet_with_state(SubnetKind.NNS, tmp_dir, principal)
         pic = PocketIC(subnet_config=config)
 
-        (k,v) = list(pic.topology.items())[0]
+        (k, v) = list(pic.topology.items())[0]
         self.assertEqual(str(k), str(principal))
         self.assertEqual(v, SubnetKind.NNS)
         os.rmdir(tmp_dir)
+
 
 if __name__ == "__main__":
     unittest.main()
