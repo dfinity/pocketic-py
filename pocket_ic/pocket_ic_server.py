@@ -54,16 +54,16 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
         self.url = self._get_url(port_file_path)
         self.request_client = requests.session()
 
-    def new_instance(self, subnet_config: dict) -> Tuple[int, dict]:
-        """Creates a new PocketIC instance.
+    def new_instance(self, subnet_config: dict) -> int:
+        """Creates a new PocketIC instance ID.
 
         Returns:
-            str: the new instance ID
+            int: the new instance ID
         """
         url = f"{self.url}/instances"
         response = self.request_client.post(url, json=subnet_config)
         res = self._check_response(response)["Created"]
-        return res["instance_id"], res["topology"]
+        return res["instance_id"]
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.

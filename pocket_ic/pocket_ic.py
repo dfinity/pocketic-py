@@ -155,8 +155,7 @@ class PocketIC:
         self.server = PocketICServer()
         subnet_config = subnet_config if subnet_config else SubnetConfig(application=1)
         subnet_config.validate()
-        self.instance_id, topology = self.server.new_instance(subnet_config._json())
-        self.topology = self._generate_topology(topology)
+        self.instance_id = self.server.new_instance(subnet_config._json())
         self.sender = ic.Principal.anonymous()
 
     def __del__(self) -> None:
@@ -175,13 +174,24 @@ class PocketIC:
         """
         self.sender = principal
 
+    def topology(self):
+        """Returns the current topology of the PocketIC instance."""
+        res = self._instance_get("read/topology")
+        t = dict()
+        subnets = res["subnet_configs"]
+        for subnet_id, config in subnets.items():
+            subnet_id = ic.Principal.from_str(subnet_id)
+            subnet_kind = SubnetKind(config["subnet_kind"])
+            t.update({subnet_id: subnet_kind})
+        return t
+
     def get_root_key(self) -> Optional[bytes]:
         """Get the root key of the IC. If there is no NNS subnet, returns `None`.
 
         Returns:
             Optional[bytes]: the root key of the IC
         """
-        nns_subnet = [k for k, v in self.topology.items() if v == SubnetKind.NNS]
+        nns_subnet = [k for k, v in self.topology().items() if v == SubnetKind.NNS]
         if not nns_subnet:
             return None
         body = {
@@ -542,15 +552,6 @@ class PocketIC:
 
         res = self._instance_post(endpoint, body)
         return self._get_ok_reply(res)
-
-    def _generate_topology(self, topology):
-        t = dict()
-        subnets = topology["subnet_configs"]
-        for subnet_id, config in subnets.items():
-            subnet_id = ic.Principal.from_str(subnet_id)
-            subnet_kind = SubnetKind(config["subnet_kind"])
-            t.update({subnet_id: subnet_kind})
-        return t
 
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:

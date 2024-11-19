@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - `with_nns_state`. Use `SubnetConfig.add_subnet_with_state` instead
+- `PocketIC.topology`. Use `PocketIC.topology()` instead
 
 
 
