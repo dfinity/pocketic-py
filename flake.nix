@@ -1,15 +1,15 @@
 {
-  description = "PocketIC Python Libary";
+  description = "PocketIC Python Library";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pocket-ic-darwin-gz = {
-      url = "https://github.com/dfinity/pocketic/releases/download/3.0.1/pocket-ic-x86_64-darwin.gz";
+      url = "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-darwin.gz";
       flake = false;
     };
     pocket-ic-linux-gz = {
-      url = "https://github.com/dfinity/pocketic/releases/download/3.0.1/pocket-ic-x86_64-linux.gz";
+      url = "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-linux.gz";
       flake = false;
     };
   };
@@ -86,7 +86,7 @@
         '';
 
         checks.default = pkgs.runCommand "pocketic-py-tests" {
-          nativeBuildInputs = [ pytest pocketic-py];
+          nativeBuildInputs = [ pytest pocketic-py pkgs.cacert];
           POCKET_IC_BIN = "${pocket-ic}/bin/pocket-ic";
           inherit projectDir;
         } ''

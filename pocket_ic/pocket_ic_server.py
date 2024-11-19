@@ -9,9 +9,6 @@ from typing import List, Tuple, Optional
 from tempfile import gettempdir
 
 
-HEADERS = {"processing-timeout-ms": "300000"}
-
-
 class PocketICServer:
     """
     An object of this class represents a running PocketIC server. During instantiation,
@@ -46,24 +43,27 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
 """
             )
 
-        # Attempt to start the PocketIC server if it's not already running.
         mute = (
             "1> /dev/null 2> /dev/null" if "POCKET_IC_MUTE_SERVER" in os.environ else ""
         )
-        os.system(f"{bin_path} --pid {pid} {mute} &")
-        self.url = self._get_url(pid)
+        # Attempt to start the PocketIC server if it's not already running.
+        tmp_dir = gettempdir()
+        port_file_path = f"{tmp_dir}/pocket_ic_{pid}.port"
+
+        os.system(f"{bin_path} --port-file {port_file_path} {mute} &")
+        self.url = self._get_url(port_file_path)
         self.request_client = requests.session()
 
-    def new_instance(self, subnet_config: dict) -> Tuple[int, dict]:
+    def new_instance(self, subnet_config: dict) -> int:
         """Creates a new PocketIC instance.
 
         Returns:
-            str: the new instance ID
+            int: the new instance ID
         """
         url = f"{self.url}/instances"
-        response = self.request_client.post(url, headers=HEADERS, json=subnet_config)
+        response = self.request_client.post(url, json=subnet_config)
         res = self._check_response(response)["Created"]
-        return res["instance_id"], res["topology"]
+        return res["instance_id"]
 
     def list_instances(self) -> List[str]:
         """Lists the currently running instances on the PocketIC Server.
@@ -72,7 +72,7 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
             List[str]: a list of instance names
         """
         url = f"{self.url}/instances"
-        response = self.request_client.get(url, headers=HEADERS)
+        response = self.request_client.get(url)
         response = self._check_response(response)
         return response
 
@@ -83,18 +83,18 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
             instance_id (int): the ID of the instance to delete
         """
         url = f"{self.url}/instances/{instance_id}"
-        self.request_client.delete(url, headers=HEADERS)
+        self.request_client.delete(url)
 
     def instance_get(self, endpoint: str, instance_id: int):
         """HTTP get requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
-        response = self.request_client.get(url, headers=HEADERS)
+        response = self.request_client.get(url)
         return self._check_response(response)
 
     def instance_post(self, endpoint: str, instance_id: int, body: Optional[dict]):
         """HTTP post requests for instance endpoints"""
         url = f"{self.url}/instances/{instance_id}/{endpoint}"
-        response = self.request_client.post(url, json=body, headers=HEADERS)
+        response = self.request_client.post(url, json=body)
         return self._check_response(response)
 
     def set_blob_store_entry(self, blob: bytes, compression: Optional[str]) -> str:
@@ -109,9 +109,9 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
         """
         url = f"{self.url}/blobstore"
         if compression is None:
-            response = self.request_client.post(url, data=blob, headers=HEADERS)
+            response = self.request_client.post(url, data=blob)
         elif compression == "gzip":
-            headers = HEADERS | {"Content-Encoding": "gzip"}
+            headers = {"Content-Encoding": "gzip"}
             response = self.request_client.post(url, data=blob, headers=headers)
         else:
             raise ValueError('only "gzip" compression is supported')
@@ -119,34 +119,22 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
         self._check_status_code(response)
         return response.text
 
-    def _get_url(self, pid: int) -> str:
-        tmp_dir = gettempdir()
-        ready_file_path = f"{tmp_dir}/pocket_ic_{pid}.ready"
-        port_file_path = f"{tmp_dir}/pocket_ic_{pid}.port"
+    def _get_url(self, port_file_path: int) -> str:
+        while True:
+            if os.path.isfile(port_file_path):
+                with open(port_file_path, "r", encoding="utf-8") as port_file:
+                    port = port_file.readline()
+                if "\n" in port:
+                    return f"http://127.0.0.1:{port.strip()}"
+            time.sleep(0.02)  # wait for 20ms
 
-        stop_at = time.time() + 10  # Wait for the ready file for 10 seconds
-
-        while not os.path.exists(ready_file_path):
-            if time.time() < stop_at:
-                time.sleep(0.1)  # 100ms
-            else:
-                raise TimeoutError("PocketIC failed to start")
-
-        if os.path.isfile(ready_file_path):
-            with open(port_file_path, "r", encoding="utf-8") as port_file:
-                port = port_file.readline().strip()
-        else:
-            raise ValueError(f"{ready_file_path} is not a file!")
-
-        return f"http://127.0.0.1:{port}"
-
-    def _check_response(self, response):
+    def _check_response(self, response: requests.Response):
         self._check_status_code(response)
         res_json = response.json()
         return res_json
 
-    def _check_status_code(self, response):
+    def _check_status_code(self, response: requests.Response):
         if response.status_code not in [200, 201, 202]:
             raise ConnectionError(
-                f'PocketIC server returned status code {response.status_code}: "{response.reason}"'
+                f'PocketIC server returned status code {response.status_code}: "{response.text}"'
             )

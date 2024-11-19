@@ -3,11 +3,12 @@ This module contains 'PocketIC', which is the main interface we expose to a test
 It also contains 'SubnetConfig' and 'SubnetKind', which are used to configure the
 subnets of a PocketIC instance.
 """
+
 import base64
 import ic
 from enum import Enum
 from ic.candid import Types
-from typing import List, Optional, Any
+from typing import Optional, Any
 from pocket_ic.pocket_ic_server import PocketICServer
 
 
@@ -21,6 +22,7 @@ class SubnetKind(Enum):
     NNS = "NNS"
     SNS = "SNS"
     SYSTEM = "System"
+    VERIFIED_APPLICATION = "VerifiedApplication"
 
 
 class SubnetConfig:
@@ -35,24 +37,26 @@ class SubnetConfig:
         nns=False,
         sns=False,
         system=0,
+        verified_application=0,
     ) -> None:
-        self.application = application
-        self.bitcoin = bitcoin
-        self.fiduciary = fiduciary
-        self.ii = ii
-        self.nns = nns
-        self.sns = sns
-        self.system = system
+        new = {"state_config": "New", "instruction_config": "Production"}
+        self.application = [new] * application
+        self.bitcoin = new if bitcoin else None
+        self.fiduciary = new if fiduciary else None
+        self.ii = new if ii else None
+        self.nns = new if nns else None
+        self.sns = new if sns else None
+        self.system = [new] * system
+        self.verified_application = [new] * verified_application
 
     def __repr__(self) -> str:
-        return f"SubnetConfigSet(application={self.application}, bitcoin={self.bitcoin}, fiduciary={self.fiduciary}, ii={self.ii}, nns={self.nns}, sns={self.sns}, system={self.system})"
+        return f"SubnetConfigSet(application={self.application}, bitcoin={self.bitcoin}, fiduciary={self.fiduciary}, ii={self.ii}, nns={self.nns}, sns={self.sns}, system={self.system}, verified_application={self.verified_application})"
 
     def validate(self) -> None:
         """Validates the subnet configuration.
 
         Raises:
-            ValueError: if no subnet is configured or if the number of application or system
-                subnets is negative
+            ValueError: if no subnet is configured
         """
         if not (
             self.bitcoin
@@ -62,34 +66,77 @@ class SubnetConfig:
             or self.sns
             or self.system
             or self.application
+            or self.verified_application
         ):
             raise ValueError("At least one subnet must be configured.")
 
-        if self.application < 0 or self.system < 0:
-            raise ValueError(
-                "The number of application and system subnets must be non-negative."
-            )
+    def add_subnet_with_state(
+        self, subnet_type: SubnetKind, state_dir_path: str, subnet_id: ic.Principal
+    ):
+        """Add a subnet with state loaded form the given state directory.
+        Note that the provided path must be accessible for the PocketIC server process.
 
-    def with_nns_state(self, state_dir_path: str, nns_subnet_id: ic.Principal):
-        """Provide an NNS state directory and a subnet id. """
-        self.nns = (state_dir_path, nns_subnet_id)
+        `state_dir` should point to a directory which is expected to have the following structure:
+
+        state_dir/
+         |-- backups
+         |-- checkpoints
+         |-- diverged_checkpoints
+         |-- diverged_state_markers
+         |-- fs_tmp
+         |-- page_deltas
+         |-- states_metadata.pbuf
+         |-- tip
+         `-- tmp
+
+        `subnet_id` should be the subnet ID of the subnet in the state to be loaded"""
+
+        raw_subnet_id_bytes = base64.b64encode(
+            subnet_id.bytes
+        )  # convert bytes to base64 bytes
+        raw_subnet_id = raw_subnet_id_bytes.decode()  # convert bytes to str
+
+        new_from_path = {
+            "state_config": {
+                "FromPath": [state_dir_path, {"subnet_id": raw_subnet_id}]
+            },
+            "instruction_config": "Production",
+        }
+
+        match subnet_type:
+            case SubnetKind.APPLICATION:
+                self.application.append(new_from_path)
+            case SubnetKind.BITCOIN:
+                self.bitcoin = new_from_path
+            case SubnetKind.FIDUCIARY:
+                self.fiduciary = new_from_path
+            case SubnetKind.II:
+                self.ii = new_from_path
+            case SubnetKind.NNS:
+                self.nns = new_from_path
+            case SubnetKind.SNS:
+                self.sns = new_from_path
+            case SubnetKind.SYSTEM:
+                self.system.append(new_from_path)
+            case SubnetKind.VERIFIED_APPLICATION:
+                self.verified_application.append(new_from_path)
 
     def _json(self) -> dict:
-        if isinstance(self.nns, tuple):
-            raw_subnet_id = base64.b64encode(self.nns[1].bytes).decode()
-            nns = {"FromPath": (self.nns[0], {"subnet_id": raw_subnet_id})}
-        elif self.nns:
-            nns = "New"
-        else:
-            nns = None
         return {
-            "application": self.application * ["New"],
-            "bitcoin": "New" if self.bitcoin else None,
-            "fiduciary": "New" if self.fiduciary else None,
-            "ii": "New" if self.ii else None,
-            "nns": nns,
-            "sns": "New" if self.sns else None,
-            "system": self.system * ["New"],
+            "subnet_config_set": {
+                "application": self.application,
+                "bitcoin": self.bitcoin,
+                "fiduciary": self.fiduciary,
+                "ii": self.ii,
+                "nns": self.nns,
+                "sns": self.sns,
+                "system": self.system,
+                "verified_application": self.verified_application,
+            },
+            "state_dir": None,
+            "nonmainnet_features": False,
+            "log_level": None,
+            "bitcoind_addr": None,
         }
 
 
@@ -111,8 +158,7 @@ class PocketIC:
         self.server = PocketICServer()
         subnet_config = subnet_config if subnet_config else SubnetConfig(application=1)
         subnet_config.validate()
-        self.instance_id, topology = self.server.new_instance(subnet_config._json())
-        self.topology = self._generate_topology(topology)
+        self.instance_id = self.server.new_instance(subnet_config._json())
         self.sender = ic.Principal.anonymous()
 
     def __del__(self) -> None:
@@ -131,13 +177,24 @@ class PocketIC:
         """
         self.sender = principal
 
+    def topology(self):
+        """Returns the current topology of the PocketIC instance."""
+        res = self._instance_get("read/topology")
+        t = dict()
+        subnets = res["subnet_configs"]
+        for subnet_id, config in subnets.items():
+            subnet_id = ic.Principal.from_str(subnet_id)
+            subnet_kind = SubnetKind(config["subnet_kind"])
+            t.update({subnet_id: subnet_kind})
+        return t
+
     def get_root_key(self) -> Optional[bytes]:
         """Get the root key of the IC. If there is no NNS subnet, returns `None`.
 
         Returns:
             Optional[bytes]: the root key of the IC
         """
-        nns_subnet = [k for k, v in self.topology.items() if v == SubnetKind.NNS]
+        nns_subnet = [k for k, v in self.topology().items() if v == SubnetKind.NNS]
         if not nns_subnet:
             return None
         body = {
@@ -448,7 +505,7 @@ class PocketIC:
             arg = [{"type": canister_arguments[0], "value": init_args}]
         else:
             raise ValueError("The candid file appears to be malformed")
-        
+
         self.add_cycles(canister_id, 2_000_000_000_000)
         self.install_code(canister_id, wasm_module, arg)
         return canister
@@ -498,14 +555,6 @@ class PocketIC:
 
         res = self._instance_post(endpoint, body)
         return self._get_ok_reply(res)
-
-    def _generate_topology(self, topology):
-        t = dict()
-        for subnet_id, config in topology.items():
-            subnet_id = ic.Principal.from_str(subnet_id)
-            subnet_kind = SubnetKind(config["subnet_kind"])
-            t.update({subnet_id: subnet_kind})
-        return t
 
     def _get_ok_reply(self, request_result):
         if "Ok" in request_result:
