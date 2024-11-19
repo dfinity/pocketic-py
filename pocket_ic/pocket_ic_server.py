@@ -55,7 +55,7 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
         self.request_client = requests.session()
 
     def new_instance(self, subnet_config: dict) -> int:
-        """Creates a new PocketIC instance ID.
+        """Creates a new PocketIC instance.
 
         Returns:
             int: the new instance ID
