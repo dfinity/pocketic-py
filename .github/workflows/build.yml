@@ -33,21 +33,14 @@ jobs:
 
     - if: matrix.os == 'ubuntu-latest'
       name: Upload wheel file
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pocket_ic_${{ github.sha }}.whl
         path: ${{ steps.release-build.outputs.dist }}/*.whl
         
     - if: matrix.os == 'ubuntu-latest'
       name: Upload sources
-      uses: actions/upload-artifact@v3
-      with:
-        name: pocket_ic_${{ github.sha }}.tar.gz
-        path: ${{ steps.release-build.outputs.dist }}/*.tar.gz
-
-    - if: matrix.os == 'ubuntu-latest'
-      name: Upload sources
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pocket_ic_${{ github.sha }}.tar.gz
         path: ${{ steps.release-build.outputs.dist }}/*.tar.gz
@@ -62,11 +55,11 @@ jobs:
     permissions: write-all
 
     steps:
-    - uses: actions/download-artifact@v4.1.7
+    - uses: actions/download-artifact@v4
       with:
         name: pocket_ic_${{ github.sha }}.whl
 
-    - uses: actions/download-artifact@v4.1.7
+    - uses: actions/download-artifact@v4
       with:
         name: pocket_ic_${{ github.sha }}.tar.gz
 
