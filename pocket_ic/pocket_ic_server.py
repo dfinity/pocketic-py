@@ -136,5 +136,5 @@ To download the binary, please visit https://github.com/dfinity/pocketic.
     def _check_status_code(self, response: requests.Response):
         if response.status_code not in [200, 201, 202]:
             raise ConnectionError(
-                f'PocketIC server returned status code {response.status_code}: "{response.text}"'
+                f'PocketIC server returned status code {response.status_code}: {response.json()["message"]}'
             )

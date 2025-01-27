@@ -21,7 +21,7 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(actual_canister_id.bytes, canister_id.bytes)
 
         # Creating a new canister with the same ID fails.
-        with self.assertRaises(ValueError) as ex:
+        with self.assertRaises(RuntimeError) as ex:
             pic.create_canister(canister_id=canister_id)
         self.assertIn(
             "CanisterAlreadyInstalled",
@@ -141,6 +141,26 @@ class PocketICTests(unittest.TestCase):
         pic = PocketIC()
         canister_id = ic.Principal.anonymous()
         self.assertEqual(pic.check_canister_exists(canister_id), False)
+
+    def test_call_empty_canister_throws(self):
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        with self.assertRaises(RuntimeError) as ex:
+            pic.query_call(canister_id, "foo", b"")
+        self.assertIn(
+            "CanisterWasmModuleNotFound",
+            ex.exception.args[0],
+        )
+
+    def test_call_nonexistent_canister(self):
+        pic = PocketIC()
+        canister_id = ic.Principal.anonymous()
+        with self.assertRaises(ConnectionError) as ex:
+            pic.query_call(canister_id, "foo", b"")
+        self.assertIn(
+            "does not belong to any subnet",
+            ex.exception.args[0],
+        )
 
     def test_cycles_balance(self):
         pic = PocketIC()
