@@ -21,7 +21,7 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(actual_canister_id.bytes, canister_id.bytes)
 
         # Creating a new canister with the same ID fails.
-        with self.assertRaises(RuntimeError) as ex:
+        with self.assertRaises(ValueError) as ex:
             pic.create_canister(canister_id=canister_id)
         self.assertIn(
             "CanisterAlreadyInstalled",
