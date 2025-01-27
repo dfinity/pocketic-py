@@ -563,7 +563,7 @@ class PocketIC:
             reject_message = err['reject_message']
             error_code = err['error_code']
             msg = f"PocketIC returned a rejection error: reject code {reject_code}, reject message {reject_message}, error code {error_code}"
-            raise RuntimeError(msg)
+            raise ValueError(msg)
         raise ValueError(f"Malformed response: {request_result}")
 
     def _get_ok_data(self, request_result):
