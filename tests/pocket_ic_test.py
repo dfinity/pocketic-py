@@ -145,7 +145,7 @@ class PocketICTests(unittest.TestCase):
     def test_call_empty_canister_throws(self):
         pic = PocketIC()
         canister_id = pic.create_canister()
-        with self.assertRaises(RuntimeError) as ex:
+        with self.assertRaises(ValueError) as ex:
             pic.query_call(canister_id, "foo", b"")
         self.assertIn(
             "CanisterWasmModuleNotFound",
