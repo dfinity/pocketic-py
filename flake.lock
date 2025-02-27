@@ -5,11 +5,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1692799911,
-        "narHash": "sha256-3eihraek4qL744EvQXsK1Ha6C3CR7nnT8X2qWap4RNk=",
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "f9e7cf818399d17d347f847525c5a5a8032e4e44",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
         "type": "github"
       },
       "original": {
@@ -20,11 +20,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1693158576,
-        "narHash": "sha256-aRTTXkYvhXosGx535iAFUaoFboUrZSYb1Ooih/auGp0=",
+        "lastModified": 1740560979,
+        "narHash": "sha256-Vr3Qi346M+8CjedtbyUevIGDZW8LcA1fTG0ugPY/Hic=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a999c1cc0c9eb2095729d5aa03e0d8f7ed256780",
+        "rev": "5135c59491985879812717f4c9fea69604e7f26f",
         "type": "github"
       },
       "original": {
@@ -37,25 +37,25 @@
     "pocket-ic-darwin-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-tAxziSPN43Utb7Bq6aJheN/uZafOIdWFaq395kw97HE=",
+        "narHash": "sha256-/+hY0OWaNLmEs26+VFB4GHpSemSkwyLzxa+HYLK5dSQ=",
         "type": "file",
-        "url": "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-darwin.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-darwin.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-darwin.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-darwin.gz"
       }
     },
     "pocket-ic-linux-gz": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-oks9H8GARq8opVcy+0RH7lffG34lZDuY90iFS0bGhvI=",
+        "narHash": "sha256-3npfjtPVF9VecKhjz5DgPqrnq8TBlUm+18zs865pSGI=",
         "type": "file",
-        "url": "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-linux.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-linux.gz"
       },
       "original": {
         "type": "file",
-        "url": "https://github.com/dfinity/pocketic/releases/download/7.0.0/pocket-ic-x86_64-linux.gz"
+        "url": "https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-linux.gz"
       }
     },
     "root": {
