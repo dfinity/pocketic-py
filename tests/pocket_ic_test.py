@@ -142,6 +142,26 @@ class PocketICTests(unittest.TestCase):
         canister_id = ic.Principal.anonymous()
         self.assertEqual(pic.check_canister_exists(canister_id), False)
 
+    def test_call_empty_canister_throws(self):
+        pic = PocketIC()
+        canister_id = pic.create_canister()
+        with self.assertRaises(ValueError) as ex:
+            pic.query_call(canister_id, "foo", b"")
+        self.assertIn(
+            "CanisterWasmModuleNotFound",
+            ex.exception.args[0],
+        )
+
+    def test_call_nonexistent_canister(self):
+        pic = PocketIC()
+        canister_id = ic.Principal.anonymous()
+        with self.assertRaises(ConnectionError) as ex:
+            pic.query_call(canister_id, "foo", b"")
+        self.assertIn(
+            "does not belong to any subnet",
+            ex.exception.args[0],
+        )
+
     def test_cycles_balance(self):
         pic = PocketIC()
         canister_id = pic.create_canister()

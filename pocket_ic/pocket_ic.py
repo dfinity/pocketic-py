@@ -232,7 +232,7 @@ class PocketIC:
 
     def tick(self) -> None:
         """Make the IC produce and progress by one block."""
-        self._instance_post("update/tick", "")
+        self._instance_post("update/tick", {})
 
     def get_subnet(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
         """Get the subnet ID of the subnet that contains the given canister.
@@ -358,7 +358,18 @@ class PocketIC:
         Returns:
             list: a list of candid objects
         """
-        return self._canister_call("read/query", canister_id, None, method, payload)
+
+        canister_id = canister_id if canister_id else ic.Principal.management_canister()
+        body = {
+            "sender": base64.b64encode(self.sender.bytes).decode(),
+            "effective_principal": "None",
+            "canister_id": base64.b64encode(canister_id.bytes).decode(),
+            "method": method,
+            "payload": base64.b64encode(payload).decode(),
+        }
+
+        submit_ingress_message_response = self._instance_post("read/query", body)
+        return self._get_ok_data(submit_ingress_message_response)
 
     def create_canister(
         self,
@@ -527,22 +538,7 @@ class PocketIC:
                 encoded, or `None`.
             method (str): the method to call
             payload (bytes): the candid encoded payload"""
-        return self._canister_call(
-            "update/execute_ingress_message",
-            canister_id,
-            effective_principal,
-            method,
-            payload,
-        )
 
-    def _canister_call(
-        self,
-        endpoint: str,
-        canister_id: Optional[ic.Principal],
-        effective_principal: Optional[Any],
-        method: str,
-        payload: bytes,
-    ):
         canister_id = canister_id if canister_id else ic.Principal.management_canister()
         effective_principal = effective_principal if effective_principal else "None"
         body = {
@@ -553,26 +549,30 @@ class PocketIC:
             "payload": base64.b64encode(payload).decode(),
         }
 
-        res = self._instance_post(endpoint, body)
-        return self._get_ok_reply(res)
-
-    def _get_ok_reply(self, request_result):
+        submit_ingress_message = self._instance_post("update/submit_ingress_message", body)
+        ok = self._get_ok(submit_ingress_message)
+        result = self._instance_post("update/await_ingress_message", ok)
+        return self._get_ok_data(result)
+    
+    def _get_ok(self, request_result):
         if "Ok" in request_result:
-            if "Reply" not in request_result["Ok"]:
-                raise ValueError(
-                    f'Request contains no key "Reply": {request_result["Ok"]}'
-                )
-            result = request_result["Ok"]["Reply"]
-            maybe_candid = base64.b64decode(result)
-            # if we have a non-candid byte array, return that without decoding
-            if maybe_candid.startswith(b"DIDL"):
-                return maybe_candid
-            return list(maybe_candid)
-
+            return request_result["Ok"]
         if "Err" in request_result:
-            raise ValueError(f'Request returned "Err": {request_result["Err"]}')
-
+            err = request_result['Err']
+            reject_code = err['reject_code']
+            reject_message = err['reject_message']
+            error_code = err['error_code']
+            msg = f"PocketIC returned a rejection error: reject code {reject_code}, reject message {reject_message}, error code {error_code}"
+            raise ValueError(msg)
         raise ValueError(f"Malformed response: {request_result}")
+
+    def _get_ok_data(self, request_result):
+        result = self._get_ok(request_result)
+        maybe_candid = base64.b64decode(result)
+        # if we have a non-candid byte array, return that without decoding
+        if maybe_candid.startswith(b"DIDL"):
+            return maybe_candid
+        return list(maybe_candid)
 
     def _instance_get(self, endpoint):
         """HTTP get requests for instance endpoints"""

@@ -1,6 +1,6 @@
 name: Build and Release
 
-on: 
+on:
   push:
   release:
     types: [published]
@@ -9,41 +9,59 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - uses: cachix/install-nix-action@v22
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10" # Adjust based on your project’s requirements
 
-    - name: Build package
-      run: |
-        nix build --no-link --print-out-paths --print-build-logs .#default
+      - name: Install PocketIC server
+        uses: dfinity/pocketic@main
+        with:
+          pocket-ic-server-version: "8.0.0"
 
-    - name: Build distribution
-      id: release-build
-      run: |
-        dist=$(nix build --no-link --print-out-paths --print-build-logs .#dist)
-        echo "dist=$dist" >> $GITHUB_OUTPUT
+      - name: Create python environment and run tests and examples
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
 
-    - name: Test package
-      run: nix flake check --print-build-logs
+          # Run tests
+          python3 tests/pocket_ic_test.py
+          # Ledger canister
+          python3 examples/ledger_canister/ledger_canister_test.py
+          # Counter canister
+          python3 examples/counter_canister/counter_canister_test.py
 
-    - if: matrix.os == 'ubuntu-latest'
-      name: Upload wheel file
-      uses: actions/upload-artifact@v4
-      with:
-        name: pocket_ic_${{ github.sha }}.whl
-        path: ${{ steps.release-build.outputs.dist }}/*.whl
-        
-    - if: matrix.os == 'ubuntu-latest'
-      name: Upload sources
-      uses: actions/upload-artifact@v4
-      with:
-        name: pocket_ic_${{ github.sha }}.tar.gz
-        path: ${{ steps.release-build.outputs.dist }}/*.tar.gz
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build distribution
+        run: poetry build
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: Upload wheel file
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket_ic_${{ github.sha }}.whl
+          path: dist/*.whl
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: Upload sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket_ic_${{ github.sha }}.tar.gz
+          path: dist/*.tar.gz
 
   release:
     needs: build
@@ -55,40 +73,37 @@ jobs:
     permissions: write-all
 
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: pocket_ic_${{ github.sha }}.whl
+      - uses: actions/download-artifact@v4
+        with:
+          name: pocket_ic_${{ github.sha }}.whl
 
-    - uses: actions/download-artifact@v4
-      with:
-        name: pocket_ic_${{ github.sha }}.tar.gz
+      - uses: actions/download-artifact@v4
+        with:
+          name: pocket_ic_${{ github.sha }}.tar.gz
 
-    - name: Set tag
-      id: set_tag
-      run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      - name: Set tag
+        id: set_tag
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
-    - name: Set whl artifact name
-      id: set_name_whl
-      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
-    
-    - name: Set whl artifact name
-      id: set_name_tar
-      run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
+      - name: Set whl artifact name
+        id: set_name_whl
+        run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}-py3-none-any.whl" >> $GITHUB_OUTPUT
 
-    - name: ls
-      run: echo `ls -la `
+      - name: Set whl artifact name
+        id: set_name_tar
+        run: echo "artifact_name=pocket_ic-${{ steps.set_tag.outputs.tag }}.tar.gz" >> $GITHUB_OUTPUT
 
-    - name: move artifacs to dist
-      run: |
-        mkdir dist
-        cp *.whl dist/
-        cp *.tar.gz dist/
+      - name: move artifacs to dist
+        run: |
+          mkdir dist
+          cp *.whl dist/
+          cp *.tar.gz dist/
 
-    - name: upload artifacts to release page
-      uses: softprops/action-gh-release@master
-      with:
-        files: |
-          ${{ steps.set_name_whl.outputs.artifact_name }}
+      - name: upload artifacts to release page
+        uses: softprops/action-gh-release@master
+        with:
+          files: |
+            ${{ steps.set_name_whl.outputs.artifact_name }}
 
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

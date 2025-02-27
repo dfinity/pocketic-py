@@ -22,7 +22,7 @@ class CounterCanisterTests(unittest.TestCase):
         pic.install_code(canister_id, bytes(wasm_module), [])
 
         self.assertEqual(
-            pic.update_call(canister_id, "read", ic.encode([])),
+            pic.query_call(canister_id, "read", ic.encode([])),
             [0, 0, 0, 0],
         )
         self.assertEqual(
@@ -31,6 +31,10 @@ class CounterCanisterTests(unittest.TestCase):
         )
         self.assertEqual(
             pic.update_call(canister_id, "write", ic.encode([])),
+            [2, 0, 0, 0],
+        )
+        self.assertEqual(
+            pic.query_call(canister_id, "read", ic.encode([])),
             [2, 0, 0, 0],
         )
         self.assertEqual(
