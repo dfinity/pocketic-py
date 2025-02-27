@@ -17,13 +17,10 @@ jobs:
         with:
           python-version: "3.10" # Adjust based on your project’s requirements
 
-      - name: Download PocketIC Server
-        run: |
-          curl -sLO https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-linux.gz
-          gunzip pocket-ic-x86_64-linux.gz
-          chmod +x pocket-ic-x86_64-linux
-          mv pocket-ic-x86_64-linux pocket-ic
-          ./pocket-ic --version
+      - name: Install PocketIC server
+        uses: dfinity/pocketic@main
+        with:
+          pocket-ic-server-version: "8.0.0"
 
       - name: Create python environment and run tests and examples
         run: |
