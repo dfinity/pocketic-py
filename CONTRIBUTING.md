@@ -1,5 +1,8 @@
 # Contributing to PocketIC Python
 
+We welcome contributions to the PocketIC Python library! If you have any questions or need help, please reach out to us on the [Forum](https://forum.dfinity.org/).
+If you decide to contribute, we encourage you to announce it on the [Forum](https://forum.dfinity.org/)!
+
 ## Installation
 
 Downloading PocketIC:
