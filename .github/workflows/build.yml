@@ -7,12 +7,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -36,6 +31,7 @@ jobs:
           gunzip pocket-ic-x86_64-linux.gz
           chmod +x pocket-ic-x86_64-linux
           mv pocket-ic-x86_64-linux pocket-ic
+          ./pocket-ic --version
 
       - name: Create python environment and run tests and examples
         run: |
@@ -54,14 +50,12 @@ jobs:
         run: poetry build
 
       - name: Upload wheel file
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: pocket_ic_${{ github.sha }}.whl
           path: dist/*.whl
 
       - name: Upload sources
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: pocket_ic_${{ github.sha }}.tar.gz
