@@ -1,3 +1,35 @@
 # Contributing to PocketIC Python
 
-TODO
+## Installation
+
+Downloading PocketIC:
+```bash
+curl -sLO <URL>
+gunzip pocket-ic-x86_64-<platform>.gz && chmod +x pocket-ic-x86_64-<platform>
+mv pocket-ic-x86_64-<platform> pocket-ic
+```
+
+Setting up a Python venv:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+
+## Development
+
+Running tests:
+```bash
+python3 -m unittest tests/pocket_ic_test.py
+```
+
+Running examples:
+```bash
+# Ledger canister
+python3 -m unittest examples/ledger_canister/ledger_canister_test.py
+
+# Counter canister
+python3 -m unittest examples/counter_canister/counter_canister_test.py
+```
+

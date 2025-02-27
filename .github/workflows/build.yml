@@ -36,9 +36,20 @@ jobs:
           gunzip pocket-ic-x86_64-linux.gz
           chmod +x pocket-ic-x86_64-linux
           mv pocket-ic-x86_64-linux pocket-ic
+          ./pocket-ic --version
 
-      - name: Run tests and examples
-        run: ./
+      - name: Create python environment and run tests and examples
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+          # Run tests
+          python3 -m unittest tests/pocket_ic_test.py
+          # Ledger canister
+          python3 -m unittest examples/ledger_canister/ledger_canister_test.py
+          # Counter canister
+          python3 -m unittest examples/counter_canister/counter_canister_test.py
 
       - name: Build distribution
         run: poetry build
