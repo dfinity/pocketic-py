@@ -36,7 +36,6 @@ jobs:
           gunzip pocket-ic-x86_64-linux.gz
           chmod +x pocket-ic-x86_64-linux
           mv pocket-ic-x86_64-linux pocket-ic
-          ./pocket-ic --version
 
       - name: Create python environment and run tests and examples
         run: |
