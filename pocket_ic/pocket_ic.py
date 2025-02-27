@@ -232,7 +232,7 @@ class PocketIC:
 
     def tick(self) -> None:
         """Make the IC produce and progress by one block."""
-        self._instance_post("update/tick", "")
+        self._instance_post("update/tick", {})
 
     def get_subnet(self, canister_id: ic.Principal) -> Optional[ic.Principal]:
         """Get the subnet ID of the subnet that contains the given canister.
