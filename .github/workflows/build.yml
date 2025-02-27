@@ -32,11 +32,11 @@ jobs:
           pip install -r requirements.txt
 
           # Run tests
-          python3 -m unittest tests/pocket_ic_test.py
+          python3 tests/pocket_ic_test.py
           # Ledger canister
-          python3 -m unittest examples/ledger_canister/ledger_canister_test.py
+          python3 examples/ledger_canister/ledger_canister_test.py
           # Counter canister
-          python3 -m unittest examples/counter_canister/counter_canister_test.py
+          python3 examples/counter_canister/counter_canister_test.py
 
       - name: Install Poetry
         uses: snok/install-poetry@v1

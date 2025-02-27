@@ -24,15 +24,15 @@ pip install -r requirements.txt
 
 Running tests:
 ```bash
-python3 -m unittest tests/pocket_ic_test.py
+python3 tests/pocket_ic_test.py
 ```
 
 Running examples:
 ```bash
 # Ledger canister
-python3 -m unittest examples/ledger_canister/ledger_canister_test.py
+python3 examples/ledger_canister/ledger_canister_test.py
 
 # Counter canister
-python3 -m unittest examples/counter_canister/counter_canister_test.py
+python3 examples/counter_canister/counter_canister_test.py
 ```
 
