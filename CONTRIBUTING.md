@@ -5,20 +5,14 @@ If you decide to contribute, we encourage you to announce it on the [Forum](http
 
 ## Installation
 
-Downloading PocketIC:
-```bash
-curl -sLO <URL>
-gunzip pocket-ic-x86_64-<platform>.gz && chmod +x pocket-ic-x86_64-<platform>
-mv pocket-ic-x86_64-<platform> pocket-ic
-```
+Download the [PocketIC server](https://github.com/dfinity/pocketic?tab=readme-ov-file#download-the-pocketic-server) for your platform and place it in the repository root directory.
 
-Setting up a Python venv:
+Next, set up a Python venv, activate it and install the dependencies:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
 
 ## Development
 
@@ -35,4 +29,3 @@ python3 examples/ledger_canister/ledger_canister_test.py
 # Counter canister
 python3 examples/counter_canister/counter_canister_test.py
 ```
-
