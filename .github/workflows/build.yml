@@ -17,14 +17,6 @@ jobs:
         with:
           python-version: "3.10" # Adjust based on your project’s requirements
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-
-      - name: Install dependencies
-        run: poetry install
-
       - name: Download PocketIC Server
         run: |
           curl -sLO https://github.com/dfinity/pocketic/releases/download/8.0.0/pocket-ic-x86_64-linux.gz
@@ -45,6 +37,14 @@ jobs:
           python3 -m unittest examples/ledger_canister/ledger_canister_test.py
           # Counter canister
           python3 -m unittest examples/counter_canister/counter_canister_test.py
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Build distribution
         run: poetry build
