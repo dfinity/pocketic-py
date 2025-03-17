@@ -25,6 +25,22 @@ response = my_canister.greet()
 assert(response == 'Hello, PocketIC!')
 ```
 
+You can also use the "live mode" to make your PocketIC instance automatically advance time and process messages:
+
+```python
+# Create a PocketIC instance with NNS subnet (required for HTTP gateway functionality)
+pic = PocketIC(subnet_config=SubnetConfig(application=1, nns=True))
+
+# Enable live mode - this creates an HTTP gateway and enables auto progress
+url = pic.make_live()
+
+# The URL can be used to interact with the instance using standard IC agents
+print(f"PocketIC instance is accessible at: {url}")
+
+# When done, stop live mode
+pic.stop_live()
+```
+
 ## Getting Started
 
 ### Quickstart
