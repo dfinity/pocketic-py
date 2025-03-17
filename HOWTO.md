@@ -100,3 +100,53 @@ assert(counter_canister.read() == 1)
 ```
 
 If you need help with candid-encoding your `init_args`, canister call arguments and responses, check out the community developed [Python-agent](https://github.com/rocklabs-io/ic-py), which offers some useful candid functionality.
+
+## Live Mode
+
+PocketIC instances do not "make progress" by default, i.e., they do not execute any messages and time does not advance unless dedicated operations are triggered by separate requests. The "live" mode enabled by calling the function `PocketIC.make_live()` automates those steps by:
+
+- Setting the current time as the PocketIC instance time
+- Advancing time on the PocketIC instance regularly
+- Creating an HTTP gateway that exposes the ICP's HTTP interface
+
+This is particularly useful when you want to:
+1. Test your canister with standard IC agents (like the JavaScript or Rust agents)
+2. Test long-running processes that require time to advance automatically
+3. Simulate a more realistic environment where messages are processed continuously
+
+Here's how to use the live mode:
+
+```python
+from pocket_ic import PocketIC, SubnetConfig
+
+# Create a PocketIC instance with NNS subnet (required for HTTP gateway functionality)
+# The HTTP gateway requires an NNS subnet to function properly
+pic = PocketIC(subnet_config=SubnetConfig(application=1, nns=True))
+
+# Create a canister
+canister_id = pic.create_canister()
+pic.add_cycles(canister_id, 2_000_000_000_000)  # 2T cycles
+pic.install_code(canister_id, wasm_module, [])
+
+# Enable live mode - this creates an HTTP gateway and enables auto progress
+# You can optionally specify a port to listen on: pic.make_live(listen_at=8000)
+url = pic.make_live()
+
+print(f"PocketIC instance is accessible at: {url}")
+
+# Now you can interact with your canister using standard IC agents
+# For example, using the JavaScript agent:
+# agent = new HttpAgent({ host: url });
+# agent.fetchRootKey();  # Only needed for local development
+# const actor = Actor.createActor(idlFactory, { agent, canisterId });
+# const result = await actor.greet();
+
+# When done, stop live mode
+pic.stop_live()
+```
+
+The `make_live()` function returns a URL that can be used to interact with the PocketIC instance using standard IC agents. This URL is also stored as the `gateway_url` attribute on the PocketIC instance.
+
+If you call `make_live()` multiple times on the same PocketIC instance, it will return the same URL without creating a new HTTP gateway.
+
+To stop the live mode, call `stop_live()`. This will stop the automatic time updates and round executions, and shut down the HTTP gateway.

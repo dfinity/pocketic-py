@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Added `make_live()` function that enables "live mode" which automatically advances time and processes messages
+- Added `auto_progress()` function to configure automatic time updates and round executions
+- Added `stop_live()` function to stop automatic time updates and the HTTP gateway
+
 ## 3.0.1 - 2025-02-27
 
 ### Added

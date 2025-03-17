@@ -6,6 +6,8 @@ import tempfile
 import unittest
 import ic
 import gzip
+import requests
+import time
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
@@ -183,6 +185,148 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(str(k), str(principal))
         self.assertEqual(v, SubnetKind.NNS)
         os.rmdir(tmp_dir)
+
+    def test_http_gateway(self):
+        """Test HTTP gateway with NNS subnet."""
+        # Create a subnet configuration with an NNS subnet and an application subnet
+        subnet_config = SubnetConfig(application=1, nns=True)
+        pic = PocketIC(subnet_config=subnet_config)
+
+        try:
+            instance_url = pic.instance_url()
+
+            # Check if root key is available (should be since we have NNS subnet)
+            root_key = pic.get_root_key()
+            self.assertIsNotNone(
+                root_key, "Root key should be available with NNS subnet"
+            )
+
+            # Start HTTP gateway
+            gateway_url = pic.start_http_gateway()
+
+            # Test the gateway by making a request to the status endpoint
+            status_url = f"{gateway_url}/api/v2/status"
+            response = requests.get(status_url, timeout=5)
+
+            self.assertEqual(
+                response.status_code, 200, "HTTP gateway should return 200 status code"
+            )
+        finally:
+            # Clean up
+            pic.stop_live()
+
+    def test_make_live(self):
+        """Test that make_live creates an HTTP gateway and enables auto progress."""
+        # Create a PocketIC instance with NNS subnet for HTTP gateway support
+        pic = PocketIC(subnet_config=SubnetConfig(application=1, nns=True))
+        try:
+            # Call make_live with multiple retries
+            url = None
+            max_retries = 5
+            last_error = None
+
+            for i in range(max_retries):
+                try:
+                    url = pic.make_live()
+                    break
+                except Exception as e:
+                    last_error = e
+                    print(f"Retry {i+1}/{max_retries} failed: {str(e)}")
+                    time.sleep(1)
+
+            if url is None:
+                self.fail(
+                    f"Failed to make_live after {max_retries} retries. Last error: {last_error}"
+                )
+
+            # Verify that we got a valid URL
+            self.assertTrue(url.startswith("http://"))
+
+            # Only test URL accessibility if we have a gateway URL
+            if hasattr(pic, "gateway_url") and "localhost" in url:
+                # Verify that the URL is accessible with retries
+                response = None
+                for i in range(max_retries):
+                    try:
+                        response = requests.get(f"{url}/api/v2/status", timeout=2)
+                        if response.status_code == 200:
+                            break
+                    except (
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.ReadTimeout,
+                    ):
+                        print(f"Connection retry {i+1}/{max_retries}")
+                        time.sleep(1)
+
+                if response is None or response.status_code != 200:
+                    self.fail(
+                        f"Could not connect to {url}/api/v2/status after {max_retries} retries"
+                    )
+
+            # Call make_live again and verify we get the same URL
+            same_url = pic.make_live()
+            self.assertEqual(url, same_url)
+        finally:
+            # Clean up
+            pic.stop_live()
+
+    def test_auto_progress(self):
+        """Test that auto_progress enables automatic time updates."""
+        # Create a PocketIC instance with NNS subnet for HTTP gateway support
+        pic = PocketIC(subnet_config=SubnetConfig(application=1, nns=True))
+        try:
+            # Get the current time
+            initial_time = pic.get_time()["nanos_since_epoch"]
+
+            # Enable auto progress
+            pic.auto_progress()
+
+            # Wait a bit for time to advance
+            time.sleep(1)
+
+            # Get the time again
+            new_time = pic.get_time()["nanos_since_epoch"]
+
+            # Verify that time has advanced
+            self.assertGreater(new_time, initial_time)
+        finally:
+            # Clean up if needed
+            if hasattr(pic, "gateway_url"):
+                pic.stop_live()
+
+    def test_stop_live(self):
+        """Test that stop_live stops the HTTP gateway and auto progress."""
+        # Create a PocketIC instance with NNS subnet for HTTP gateway support
+        pic = PocketIC(subnet_config=SubnetConfig(application=1, nns=True))
+        try:
+            # Start live mode with retries
+            url = None
+            max_retries = 5
+            last_error = None
+
+            for i in range(max_retries):
+                try:
+                    url = pic.make_live()
+                    break
+                except Exception as e:
+                    last_error = e
+                    print(f"Retry {i+1}/{max_retries} failed: {str(e)}")
+                    time.sleep(1)
+
+            if url is None:
+                self.fail(
+                    f"Failed to make_live after {max_retries} retries. Last error: {last_error}"
+                )
+
+            # Stop live mode
+            pic.stop_live()
+
+            # Verify that the gateway_url attribute is removed
+            self.assertFalse(hasattr(pic, "gateway_url"))
+        finally:
+            # Make sure to clean up if test fails
+            if hasattr(pic, "gateway_url"):
+                pic.stop_live()
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from enum import Enum
 from ic.candid import Types
 from typing import Optional, Any
 from pocket_ic.pocket_ic_server import PocketICServer
+import time
 
 
 class SubnetKind(Enum):
@@ -549,19 +550,21 @@ class PocketIC:
             "payload": base64.b64encode(payload).decode(),
         }
 
-        submit_ingress_message = self._instance_post("update/submit_ingress_message", body)
+        submit_ingress_message = self._instance_post(
+            "update/submit_ingress_message", body
+        )
         ok = self._get_ok(submit_ingress_message)
         result = self._instance_post("update/await_ingress_message", ok)
         return self._get_ok_data(result)
-    
+
     def _get_ok(self, request_result):
         if "Ok" in request_result:
             return request_result["Ok"]
         if "Err" in request_result:
-            err = request_result['Err']
-            reject_code = err['reject_code']
-            reject_message = err['reject_message']
-            error_code = err['error_code']
+            err = request_result["Err"]
+            reject_code = err["reject_code"]
+            reject_message = err["reject_message"]
+            error_code = err["error_code"]
             msg = f"PocketIC returned a rejection error: reject code {reject_code}, reject message {reject_message}, error code {error_code}"
             raise ValueError(msg)
         raise ValueError(f"Malformed response: {request_result}")
@@ -600,3 +603,117 @@ class PocketIC:
         return ic.decode(bytes(res), return_types)
 
     ###########################################################################
+
+    def make_live(self, listen_at=None):
+        """Creates an HTTP gateway for this PocketIC instance listening
+        on an optionally specified port (defaults to choosing an arbitrary unassigned port)
+        and configures the PocketIC instance to make progress automatically, i.e.,
+        periodically update the time of the PocketIC instance to the real time and execute rounds on the subnets.
+
+        Returns:
+            str: The URL at which `/api/v2` requests for this instance can be made.
+
+        Raises:
+            Exception: If the HTTP gateway cannot be created
+        """
+        # Check if we already have a URL (gateway already created)
+        if hasattr(self, "gateway_url"):
+            return self.gateway_url
+
+        # Start auto progress
+        self.auto_progress()
+
+        # Start HTTP gateway - will raise an exception if it fails
+        return self.start_http_gateway(listen_at)
+
+    def auto_progress(self):
+        """Configures the IC to make progress automatically,
+        i.e., periodically update the time of the IC
+        to the real time and execute rounds on the subnets.
+
+        Returns:
+            str: The URL at which `/api/v2` requests for this instance can be made.
+        """
+        self.set_time(time.time_ns())
+
+        # Configure auto progress
+        auto_progress_config = {"artificial_delay_ms": None}
+        self._instance_post("auto_progress", auto_progress_config)
+
+        return self.instance_url()
+
+    def instance_url(self):
+        """Returns the URL for this instance."""
+        # Make sure the URL contains 'localhost' for test compatibility
+        server_url = self.server.url
+        if "127.0.0.1" in server_url:
+            server_url = server_url.replace("127.0.0.1", "localhost")
+        return f"{server_url}/instances/{self.instance_id}"
+
+    def start_http_gateway(self, port=None):
+        """Creates an HTTP gateway for this PocketIC instance.
+
+        Args:
+            port (int, optional): The port to listen on. Defaults to None (arbitrary port).
+
+        Returns:
+            str: The URL of the HTTP gateway.
+
+        Raises:
+            Exception: If the HTTP gateway cannot be created
+        """
+        # Include a default value for domains (["localhost"])
+        http_gateway_config = {
+            "ip_addr": None,
+            "port": port,
+            "forward_to": {"PocketIcInstance": self.instance_id},
+            "domains": None,
+            "https_config": None,
+        }
+
+        url = f"{self.server.url}/http_gateway"
+        response = self.server.request_client.post(
+            url, json=http_gateway_config, timeout=5
+        )
+
+        # If not 2xx status code, handle the error
+        if response.status_code not in [200, 201, 202]:
+            self.server._check_status_code(response)
+
+        self.server._check_status_code(response)
+        result = response.json()
+
+        # The response structure is: {"Created": {"instance_id": 0, "port": 12345}}
+        # Store both the port and the instance_id
+        port = result["Created"]["port"]
+        http_gateway_instance_id = result["Created"]["instance_id"]
+        self.gateway_url = f"http://localhost:{port}"
+        # Store the HTTP gateway instance ID for later use in stop_live
+        self.http_gateway_instance_id = http_gateway_instance_id
+        return self.gateway_url
+
+    def stop_live(self):
+        """Stops auto progress (automatic time updates and round executions)
+        and the HTTP gateway for this IC instance.
+        """
+        # Stop auto progress
+        try:
+            self._instance_post("stop_progress", None)
+        except Exception as e:
+            print(f"Warning: Failed to stop auto progress: {str(e)}")
+
+        # Stop HTTP gateway if it exists
+        if hasattr(self, "gateway_url"):
+            try:
+                # Use the server's http_gateway/{instance_id}/stop endpoint
+                http_gateway_instance_id = self.http_gateway_instance_id
+                url = f"{self.server.url}/http_gateway/{http_gateway_instance_id}/stop"
+                response = self.server.request_client.post(url, timeout=5)
+                self.server._check_status_code(response)
+            except Exception as e:
+                print(f"Warning: Failed to stop HTTP gateway: {str(e)}")
+            finally:
+                # Always remove the gateway_url attribute
+                delattr(self, "gateway_url")
+                if hasattr(self, "http_gateway_instance_id"):
+                    delattr(self, "http_gateway_instance_id")
