@@ -7,6 +7,7 @@ import unittest
 import ic
 import gzip
 import json
+import shutil
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
@@ -227,6 +228,9 @@ class PocketICTests(unittest.TestCase):
         stable_mem3 = pic3.get_stable_memory(canister_id)
         self.assertEqual(stable_mem3, stable_mem2)
         self.assertEqual(len(pic3.topology()), 1)
+
+        # clean up
+        shutil.rmtree(tmp_dir)
 
 
 if __name__ == "__main__":
