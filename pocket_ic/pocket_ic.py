@@ -1,5 +1,5 @@
 """
-This module contains 'PocketIC', which is the main interface exposed to the test author.
+This module contains `PocketIC`, which is the main interface exposed to the test author.
 """
 
 import base64

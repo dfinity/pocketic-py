@@ -1,5 +1,5 @@
 """
-This module contains 'SubnetConfig' and 'SubnetKind', which are used to configure the
+This module contains `SubnetConfig` and `SubnetKind`, which are used to configure the
 subnets of a PocketIC instance.
 """
 

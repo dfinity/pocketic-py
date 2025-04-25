@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Support for PocketIC server version 9.0.0
-- Load and store PocketIC state to a directory 
+- Load and store PocketIC state from/to a directory 
 
 
 
