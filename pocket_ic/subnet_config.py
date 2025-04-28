@@ -73,7 +73,7 @@ class SubnetConfig:
             or len(os.listdir(self.state_dir)) != 0
         ):
             raise ValueError(
-                "At least one subnet or a state directory must be configured."
+                "At least one subnet or a non-empty state directory must be configured."
             )
 
     def add_subnet_with_state(self, subnet_type: SubnetKind, state_dir_path: str):

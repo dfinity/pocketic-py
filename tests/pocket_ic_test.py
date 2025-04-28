@@ -184,9 +184,9 @@ class PocketICTests(unittest.TestCase):
         canister_id = pic.create_canister(subnet=app_subnet)
         pic.add_cycles(canister_id, 20_000_000_000_000)
         pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
-        pic.set_stable_memory(canister_id, b"Hello world!")
 
         # set stable memory of the canister
+        pic.set_stable_memory(canister_id, b"Hello world!")
         stable_mem = pic.get_stable_memory(canister_id)
         self.assertTrue(stable_mem.startswith(b"Hello world!"))
 
