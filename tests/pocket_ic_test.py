@@ -6,6 +6,8 @@ import tempfile
 import unittest
 import ic
 import gzip
+import json
+import shutil
 
 # The test needs to have the module in its sys path, so we traverse
 # up until we find the pocket_ic package.
@@ -169,20 +171,66 @@ class PocketICTests(unittest.TestCase):
         pic.add_cycles(canister_id, 6_666)
         self.assertEqual(pic.get_cycles_balance(canister_id), initial_balance + 6_666)
 
-    def test_load_state(self):
-        principal = ic.Principal.from_str(
-            "6gvjz-uotju-2ngtj-u2ngt-ju2ng-tju2n-gtju2-ngtjv"
-        )
+    def test_store_restore_state(self):
+        # create a PocketIC instance with a state directory
         tmp_dir = tempfile.mkdtemp()
+        config = SubnetConfig(application=1, nns=True, state_dir=tmp_dir)
+        pic = PocketIC(config)
 
-        config = SubnetConfig()
-        config.add_subnet_with_state(SubnetKind.NNS, tmp_dir, principal)
-        pic = PocketIC(subnet_config=config)
+        # create a canister on app subnet
+        app_subnet = next(
+            k for k, v in pic.topology().items() if v == SubnetKind.APPLICATION
+        )
+        canister_id = pic.create_canister(subnet=app_subnet)
+        pic.add_cycles(canister_id, 20_000_000_000_000)
+        pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
 
-        (k, v) = list(pic.topology().items())[0]
-        self.assertEqual(str(k), str(principal))
-        self.assertEqual(v, SubnetKind.NNS)
-        os.rmdir(tmp_dir)
+        # set stable memory of the canister
+        pic.set_stable_memory(canister_id, b"Hello world!")
+        stable_mem = pic.get_stable_memory(canister_id)
+        self.assertTrue(stable_mem.startswith(b"Hello world!"))
+
+        # delete the PocketIC instance
+        del pic
+
+        # create a new PocketIC instance with the same state, subnets and canister states stay
+        config2 = SubnetConfig(
+            state_dir=tmp_dir,
+        )
+        pic2 = PocketIC(config2)
+        stable_mem2 = pic2.get_stable_memory(canister_id)
+        self.assertEqual(stable_mem2, stable_mem)
+        self.assertEqual(len(pic2.topology()), 2)
+
+        del pic2
+
+        # create a new PocketIC instance with only the app subnet copied over
+        config3 = SubnetConfig()
+
+        # get the app subnet's folder from the state directory
+        with open(os.path.join(tmp_dir, "topology.json"), "r") as f:
+            dirs = json.load(f)["subnet_configs"].items()
+
+        # find the app subnet's folder
+        app_subnet_key = [
+            k
+            for k, v in dirs
+            if v["subnet_config"]["subnet_kind"] == SubnetKind.APPLICATION.value
+        ][0]
+
+        config3.add_subnet_with_state(
+            SubnetKind.APPLICATION,
+            os.path.join(tmp_dir, app_subnet_key),
+        )
+
+        # app subnet canister stays, NNS subnet is not there
+        pic3 = PocketIC(config3)
+        stable_mem3 = pic3.get_stable_memory(canister_id)
+        self.assertEqual(stable_mem3, stable_mem2)
+        self.assertEqual(len(pic3.topology()), 1)
+
+        # clean up
+        shutil.rmtree(tmp_dir)
 
 
 if __name__ == "__main__":

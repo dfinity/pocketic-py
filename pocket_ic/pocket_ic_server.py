@@ -1,11 +1,11 @@
 """
-This module contains the 'PocketICServer', which starts or discovers a PocketIC server process.
+This module contains the `PocketICServer`, which starts or discovers a PocketIC server process.
 """
 
 import os
 import time
 import requests
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from tempfile import gettempdir
 
 
