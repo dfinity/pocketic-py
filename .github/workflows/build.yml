@@ -23,7 +23,7 @@ jobs:
       - name: Install PocketIC server
         uses: dfinity/pocketic@main
         with:
-          pocket-ic-server-version: "9.0.0"
+          pocket-ic-server-version: "9.0.1"
 
       - name: Create python environment and run tests and examples
         run: |
