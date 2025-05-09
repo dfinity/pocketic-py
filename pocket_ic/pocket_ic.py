@@ -424,15 +424,13 @@ class PocketIC:
         )
         msg_id = self._get_ok(submit_ingress_message)
         rounds = 0
-        while True:
+        for round_limit in range(100):
           self.tick()
-          rounds += 1
           result = self._ingress_status(msg_id)
           if result:
             return self._get_ok_data(result)
-          if rounds >= 100:
-            msg = f"PocketIC did not complete the update call within 100 rounds"
-            raise ValueError(msg)
+        msg = f"PocketIC did not complete the update call within 100 rounds"
+        raise ValueError(msg)
 
     def _ingress_status(self, msg_id):
         body = {
