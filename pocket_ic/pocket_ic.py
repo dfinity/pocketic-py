@@ -423,7 +423,6 @@ class PocketIC:
             "update/submit_ingress_message", body
         )
         msg_id = self._get_ok(submit_ingress_message)
-        rounds = 0
         for round_limit in range(100):
           self.tick()
           result = self._ingress_status(msg_id)
