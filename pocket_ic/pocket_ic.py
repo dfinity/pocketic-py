@@ -422,9 +422,21 @@ class PocketIC:
         submit_ingress_message = self._instance_post(
             "update/submit_ingress_message", body
         )
-        ok = self._get_ok(submit_ingress_message)
-        result = self._instance_post("update/await_ingress_message", ok)
-        return self._get_ok_data(result)
+        msg_id = self._get_ok(submit_ingress_message)
+        for round_limit in range(100):
+          self.tick()
+          result = self._ingress_status(msg_id)
+          if result:
+            return self._get_ok_data(result)
+        msg = f"PocketIC did not complete the update call within 100 rounds"
+        raise ValueError(msg)
+
+    def _ingress_status(self, msg_id):
+        body = {
+            "raw_message_id": msg_id,
+            "raw_caller": None,
+        }
+        return self._instance_post("read/ingress_status", body)
 
     def _get_ok(self, request_result):
         if "Ok" in request_result:
