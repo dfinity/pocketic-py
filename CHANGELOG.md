@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+- `PocketICServer` now looks for the PocketIC binary in the `POCKET_IC_BIN` environment variable, or in the working directory, or on the PATH, in that order of precedence.
+
+
 ## 3.1.0 - 2025-04-28
 
 ### Added

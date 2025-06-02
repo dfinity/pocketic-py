@@ -3,6 +3,7 @@ This module contains the `PocketICServer`, which starts or discovers a PocketIC 
 """
 
 import os
+import shutil
 import time
 import requests
 from typing import List, Optional
@@ -13,8 +14,8 @@ class PocketICServer:
     """
     An object of this class represents a running PocketIC server. During instantiation,
     a running server is discovered, or a new one is launched from the PocketIC binary,
-    which is assumed to be in your working directory or specified via the POCKET_IC_BIN
-    environment variable.
+    which is assumed to be specified via the POCKET_IC_BIN environment variable, be on your
+    PATH, or in your working directory, in that order of precedence.
 
     All tests within a testsuite should use the same server, so the service
     discovery mechanism uses the current process id. This means that only the first
@@ -29,6 +30,8 @@ class PocketICServer:
         pid = os.getpid()
         if "POCKET_IC_BIN" in os.environ:
             bin_path = os.environ["POCKET_IC_BIN"]
+        elif shutil.which("pocket-ic") is not None:
+            bin_path = "pocket-ic"
         else:
             bin_path = "./pocket-ic"
 
