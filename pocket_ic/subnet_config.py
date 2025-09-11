@@ -130,7 +130,6 @@ class SubnetConfig:
                 "verified_application": self.verified_application,
             },
             "state_dir": self.state_dir,
-            "nonmainnet_features": {},
             "log_level": None,
             "bitcoind_addr": None,
         }
