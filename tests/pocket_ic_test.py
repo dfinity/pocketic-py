@@ -202,32 +202,51 @@ class PocketICTests(unittest.TestCase):
         self.assertEqual(stable_mem2, stable_mem)
         self.assertEqual(len(pic2.topology()), 2)
 
+        # delete the PocketIC instance
         del pic2
 
-        # create a new PocketIC instance with only the app subnet copied over
-        config3 = SubnetConfig()
+        # clean up
+        shutil.rmtree(tmp_dir)
+
+    def test_add_subnet_with_state(self):
+        # create a PocketIC instance with a state directory
+        tmp_dir = tempfile.mkdtemp()
+        config = SubnetConfig(application=1, state_dir=tmp_dir)
+        pic = PocketIC(config)
+
+        # create a canister on app subnet
+        canister_id = pic.create_canister()
+        pic.add_cycles(canister_id, 20_000_000_000_000)
+        pic.install_code(canister_id, b"\x00\x61\x73\x6d\x01\x00\x00\x00", [])
+
+        # set stable memory of the canister
+        pic.set_stable_memory(canister_id, b"Hello world!")
+        stable_mem = pic.get_stable_memory(canister_id)
+        self.assertTrue(stable_mem.startswith(b"Hello world!"))
+
+        # delete the PocketIC instance
+        del pic
+
+        # create a new PocketIC instance with only the app subnet restored from state
+        config2 = SubnetConfig()
 
         # get the app subnet's folder from the state directory
-        with open(os.path.join(tmp_dir, "topology.json"), "r") as f:
-            dirs = json.load(f)["subnet_configs"].items()
+        # (the app subnet's folder is the only subfolder in the state directory)
+        subfolders = [d for d in os.listdir(tmp_dir) if os.path.isdir(os.path.join(tmp_dir, d))]
+        self.assertEqual(len(subfolders), 1)
+        app_subnet_key = subfolders[0]
 
-        # find the app subnet's folder
-        app_subnet_key = [
-            k
-            for k, v in dirs
-            if v["subnet_config"]["subnet_kind"] == SubnetKind.APPLICATION.value
-        ][0]
-
-        config3.add_subnet_with_state(
+        # add the app subnet with its state
+        config2.add_subnet_with_state(
             SubnetKind.APPLICATION,
             os.path.join(tmp_dir, app_subnet_key),
         )
 
         # app subnet canister stays, NNS subnet is not there
-        pic3 = PocketIC(config3)
-        stable_mem3 = pic3.get_stable_memory(canister_id)
-        self.assertEqual(stable_mem3, stable_mem2)
-        self.assertEqual(len(pic3.topology()), 1)
+        pic2 = PocketIC(config2)
+        stable_mem2 = pic2.get_stable_memory(canister_id)
+        self.assertEqual(stable_mem2, stable_mem)
+        self.assertEqual(len(pic2.topology()), 1)
 
         # clean up
         shutil.rmtree(tmp_dir)
