@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 3.1.2 - 2026-03-23
+
+### Added
+- Support for PocketIC server version 13.0.0
+
+
+
 ## 3.1.1 - 2025-09-12
 
 ### Added
