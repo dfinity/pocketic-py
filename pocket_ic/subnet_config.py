@@ -128,6 +128,7 @@ class SubnetConfig:
                 "sns": self.sns,
                 "system": self.system,
                 "verified_application": self.verified_application,
+                "cloud_engine": [],
             },
             "state_dir": self.state_dir,
             "log_level": None,
