@@ -37,6 +37,8 @@ jobs:
           python3 examples/ledger_canister/ledger_canister_test.py
           # Counter canister
           python3 examples/counter_canister/counter_canister_test.py
+          # Inter-canister calls
+          python3 examples/inter_canister_calls/inter_canister_calls_test.py
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
